@@ -22,7 +22,7 @@ def get_points_from_kml(k: kml):
 
 
 def load_kml_file(k: kml):
-    file = "run_page/import.kml"
+    file = "20250613122307.kml"
     try:
         with open(file, "rb") as f:
             kml_string = f.read()
@@ -62,10 +62,10 @@ if __name__ == "__main__":
     track = Track()
     # TODO modify here
     # trip name
-    track.name = "2020-10 Tibet Road Trip"
+    track.name = "2025-10 Tibet Road Trip"
     # start/end time Year-Month-Day-Hour-Minute
-    track.start_time = datetime(2020, 9, 29, 10, 0)
-    track.end_time = datetime(2020, 10, 10, 18, 0)
+    track.start_time = datetime(2025, 6, 13, 10, 0)
+    track.end_time = datetime(2025, 6, 13, 12, 0)
     # total distance
     distance = 4000  # KM
     # total days
