@@ -21566,5 +21566,53 @@
 "elevation_gain": 0.0,
 "source": "strava",
 "streak": 1
+},
+{
+"run_id": 14989964727,
+"name": "\u6668\u95f4\u8dd1\u6b65",
+"distance": 5076.3,
+"moving_time": "0:31:58",
+"type": "Run",
+"start_date": "2025-06-30 23:50:58+00:00",
+"start_date_local": "2025-07-01 07:50:58",
+"location_country": null,
+"summary_polyline": "",
+"average_heartrate": 156.1,
+"average_speed": 2.647,
+"elevation_gain": 0.0,
+"source": "strava",
+"streak": 1
+},
+{
+"run_id": 14989960108,
+"name": "\u6668\u95f4\u8dd1\u6b65",
+"distance": 5010.8,
+"moving_time": "0:30:55",
+"type": "Run",
+"start_date": "2025-07-02 01:01:04+00:00",
+"start_date_local": "2025-07-02 09:01:04",
+"location_country": null,
+"summary_polyline": "",
+"average_heartrate": 154.0,
+"average_speed": 2.701,
+"elevation_gain": 0.0,
+"source": "strava",
+"streak": 2
+},
+{
+"run_id": 14989960104,
+"name": "\u6668\u95f4\u8dd1\u6b65",
+"distance": 5003.2,
+"moving_time": "0:30:49",
+"type": "Run",
+"start_date": "2025-07-02 23:45:53+00:00",
+"start_date_local": "2025-07-03 07:45:53",
+"location_country": null,
+"summary_polyline": "",
+"average_heartrate": 163.8,
+"average_speed": 2.706,
+"elevation_gain": 0.0,
+"source": "strava",
+"streak": 3
 }
 ]
