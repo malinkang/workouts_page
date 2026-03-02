@@ -15,6 +15,7 @@ const Layout = ({ children }: React.PropsWithChildren) => {
         <title>{siteTitle}</title>
         <meta name="description" content={description} />
         <meta name="keywords" content={keywords} />
+        <meta name="theme-color" content="#151516" />
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
