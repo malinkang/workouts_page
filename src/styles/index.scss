@@ -3,19 +3,20 @@
 @import './variables';
 @import './themes';
 
-img::selection { 
-  background: transparent; 
-}
-
+/* 🌟 优化：合并 img 选中状态的伪类 */
+img::selection,
 img::-moz-selection { 
   background: transparent; 
 }
+
 html, body {
   width: 100%;
 }
+
 * {
   box-sizing: border-box;
 }
+
 /* 🌟 1. 整体底色深空灰 (Apple Dark Mode) */
 body {
   font-family: $global-font-family;
@@ -28,10 +29,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
 }
+
 iframe { 
   border: none; 
 }
-
 
 // ------------------------------------
 // 基础文本元素主题
@@ -144,8 +145,25 @@ h5 .header-link {
 }
 
 // ------------------------------------
-// 底部导航栏
+// 🌟 导航栏 & 移动端全屏菜单组件
 // ------------------------------------
+
+.hamburger-trigger {
+  display: none;
+  align-items: center;
+  cursor: pointer;
+  color: #8E8E93;
+  transition: color 0.3s ease;
+  
+  &:hover {
+    color: #FFF;
+  }
+}
+
+.mobile-full-menu {
+  display: none;
+}
+
 .header {
   position: fixed; 
   bottom: 30px; 
@@ -189,11 +207,19 @@ h5 .header-link {
   align-items: center; 
   gap: 4px; 
   transition: color 0.3s ease; 
+  
+  .nav-svg svg {
+    transition: all 0.3s ease;
+  }
 }
 
 .header-menu a:hover { 
   color: #FFFFFF; 
   text-decoration: none; 
+  
+  .nav-svg svg {
+    color: #FFFFFF;
+  }
 }
 
 .header-right { 
@@ -234,6 +260,7 @@ h5 .header-link {
 
 .menu-gaoliang svg { 
   fill: #32D74B !important; 
+  color: #32D74B !important;
   transform: scale(1.1); 
   filter: drop-shadow(0 0 8px rgba(50, 215, 75, 0.4)); 
 }
@@ -304,7 +331,6 @@ h5 .header-link {
 // ------------------------------------
 // 🌟 左(地图) + 右(统计) 🌟
 // ------------------------------------
-
 .bento-hero {
   display: grid;
   grid-template-columns: 1.5fr 1fr; 
@@ -362,6 +388,7 @@ h5 .header-link {
     z-index: 2; 
   }
 }
+
 // ------------------------------------
 // 🌟 运动列表 🌟
 // ------------------------------------
@@ -369,22 +396,23 @@ h5 .header-link {
   position: relative;
   z-index: 90;
 }
+
 // ------------------------------------
 // 🌟 全新特效：地图专属吸顶动画 🌟
 // ------------------------------------
 .sticky-map {
   position: fixed !important;
-  top: 15px !important; /* 1. 顶部留出 15px 的呼吸空间 */
+  top: 15px !important;
   left: 50%;
   transform: translateX(-50%);
-  width: calc(100% - 40px) !important; /* 左右各减去 20px padding 铺满页面 */
-  max-width: 860px !important; /* 900px 减去 40px 的最大宽度，完美对齐下层卡片 */
+  width: calc(100% - 40px) !important; 
+  max-width: 860px !important; 
   height: 250px !important; 
   min-height: auto !important;
   z-index: 100 !important;
-  border-radius: 16px !important; /* 3. 恢复全圆角胶囊形态 */
+  border-radius: 16px !important; 
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  box-shadow: none !important; /* 2. 彻底去掉投影 */
+  box-shadow: none !important; 
   background: #1C1C1E;
   
   animation: mapSlideDown 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
@@ -402,38 +430,96 @@ h5 .header-link {
 }
 
 // ------------------------------------
-// 📱 手机端响应式适配 (重构排序逻辑)
+// 📱 手机端响应式适配
 // ------------------------------------
 @media (max-width: 768px) {
   html, body {
     overflow-x: hidden;
   }
+  
   body {
     padding: 0 15px 20px 15px; 
   }
+  
   .header { 
     bottom: 12px; 
-    width: 100px; 
-    height: 50px; 
+    width: 150px; 
+    height: 58px;
+    padding: 0 18px;  
     display: flex; 
-    justify-content: center; 
+    justify-content: space-between; 
     align-items: center; 
     box-shadow: none; 
+    z-index: 100; 
   }
   
+  .header-menu, 
+  .header-right svg { 
+    display: none; 
+  }
+  
+  .hamburger-trigger {
+    display: flex; 
+  }
+  
+  .hamburger-trigger svg {
+    height: 32px;
+    width: 32px;
+    color: #32D74B;
+  }
+
   .header-right { 
     grid-gap: 0; 
     margin-left: 0; 
   }
   
-  .header-right svg, .header-menu { 
-    display: none; 
+  .mobile-full-menu {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 36px;
+    
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100dvh;
+    z-index: 99;
+    
+    background: rgba(21, 21, 22, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.96);
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    &.open {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1);
+    }
+
+    a {
+      .nav-svg { display: none !important; }
+      font-size: 1.4rem;
+      color: #dfdfdf;
+      text-decoration: none;
+    }
+  }
+  
+  .about-koobai img {
+    width: 34px;
+    height: 34px;
   }
   
   .pagetitle { 
     margin-top: 10px; 
     margin-bottom: 10px;
   }
+  
   .buttons { 
     overflow-x: auto; 
     justify-content: flex-start; 
@@ -441,6 +527,7 @@ h5 .header-link {
     margin: 10px auto 12px auto; 
     max-width: 100%; 
     scrollbar-width: none;
+    
     &::-webkit-scrollbar {
       display: none;
     }
@@ -461,9 +548,11 @@ h5 .header-link {
     height: 240px; 
     min-height: auto;
   }
+  
   .bento-card-map { 
     height: 240px; 
     min-height: auto;
+    order: 2;
   }
   
   .sticky-map {
