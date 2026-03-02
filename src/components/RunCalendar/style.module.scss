@@ -348,7 +348,7 @@
 }
 
 /* =========================================
-   🌟 4. 背景呼吸曲线 (完美解决结尾卡顿)
+   🌟 4. 背景呼吸曲线 (静态精简版)
 ========================================= */
 .sparkline {
   position: absolute;
@@ -361,9 +361,8 @@
 }
 
 .sparklineFill {
-  opacity: 0; 
-  animation: fadeUp 1.2s cubic-bezier(0.165, 0.84, 0.44, 1) 0.2s forwards;
   transform-origin: bottom;
+  opacity: 0.7; 
 }
 
 .sparklineLine {
@@ -371,23 +370,7 @@
   stroke-width: 1;
   stroke-linecap: round;
   stroke-linejoin: round;
-  opacity: 0; 
-  /* 🌟 核心：配合 js 里的 pathLength="100"，把这里的总长度固定为 100 */
-  stroke-dasharray: 100;
-  stroke-dashoffset: 100;
-  animation: drawLine 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.4s forwards;
-}
-
-@keyframes drawLine {
-  /* 🌟 动画现在只负责从 100% 匀速画到 0%，不管曲线有多陡峭，都不会再出现溢出闪现了！ */
-  0% { stroke-dashoffset: 100; opacity: 0; }
-  5% { opacity: 0.2; } 
-  100% { stroke-dashoffset: 0; opacity: 0.2; }
-}
-
-@keyframes fadeUp {
-  0% { opacity: 0; transform: scaleY(0.5); }
-  100% { opacity: 1; transform: scaleY(1); }
+  opacity: 0.1; 
 }
 
 /* =========================================

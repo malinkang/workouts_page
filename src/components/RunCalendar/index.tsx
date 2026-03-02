@@ -239,7 +239,7 @@ const RunCalendar = ({ runs, locateActivity, runIndex, setRunIndex, year }: IRun
           <svg key={year} className={styles.sparkline} viewBox="0 0 200 40" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
             <defs><linearGradient id="sparklineGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#32D74B" stopOpacity="0.25" /><stop offset="100%" stopColor="#32D74B" stopOpacity="0" /></linearGradient></defs>
             <path d={`${sparklinePath} L 200,40 L 0,40 Z`} fill="url(#sparklineGrad)" stroke="none" className={styles.sparklineFill} />
-            <path d={sparklinePath} fill="none" className={styles.sparklineLine} pathLength="100" />
+            <path d={sparklinePath} fill="none" className={styles.sparklineLine} />
           </svg>
         )}
         
