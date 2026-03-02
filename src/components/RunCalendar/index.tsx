@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Activity, RunIds, colorFromType, formatRunName } from '@/utils/utils';
 import styles from './style.module.scss';
 
@@ -173,9 +173,6 @@ function useRunDataEngine(runs: Activity[], year: string, monthIndex: number) {
 const RunCalendar = ({ runs, locateActivity, runIndex, setRunIndex, year }: IRunCalendarProps) => {
   const [monthIndex, setMonthIndex] = useState<number>(new Date().getMonth());
   const [direction, setDirection] = useState<number>(0);
-  
-  const [animatedDist, setAnimatedDist] = useState(0);
-  const prevDistRef = useRef(0);
 
   const engine = useRunDataEngine(runs, year, monthIndex);
 
@@ -185,40 +182,6 @@ const RunCalendar = ({ runs, locateActivity, runIndex, setRunIndex, year }: IRun
       setDirection(0);
     }
   }, [engine.normalizedRuns]);
-
-  useEffect(() => {
-    const targetDist = engine.globalData.stats.totalDist;
-    const startDist = prevDistRef.current; 
-    
-    if (targetDist === startDist) {
-      setAnimatedDist(targetDist);
-      return;
-    }
-
-    let startTime: number;
-    let animationFrameId: number;
-    const duration = 1000; 
-
-    const animate = (time: number) => {
-      if (!startTime) startTime = time;
-      const progress = time - startTime;
-      const percent = Math.min(progress / duration, 1);
-      
-      const easeOut = 1 - Math.pow(1 - percent, 4); 
-
-      setAnimatedDist(startDist + (targetDist - startDist) * easeOut);
-
-      if (progress < duration) {
-        animationFrameId = requestAnimationFrame(animate);
-      } else {
-        setAnimatedDist(targetDist); 
-        prevDistRef.current = targetDist; 
-      }
-    };
-
-    animationFrameId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animationFrameId);
-  }, [engine.globalData.stats.totalDist]);
 
   const sparklinePath = useMemo(() => {
     const data = engine.globalData.sparklineData;
@@ -283,7 +246,8 @@ const RunCalendar = ({ runs, locateActivity, runIndex, setRunIndex, year }: IRun
         <div className={styles.globalTitle}>年度总里程</div>
 
         <div className={styles.globalMainStat}>
-          <span className={styles.val}>{animatedDist.toFixed(1)}</span>
+          {/* 🌟 直接读取固定数据，移除所有动画状态 */}
+          <span className={styles.val}>{engine.globalData.stats.totalDist.toFixed(1)}</span>
           <span className={styles.unit}>KM</span>
         </div>
         

@@ -31,6 +31,8 @@ const Index = () => {
   
   const [title, setTitle] = useState('');
   const [geoData, setGeoData] = useState(geoJsonForRuns(runs));
+  
+  // 仅用于第一次打开页面时的初始中心点计算
   const bounds = getBoundsForGeoData(geoData);
   const intervalRef = useRef<number>();
 
@@ -41,7 +43,7 @@ const Index = () => {
   const bentoRef = useRef<HTMLDivElement>(null);
   const [isSticky, setIsSticky] = useState(false);
 
-  // 🌟 地图重绘触发器：解决 Sticky 切换导致的 Canvas 留白
+  // 🌟 地图重绘触发器：解决 Sticky 切换和自适应高度导致的 Canvas 留白
   const triggerMapResize = () => {
     window.dispatchEvent(new Event('resize'));
   };
@@ -69,7 +71,7 @@ const Index = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isSticky]);
 
-  // 使用 ResizeObserver 监听 Bento 容器尺寸变化
+  // 使用 ResizeObserver 监听 Bento 容器尺寸变化 (跟随右侧日历高度自适应)
   useEffect(() => {
     const node = bentoRef.current;
     if (!node) return;
@@ -94,9 +96,7 @@ const Index = () => {
 
   const changeYear = (y: string) => {
     setYear(y);
-    if ((viewState.zoom ?? 0) > 3 && bounds) {
-      setViewState({ ...bounds });
-    }
+    // 🌟 修复 1：删除了这里强制 setViewState 瞬移的错误逻辑，完全交由 RunMap 内部的 easeTo 处理平滑飞行
     changeByItem(y, 'Year', filterYearRuns);
     if (intervalRef.current) window.clearInterval(intervalRef.current);
     triggerMapResize();
@@ -122,9 +122,7 @@ const Index = () => {
     if (!isSticky) scrollToMap();
   };
 
-  useEffect(() => {
-    setViewState({ ...bounds });
-  }, [geoData]);
+  // 🌟 修复 2：彻底删除了那个一旦 geoData 改变就强制重置边界的 useEffect 炸弹！
 
   useEffect(() => {
     setGeoData(geoJsonForRuns(runs));

@@ -1,16 +1,12 @@
 import MapboxLanguage from '@mapbox/mapbox-gl-language';
-import React, {useRef, useCallback, useState, useEffect, useMemo} from 'react';
-import Map, {Layer, Source, FullscreenControl, NavigationControl, MapRef} from 'react-map-gl';
-import {MapInstance} from "react-map-gl/src/types/lib";
+import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react';
+import Map, { Layer, Source, FullscreenControl, NavigationControl, MapRef } from 'react-map-gl';
 import useActivities from '@/hooks/useActivities';
 import {
   MAP_LAYER_LIST,
   IS_CHINESE,
   ROAD_LABEL_DISPLAY,
-  MAIN_COLOR,
   MAPBOX_TOKEN,
-  PROVINCE_FILL_COLOR,
-  COUNTRY_FILL_COLOR,
   USE_DASH_LINE,
   LINE_OPACITY,
   MAP_HEIGHT,
@@ -45,23 +41,88 @@ const calculateBearing = (start: number[], end: number[]) => {
   return ((Math.atan2(y, x) * 180) / PI + 360) % 360;
 };
 
-const RunMap = ({
-  title,
-  viewState,
-  setViewState,
-  changeYear,
-  geoData,
-  thisYear,
-}: IRunMapProps) => {
+const getCoreBounds = (features: any[]) => {
+  const allCoords = features
+    .flatMap(f => f.geometry.coordinates as Coordinate[])
+    .filter(p => p && p[0] > 70 && p[0] < 140 && p[1] > 10 && p[1] < 60);
+
+  if (allCoords.length === 0) return null;
+
+  const lons = allCoords.map(p => p[0]).sort((a, b) => a - b);
+  const lats = allCoords.map(p => p[1]).sort((a, b) => a - b);
+  const medianLon = lons[Math.floor(lons.length / 2)];
+  const medianLat = lats[Math.floor(lats.length / 2)];
+
+  const coreCoords = allCoords.filter(
+    p => Math.abs(p[0] - medianLon) < 0.3 && Math.abs(p[1] - medianLat) < 0.3
+  );
+
+  const finalCoords = coreCoords.length > 0 ? coreCoords : allCoords;
+  return [
+    [Math.min(...finalCoords.map(p => p[0])), Math.min(...finalCoords.map(p => p[1]))],
+    [Math.max(...finalCoords.map(p => p[0])), Math.max(...finalCoords.map(p => p[1]))]
+  ] as [[number, number], [number, number]];
+};
+
+
+const RunMap = ({ title, viewState, setViewState, changeYear, geoData, thisYear }: IRunMapProps) => {
   const { runs, activities, countries, provinces } = useActivities() as any;
   const allRuns = runs || activities || []; 
   
   const mapRef = useRef<MapRef>();
   const [animationProgress, setAnimationProgress] = useState(0);
+  const [mapLoaded, setMapLoaded] = useState(false);
+
+  const isSingleRun = geoData.features.length === 1 && geoData.features[0].geometry.coordinates.length;
+  const isBigMap = (viewState.zoom ?? 0) <= 3;
+
+  // 🌟 修复后的核心数据获取逻辑
+  const runStats = useMemo(() => {
+    if (!isSingleRun || !geoData || !geoData.features.length) return null;
+
+    const feature = geoData.features[0];
+    const points = feature.geometry.coordinates as Coordinate[];
+    if (!points || points.length === 0) return null;
+
+    const runProps = feature.properties as any;
+    const targetId = runProps?.run_id || feature?.id;
+
+    let fullRun: any = null;
+
+    // 🌟 致命 Bug 修复处：加上安全校验，拒绝 String(undefined) 的弱智匹配！
+    if (targetId !== undefined && targetId !== null) {
+      fullRun = allRuns.find((r: any) => String(r.run_id) === String(targetId) || String(r.id) === String(targetId));
+    }
+    
+    // 如果没有 id，退而求其次用时间匹配
+    if (!fullRun && runProps?.start_date_local) {
+      fullRun = allRuns.find((r: any) => r.start_date_local === runProps.start_date_local);
+    }
+
+    const type = fullRun?.type ?? runProps?.type ?? 'Run';
+    const averageSpeed = fullRun?.average_speed ?? runProps?.average_speed;
+    const movingTime = fullRun?.moving_time ?? runProps?.moving_time;
+
+    return {
+      name: runProps?.name || '',
+      startLon: points[0][0],
+      startLat: points[0][1],
+      endLon: points[points.length - 1][0],
+      endLat: points[points.length - 1][1],
+      distance: fullRun?.distance ?? runProps?.distance ?? 0,
+      runTimeStr: movingTime ? formatRunTime(movingTime) : '--:--',
+      paceParts: averageSpeed ? formatSpeedOrPace(averageSpeed, type) : null,
+      heartRate: fullRun?.average_heartrate ?? runProps?.average_heartrate,
+      displayDate: (fullRun?.start_date_local || runProps?.start_date_local || '').slice(0, 10),
+      isRide: RIDE_TYPES.has(type),
+      runColor: colorFromType(type) || runProps?.color || '#32D74B'
+    };
+  }, [isSingleRun, geoData, allRuns]);
+
 
   useEffect(() => {
     const map = mapRef.current?.getMap();
-    if (!map) return;
+    if (!map || !mapLoaded) return;
     map.stop();
 
     if (geoData && geoData.features && geoData.features.length === 1) {
@@ -122,30 +183,20 @@ const RunMap = ({
           animationFrameId = requestAnimationFrame(animate);
         } else {
           setAnimationProgress(totalPoints); 
-          
           setTimeout(() => {
             if (!isAnimating) return;
-            const lons = points.map(p => p[0]);
-            const lats = points.map(p => p[1]);
             const bounds = [
-              [Math.min(...lons), Math.min(...lats)],
-              [Math.max(...lons), Math.max(...lats)]
+              [Math.min(...points.map(p => p[0])), Math.min(...points.map(p => p[1]))],
+              [Math.max(...points.map(p => p[0])), Math.max(...points.map(p => p[1]))]
             ] as [[number, number], [number, number]];
 
-            map.fitBounds(bounds, {
-              padding: { top: 60, bottom: 60, left: 60, right: 60 },
-              pitch: 0,     
-              bearing: 0,   
-              duration: 3000 
-            });
+            map.fitBounds(bounds, { padding: 60, pitch: 0, bearing: 0, duration: 3000 });
           }, 1000); 
         }
       };
 
       setTimeout(() => {
-        if (isAnimating) {
-          animationFrameId = requestAnimationFrame(animate);
-        }
+        if (isAnimating) animationFrameId = requestAnimationFrame(animate);
       }, 2600);
 
       return () => {
@@ -155,11 +206,26 @@ const RunMap = ({
       };
     } else {
       setAnimationProgress(0);
-      if (map.getPitch() > 0 || map.getBearing() !== 0) {
+      const bounds = getCoreBounds(geoData?.features || []);
+
+      if (bounds) {
+        const cam = map.cameraForBounds(bounds, { padding: 60 });
+        if (cam) {
+          map.easeTo({ 
+            center: cam.center, 
+            zoom: (cam.zoom || 10) - 0.2, 
+            pitch: 0,      
+            bearing: 0,    
+            duration: 2000, 
+            easing: t => t * (2 - t), 
+            essential: true 
+          });
+        }
+      } else if (map.getPitch() > 0 || map.getBearing() !== 0) {
         map.easeTo({ pitch: 0, bearing: 0, duration: 800 }); 
       }
     }
-  }, [geoData]); 
+  }, [geoData, mapLoaded]); 
 
   const displayData = useMemo(() => {
     if (geoData && geoData.features.length === 1 && animationProgress > 0) {
@@ -167,136 +233,58 @@ const RunMap = ({
       const points = feature.geometry.coordinates as Coordinate[];
       const idx = Math.floor(animationProgress);
       const remainder = animationProgress - idx;
-
       const coords = points.slice(0, idx + 1);
 
       if (idx < points.length - 1 && remainder > 0) {
         const p1 = points[idx];
         const p2 = points[idx + 1];
-        const lng = p1[0] + (p2[0] - p1[0]) * remainder;
-        const lat = p1[1] + (p2[1] - p1[1]) * remainder;
-        coords.push([lng, lat]);
+        coords.push([p1[0] + (p2[0] - p1[0]) * remainder, p1[1] + (p2[1] - p1[1]) * remainder]);
       }
 
-      return {
-        ...geoData,
-        features: [
-          {
-            ...feature,
-            geometry: {
-              ...feature.geometry,
-              coordinates: coords,
-            },
-          },
-        ],
-      };
+      return { ...geoData, features: [{ ...feature, geometry: { ...feature.geometry, coordinates: coords } }] };
     }
     return geoData; 
   }, [geoData, animationProgress]);
 
-  const mapRefCallback = useCallback(
-    (ref: MapRef) => {
-      if (ref !== null) {
-        const map = ref.getMap();
-        if (map && IS_CHINESE) {
-            map.addControl(new MapboxLanguage({defaultLanguage: 'zh-Hans'}));
+  const mapRefCallback = useCallback((ref: MapRef) => {
+    if (ref !== null) {
+      const map = ref.getMap();
+      if (map && IS_CHINESE) map.addControl(new MapboxLanguage({ defaultLanguage: 'zh-Hans' }));
+      map.on('style.load', () => {
+        if (!ROAD_LABEL_DISPLAY) {
+          MAP_LAYER_LIST.forEach(layerId => { if (map.getLayer(layerId)) map.removeLayer(layerId); });
         }
-        map.on('style.load', () => {
-          if (!ROAD_LABEL_DISPLAY) {
-            MAP_LAYER_LIST.forEach((layerId) => {
-              map.removeLayer(layerId);
-            });
-          }
-          mapRef.current = ref;
-        });
+        mapRef.current = ref;
+        setMapLoaded(true); 
+      });
+      if (map.isStyleLoaded()) {
+        mapRef.current = ref;
+        setMapLoaded(true);
       }
-    },
-    []
-  );
-
-  const filterProvinces = provinces.slice();
-  const filterCountries = countries.slice();
-  filterProvinces.unshift('in', 'name');
-  filterCountries.unshift('in', 'name');
+    }
+  }, []);
 
   const initGeoDataLength = geoData.features.length;
-  const isBigMap = (viewState.zoom ?? 0) <= 3;
   if (isBigMap && IS_CHINESE) {
     if(geoData.features.length === initGeoDataLength){
-      geoData = {
-          "type": "FeatureCollection",
-          "features": geoData.features.concat(geoJsonForMap().features)
-      };
+      geoData = { "type": "FeatureCollection", "features": geoData.features.concat(geoJsonForMap().features) };
     }
   }
 
-  const isSingleRun = geoData.features.length === 1 && geoData.features[0].geometry.coordinates.length;
-  
-  let startLon = 0;
-  let startLat = 0;
-  let endLon = 0;
-  let endLat = 0;
-  
-  let runProps: any = null;
-  let fullRun: any = null;
-
-  if (isSingleRun) {
-    const points = geoData.features[0].geometry.coordinates as Coordinate[];
-    [startLon, startLat] = points[0];
-    [endLon, endLat] = points[points.length - 1];
-    
-    runProps = geoData.features[0].properties;
-
-    const targetId = runProps.run_id || geoData.features[0].id;
-    if (targetId) {
-      fullRun = allRuns.find((r: any) => String(r.run_id) === String(targetId) || String(r.id) === String(targetId));
-    }
-    if (!fullRun && runProps.start_date_local) {
-      fullRun = allRuns.find((r: any) => r.start_date_local === runProps.start_date_local);
-    }
-  }
-
-  // 🌟 1. 统一提取各项数据
-  const distance = fullRun?.distance ?? runProps?.distance ?? 0;
-  const movingTime = fullRun?.moving_time ?? runProps?.moving_time;
-  const averageSpeed = fullRun?.average_speed ?? runProps?.average_speed;
-  const heartRate = fullRun?.average_heartrate ?? runProps?.average_heartrate;
-  const displayDate = (fullRun?.start_date_local || runProps?.start_date_local || '').slice(0, 10);
-  
-  // 🌟 2. 核心修复：拿到最准确的 type，再去计算颜色，彻底解决全绿 Bug
-  const type = fullRun?.type ?? runProps?.type ?? 'Run';
-  const isRide = RIDE_TYPES.has(type);
-  const runColor = colorFromType(type) || runProps?.color || '#32D74B';
-
-  const runTimeStr = movingTime ? formatRunTime(movingTime) : '--:--';
-  const paceParts = averageSpeed ? formatSpeedOrPace(averageSpeed, type) : null;
-
-  let dash = USE_DASH_LINE && !isSingleRun && !isBigMap ? [2, 2] : [2, 0];
-  const onMove = React.useCallback(({ viewState }: { viewState: IViewState }) => {
-    setViewState(viewState);
-  }, []);
-  
-  const style: React.CSSProperties = {
-    width: '100%',
-    height: MAP_HEIGHT,
-  };
+  const dash = USE_DASH_LINE && !isSingleRun && !isBigMap ? [2, 2] : [2, 0];
+  const onMove = React.useCallback(({ viewState }: { viewState: IViewState }) => setViewState(viewState), []);
 
   return (
     <Map
       {...viewState}
       onMove={onMove}
-      style={style}
+      style={{ width: '100%', height: MAP_HEIGHT }}
       mapStyle="mapbox://styles/mapbox/dark-v11"
       ref={mapRefCallback}
       mapboxAccessToken={MAPBOX_TOKEN}
       logoPosition="bottom-right"
       attributionControl={false} 
-      fog={{
-        range: [0.8, 3.5],
-        color: "#151516",
-        "horizon-blend": 0.15,
-        "star-intensity": 0.2
-      }}
+      fog={{ range: [0.8, 3.5], color: "#151516", "horizon-blend": 0.15, "star-intensity": 0.2 }}
       terrain={isSingleRun ? { source: 'mapbox-dem', exaggeration: 2.5 } : undefined}
     >
       <Layer
@@ -313,15 +301,7 @@ const RunMap = ({
           'fill-extrusion-opacity': 0.85,
         }}
       />
-
-      <Source
-        id="mapbox-dem"
-        type="raster-dem"
-        url="mapbox://mapbox.mapbox-terrain-dem-v1"
-        tileSize={512}
-        maxzoom={14}
-      />
-
+      <Source id="mapbox-dem" type="raster-dem" url="mapbox://mapbox.mapbox-terrain-dem-v1" tileSize={512} maxzoom={14} />
       <Source id="data" type="geojson" data={displayData}>
         <Layer
           id="runs2"
@@ -337,56 +317,47 @@ const RunMap = ({
         />
       </Source>
 
-      {isSingleRun && (
-        <RunMarker startLat={startLat} startLon={startLon} endLat={endLat} endLon={endLon} />
+      {isSingleRun && runStats && (
+        <RunMarker startLat={runStats.startLat} startLon={runStats.startLon} endLat={runStats.endLat} endLon={runStats.endLon} />
       )}
       
       <FullscreenControl position="top-left" />
       <NavigationControl showCompass={false} position="bottom-left" />
 
-      {isSingleRun && runProps && (
+      {isSingleRun && runStats && (
         <div className={styles.runDetailCard}>
           <div className={styles.detailName}>
-            <span>{runProps.name}</span>
-            {displayDate && <span className={styles.detailDate}>{displayDate}</span>}
+            <span>{runStats.name}</span>
+            {runStats.displayDate && <span className={styles.detailDate}>{runStats.displayDate}</span>}
           </div>
           <div className={styles.detailStatsRow}>
-            {/* 🌟 里程应用准确的运动类型颜色 */}
             <div className={styles.detailStatBlock}>
               <span className={styles.statLabel}>里程</span>
-              <span className={styles.statVal} style={{ color: runColor }}>
-                {(distance / 1000).toFixed(2)}<small>km</small>
+              <span className={styles.statVal} style={{ color: runStats.runColor }}>
+                {(runStats.distance / 1000).toFixed(2)}<small>km</small>
               </span>
             </div>
             <div className={styles.detailStatBlock}>
               <span className={styles.statLabel}>用时</span>
-              <span className={styles.statVal}>
-                {runTimeStr}
-              </span>
+              <span className={styles.statVal}>{runStats.runTimeStr}</span>
             </div>
             <div className={styles.detailStatBlock}>
-              <span className={styles.statLabel}>{isRide ? '均速' : '配速'}</span>
+              <span className={styles.statLabel}>{runStats.isRide ? '均速' : '配速'}</span>
               <span className={styles.statVal}>
-                {paceParts ? (
-                  Array.isArray(paceParts) ? (
-                    <>{paceParts[0]}<small>{paceParts[1]}</small></>
+                {runStats.paceParts ? (
+                  Array.isArray(runStats.paceParts) ? (
+                    <>{runStats.paceParts[0]}<small>{runStats.paceParts[1]}</small></>
                   ) : (
-                    typeof paceParts === 'string' && paceParts.includes('km/h') ? (
-                      <>{paceParts.replace(/km\/h/i, '').trim()}<small>km/h</small></>
-                    ) : (
-                      paceParts.replace(' ', '')
-                    )
+                    typeof runStats.paceParts === 'string' && runStats.paceParts.includes('km/h') ? (
+                      <>{runStats.paceParts.replace(/km\/h/i, '').trim()}<small>km/h</small></>
+                    ) : (runStats.paceParts.replace(' ', ''))
                   )
-                ) : (
-                  "-'-''"
-                )}
+                ) : ("-'-''")}
               </span>
             </div>
             <div className={styles.detailStatBlock}>
               <span className={styles.statLabel}>心率</span>
-              <span className={styles.statVal}>
-                {heartRate ? Math.round(heartRate) : '--'}
-              </span>
+              <span className={styles.statVal}>{runStats.heartRate ? Math.round(runStats.heartRate) : '--'}</span>
             </div>
           </div>
         </div>
