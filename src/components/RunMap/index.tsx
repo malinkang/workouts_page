@@ -134,12 +134,11 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
     const map = mapRef.current?.getMap();
     if (!map || !mapLoaded) return;
     
-    map.stop(); // 停止上一轮正在进行的动画
+    map.stop();
 
     let animationFrameId: number;
     let isAnimating = true;
     
-    // 🌟 极客优化 1：使用数组收集所有定时器，彻底防止闭包带来的定时器溢出和幽灵动画
     const timeouts: NodeJS.Timeout[] = [];
     const addTimeout = (fn: () => void, delay: number) => {
       const id = setTimeout(fn, delay);
@@ -152,7 +151,30 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
       const totalPoints = points.length;
       if (totalPoints < 2) return;
 
-      let current = 0;
+      const runProps = geoData.features[0].properties as any;
+      let distance = runProps?.distance ?? 0;
+      if (!distance) {
+        const targetId = runProps?.run_id || geoData.features[0].id;
+        const fullRun = allRuns.find((r: any) => String(r.run_id) === String(targetId) || String(r.id) === String(targetId));
+        distance = fullRun?.distance ?? 5000;
+      }
+      const distanceKm = distance / 1000;
+
+      let targetDurationMs = 3500 + Math.sqrt(distanceKm) * 800;
+      targetDurationMs = Math.min(targetDurationMs, 12000); 
+
+      const cumulativeDistances = new Float32Array(totalPoints);
+      cumulativeDistances[0] = 0;
+      for (let i = 1; i < totalPoints; i++) {
+        const p1 = points[i - 1];
+        const p2 = points[i];
+        const dx = p2[0] - p1[0];
+        const dy = p2[1] - p1[1];
+        cumulativeDistances[i] = cumulativeDistances[i - 1] + Math.sqrt(dx * dx + dy * dy);
+      }
+      const totalGeoDistance = cumulativeDistances[totalPoints - 1];
+
+      let startTime: number | null = null;
       const startBearing = calculateBearing(points[0], points[Math.min(5, totalPoints - 1)]);
       let currentBearing = startBearing; 
 
@@ -165,40 +187,62 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
         essential: true
       });
 
-      const animate = () => {
+      const animate = (timestamp: number) => {
         if (!isAnimating) return;
+        if (!startTime) startTime = timestamp;
 
-        let step = totalPoints / 1500;
-        if (step > 0.3) step = 0.3;
-        if (step < 0.06) step = 0.06;
+        const elapsed = timestamp - startTime;
+        const progress = Math.min(elapsed / targetDurationMs, 1);
 
-        current += step;
-        if (current < totalPoints - 1) {
-          setAnimationProgress(current);
+        const targetDist = progress * totalGeoDistance;
 
-          const idx = Math.floor(current);
-          const remainder = current - idx;
+        let l = 0, r = totalPoints - 1, idx = 0;
+        while (l <= r) {
+          const mid = (l + r) >> 1;
+          if (cumulativeDistances[mid] <= targetDist) {
+            idx = mid;
+            l = mid + 1;
+          } else {
+            r = mid - 1;
+          }
+        }
+        if (idx >= totalPoints - 1) idx = totalPoints - 2;
+
+        const distA = cumulativeDistances[idx];
+        const distB = cumulativeDistances[idx + 1];
+        const segmentLen = distB - distA;
+        const remainder = segmentLen > 0 ? (targetDist - distA) / segmentLen : 0;
+
+        const current = idx + remainder;
+        setAnimationProgress(current);
+
+        if (progress < 1) {
           const p1 = points[idx];
           const p2 = points[idx + 1];
-          const lng = p1[0] + (p2[0] - p1[0]) * remainder;
-          const lat = p1[1] + (p2[1] - p1[1]) * remainder;
+          if (p1 && p2) {
+            const lng = p1[0] + (p2[0] - p1[0]) * remainder;
+            const lat = p1[1] + (p2[1] - p1[1]) * remainder;
 
-          const lookAheadIdx = Math.min(idx + Math.floor(totalPoints / 15) + 1, totalPoints - 1);
-          const targetBearing = calculateBearing([lng, lat], points[lookAheadIdx]);
-          
-          let diff = targetBearing - currentBearing;
-          diff = ((diff + 540) % 360) - 180; 
-          currentBearing += diff * 0.05; 
+            const lookAheadDist = targetDist + totalGeoDistance * 0.05;
+            let lookAheadIdx = idx;
+            while (lookAheadIdx < totalPoints - 1 && cumulativeDistances[lookAheadIdx] < lookAheadDist) {
+              lookAheadIdx++;
+            }
+            const targetBearing = calculateBearing([lng, lat], points[lookAheadIdx]);
+            
+            let diff = targetBearing - currentBearing;
+            diff = ((diff + 540) % 360) - 180; 
+            currentBearing += diff * 0.05; 
 
-          map.easeTo({
-            center: [lng, lat],
-            bearing: currentBearing,
-            pitch: 70,   
-            zoom: 16,
-            duration: 32, 
-            easing: (t) => t
-          });
-
+            map.easeTo({
+              center: [lng, lat],
+              bearing: currentBearing,
+              pitch: 70,   
+              zoom: 16,
+              duration: 32, 
+              easing: (t) => t
+            });
+          }
           animationFrameId = requestAnimationFrame(animate);
         } else {
           setAnimationProgress(totalPoints); 
@@ -218,7 +262,7 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
         if (isAnimating) animationFrameId = requestAnimationFrame(animate);
       }, 2600);
 
-    } else {
+    } else  {
       setAnimationProgress(0);
       const bounds = getCoreBounds(geoData?.features || []);
 
@@ -247,7 +291,6 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
     return () => {
       isAnimating = false;
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
-      // 🌟 极客优化 1 的闭环：批量销毁该生命周期产生的所有定时器
       timeouts.forEach(clearTimeout);
     };
   }, [geoData, mapLoaded]); 
