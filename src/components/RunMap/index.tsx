@@ -11,7 +11,7 @@ import {
   LINE_OPACITY,
   MAP_HEIGHT,
 } from '@/utils/const';
-import { Coordinate, IViewState, geoJsonForMap, colorFromType, formatRunTime, formatSpeedOrPace } from '@/utils/utils';
+import { Coordinate, geoJsonForMap, colorFromType, formatRunTime, formatSpeedOrPace } from '@/utils/utils';
 import RunMarker from './RunMarker';
 import styles from './style.module.scss';
 import { FeatureCollection } from 'geojson';
@@ -20,11 +20,10 @@ import './mapbox.css';
 
 interface IRunMapProps {
   title: string;
-  viewState: IViewState;
-  setViewState: (_viewState: IViewState) => void;
   changeYear: (_year: string) => void;
   geoData: FeatureCollection<RPGeometry>;
   thisYear: string;
+  isSticky?: boolean; 
 }
 
 const RIDE_TYPES = new Set(['Ride', 'VirtualRide', 'EBikeRide']);
@@ -64,19 +63,23 @@ const getCoreBounds = (features: any[]) => {
   ] as [[number, number], [number, number]];
 };
 
-
-const RunMap = ({ title, viewState, setViewState, changeYear, geoData, thisYear }: IRunMapProps) => {
+const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps) => {
   const { runs, activities, countries, provinces } = useActivities() as any;
   const allRuns = runs || activities || []; 
   
-  const mapRef = useRef<MapRef>();
+  const mapRef = useRef<MapRef>(null);
   const [animationProgress, setAnimationProgress] = useState(0);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [currentZoom, setCurrentZoom] = useState(3);
 
   const isSingleRun = geoData.features.length === 1 && geoData.features[0].geometry.coordinates.length;
-  const isBigMap = (viewState.zoom ?? 0) <= 3;
+  const isBigMap = currentZoom <= 3;
 
-  // 🌟 修复后的核心数据获取逻辑
+  const initialBounds = useMemo(() => {
+    const b = getCoreBounds(geoData?.features || []);
+    return b ? b : [[70, 10], [140, 60]] as [[number, number], [number, number]];
+  }, []); // 仅挂载时计算一次即可，因为后续全靠 easeTo 飞行
+
   const runStats = useMemo(() => {
     if (!isSingleRun || !geoData || !geoData.features.length) return null;
 
@@ -89,12 +92,10 @@ const RunMap = ({ title, viewState, setViewState, changeYear, geoData, thisYear 
 
     let fullRun: any = null;
 
-    // 🌟 致命 Bug 修复处：加上安全校验，拒绝 String(undefined) 的弱智匹配！
     if (targetId !== undefined && targetId !== null) {
       fullRun = allRuns.find((r: any) => String(r.run_id) === String(targetId) || String(r.id) === String(targetId));
     }
     
-    // 如果没有 id，退而求其次用时间匹配
     if (!fullRun && runProps?.start_date_local) {
       fullRun = allRuns.find((r: any) => r.start_date_local === runProps.start_date_local);
     }
@@ -119,11 +120,32 @@ const RunMap = ({ title, viewState, setViewState, changeYear, geoData, thisYear 
     };
   }, [isSingleRun, geoData, allRuns]);
 
+  useEffect(() => {
+    const map = mapRef.current?.getMap();
+    if (map && mapLoaded) {
+      map.resize();
+      const t1 = setTimeout(() => map.resize(), 150);
+      const t2 = setTimeout(() => map.resize(), 350);
+      return () => { clearTimeout(t1); clearTimeout(t2); };
+    }
+  }, [isSticky, mapLoaded]);
 
   useEffect(() => {
     const map = mapRef.current?.getMap();
     if (!map || !mapLoaded) return;
-    map.stop();
+    
+    map.stop(); // 停止上一轮正在进行的动画
+
+    let animationFrameId: number;
+    let isAnimating = true;
+    
+    // 🌟 极客优化 1：使用数组收集所有定时器，彻底防止闭包带来的定时器溢出和幽灵动画
+    const timeouts: NodeJS.Timeout[] = [];
+    const addTimeout = (fn: () => void, delay: number) => {
+      const id = setTimeout(fn, delay);
+      timeouts.push(id);
+      return id;
+    };
 
     if (geoData && geoData.features && geoData.features.length === 1) {
       const points = geoData.features[0].geometry.coordinates as Coordinate[];
@@ -131,9 +153,6 @@ const RunMap = ({ title, viewState, setViewState, changeYear, geoData, thisYear 
       if (totalPoints < 2) return;
 
       let current = 0;
-      let animationFrameId: number;
-      let isAnimating = true;
-
       const startBearing = calculateBearing(points[0], points[Math.min(5, totalPoints - 1)]);
       let currentBearing = startBearing; 
 
@@ -183,7 +202,7 @@ const RunMap = ({ title, viewState, setViewState, changeYear, geoData, thisYear 
           animationFrameId = requestAnimationFrame(animate);
         } else {
           setAnimationProgress(totalPoints); 
-          setTimeout(() => {
+          addTimeout(() => {
             if (!isAnimating) return;
             const bounds = [
               [Math.min(...points.map(p => p[0])), Math.min(...points.map(p => p[1]))],
@@ -195,15 +214,10 @@ const RunMap = ({ title, viewState, setViewState, changeYear, geoData, thisYear 
         }
       };
 
-      setTimeout(() => {
+      addTimeout(() => {
         if (isAnimating) animationFrameId = requestAnimationFrame(animate);
       }, 2600);
 
-      return () => {
-        isAnimating = false;
-        if (animationFrameId) cancelAnimationFrame(animationFrameId);
-        if (mapRef.current) mapRef.current.getMap()?.stop();
-      };
     } else {
       setAnimationProgress(0);
       const bounds = getCoreBounds(geoData?.features || []);
@@ -211,25 +225,45 @@ const RunMap = ({ title, viewState, setViewState, changeYear, geoData, thisYear 
       if (bounds) {
         const cam = map.cameraForBounds(bounds, { padding: 60 });
         if (cam) {
-          map.easeTo({ 
-            center: cam.center, 
-            zoom: (cam.zoom || 10) - 0.2, 
-            pitch: 0,      
-            bearing: 0,    
-            duration: 2000, 
-            easing: t => t * (2 - t), 
-            essential: true 
-          });
+          addTimeout(() => {
+            map.easeTo({ 
+              center: cam.center, 
+              zoom: (cam.zoom || 10) - 0.2, 
+              pitch: 0,      
+              bearing: 0,    
+              duration: 2000, 
+              easing: t => t * (2 - t), 
+              essential: true 
+            });
+          }, 50);
+        } else {
+          map.fitBounds(bounds, { padding: 40, duration: 2000, essential: true });
         }
       } else if (map.getPitch() > 0 || map.getBearing() !== 0) {
         map.easeTo({ pitch: 0, bearing: 0, duration: 800 }); 
       }
     }
+
+    return () => {
+      isAnimating = false;
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      // 🌟 极客优化 1 的闭环：批量销毁该生命周期产生的所有定时器
+      timeouts.forEach(clearTimeout);
+    };
   }, [geoData, mapLoaded]); 
 
   const displayData = useMemo(() => {
-    if (geoData && geoData.features.length === 1 && animationProgress > 0) {
-      const feature = geoData.features[0];
+    let dataToRender = geoData;
+
+    if (isBigMap && IS_CHINESE && geoData.features.length > 1) {
+      dataToRender = {
+        type: 'FeatureCollection',
+        features: [...geoData.features, ...geoJsonForMap().features]
+      } as FeatureCollection<RPGeometry>;
+    }
+
+    if (dataToRender && dataToRender.features.length === 1 && animationProgress > 0) {
+      const feature = dataToRender.features[0];
       const points = feature.geometry.coordinates as Coordinate[];
       const idx = Math.floor(animationProgress);
       const remainder = animationProgress - idx;
@@ -241,46 +275,35 @@ const RunMap = ({ title, viewState, setViewState, changeYear, geoData, thisYear 
         coords.push([p1[0] + (p2[0] - p1[0]) * remainder, p1[1] + (p2[1] - p1[1]) * remainder]);
       }
 
-      return { ...geoData, features: [{ ...feature, geometry: { ...feature.geometry, coordinates: coords } }] };
+      return { ...dataToRender, features: [{ ...feature, geometry: { ...feature.geometry, coordinates: coords } }] };
     }
-    return geoData; 
-  }, [geoData, animationProgress]);
+    
+    return dataToRender; 
+  }, [geoData, animationProgress, isBigMap]);
 
-  const mapRefCallback = useCallback((ref: MapRef) => {
-    if (ref !== null) {
-      const map = ref.getMap();
-      if (map && IS_CHINESE) map.addControl(new MapboxLanguage({ defaultLanguage: 'zh-Hans' }));
-      map.on('style.load', () => {
-        if (!ROAD_LABEL_DISPLAY) {
-          MAP_LAYER_LIST.forEach(layerId => { if (map.getLayer(layerId)) map.removeLayer(layerId); });
-        }
-        mapRef.current = ref;
-        setMapLoaded(true); 
-      });
-      if (map.isStyleLoaded()) {
-        mapRef.current = ref;
-        setMapLoaded(true);
-      }
+  const onMapLoad = useCallback((e: any) => {
+    const map = e.target;
+    if (map && IS_CHINESE) {
+      map.addControl(new MapboxLanguage({ defaultLanguage: 'zh-Hans' }));
     }
+    if (map && !ROAD_LABEL_DISPLAY) {
+      MAP_LAYER_LIST.forEach(layerId => {
+        if (map.getLayer(layerId)) map.removeLayer(layerId);
+      });
+    }
+    setMapLoaded(true); 
   }, []);
 
-  const initGeoDataLength = geoData.features.length;
-  if (isBigMap && IS_CHINESE) {
-    if(geoData.features.length === initGeoDataLength){
-      geoData = { "type": "FeatureCollection", "features": geoData.features.concat(geoJsonForMap().features) };
-    }
-  }
-
   const dash = USE_DASH_LINE && !isSingleRun && !isBigMap ? [2, 2] : [2, 0];
-  const onMove = React.useCallback(({ viewState }: { viewState: IViewState }) => setViewState(viewState), []);
 
   return (
     <Map
-      {...viewState}
-      onMove={onMove}
+      ref={mapRef}
+      onLoad={onMapLoad}
+      initialViewState={{ bounds: initialBounds, fitBoundsOptions: { padding: 60 } }}
+      onZoom={(e) => setCurrentZoom(e.viewState.zoom)}
       style={{ width: '100%', height: MAP_HEIGHT }}
       mapStyle="mapbox://styles/mapbox/dark-v11"
-      ref={mapRefCallback}
       mapboxAccessToken={MAPBOX_TOKEN}
       logoPosition="bottom-right"
       attributionControl={false} 

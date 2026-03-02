@@ -8,11 +8,9 @@ import useSiteMetadata from '@/hooks/useSiteMetadata';
 import RunCalendar from '@/components/RunCalendar';
 import {
   Activity,
-  IViewState,
   filterAndSortRuns,
   filterYearRuns,
   geoJsonForRuns,
-  getBoundsForGeoData,
   scrollToMap,
   sortDateFunc,
   titleForShow,
@@ -31,24 +29,10 @@ const Index = () => {
   
   const [title, setTitle] = useState('');
   const [geoData, setGeoData] = useState(geoJsonForRuns(runs));
-  
-  // 仅用于第一次打开页面时的初始中心点计算
-  const bounds = getBoundsForGeoData(geoData);
-  const intervalRef = useRef<number>();
-
-  const [viewState, setViewState] = useState<IViewState>({
-    ...bounds,
-  });
 
   const bentoRef = useRef<HTMLDivElement>(null);
   const [isSticky, setIsSticky] = useState(false);
 
-  // 🌟 地图重绘触发器：解决 Sticky 切换和自适应高度导致的 Canvas 留白
-  const triggerMapResize = () => {
-    window.dispatchEvent(new Event('resize'));
-  };
-
-  // 滚动吸顶逻辑 + 性能节流
   useEffect(() => {
     let ticking = false;
     const handleScroll = () => {
@@ -59,7 +43,6 @@ const Index = () => {
             const nextSticky = rect.bottom < 80;
             if (nextSticky !== isSticky) {
               setIsSticky(nextSticky);
-              requestAnimationFrame(triggerMapResize);
             }
           }
           ticking = false;
@@ -70,15 +53,6 @@ const Index = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isSticky]);
-
-  // 使用 ResizeObserver 监听 Bento 容器尺寸变化 (跟随右侧日历高度自适应)
-  useEffect(() => {
-    const node = bentoRef.current;
-    if (!node) return;
-    const observer = new ResizeObserver(() => triggerMapResize());
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
 
   const changeByItem = (
     item: string,
@@ -96,10 +70,7 @@ const Index = () => {
 
   const changeYear = (y: string) => {
     setYear(y);
-    // 🌟 修复 1：删除了这里强制 setViewState 瞬移的错误逻辑，完全交由 RunMap 内部的 easeTo 处理平滑飞行
     changeByItem(y, 'Year', filterYearRuns);
-    if (intervalRef.current) window.clearInterval(intervalRef.current);
-    triggerMapResize();
   };
 
   const locateActivity = (runIds: RunIds) => {
@@ -118,11 +89,8 @@ const Index = () => {
 
     setGeoData(geoJsonForRuns(selectedRuns));
     setTitle(titleForShow(lastRun));
-    if (intervalRef.current) window.clearInterval(intervalRef.current);
     if (!isSticky) scrollToMap();
   };
-
-  // 🌟 修复 2：彻底删除了那个一旦 geoData 改变就强制重置边界的 useEffect 炸弹！
 
   useEffect(() => {
     setGeoData(geoJsonForRuns(runs));
@@ -153,11 +121,11 @@ const Index = () => {
             <div className={`page-map bento-card-map ${isSticky ? 'sticky-map' : ''}`}>
               <RunMap
                 title={title}
-                viewState={viewState}
                 geoData={geoData}
-                setViewState={setViewState}
                 changeYear={changeYear}
                 thisYear={year}
+                // 🌟 新增：把吸顶状态传给地图，让它知道什么时候该重新量尺寸
+                isSticky={isSticky} 
               />
             </div>
           </div>
