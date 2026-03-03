@@ -4,7 +4,6 @@
   "version": "1.0.0",
   "author": "Ben Bell <ben_29@live.com>",
   "dependencies": {
-    "@mapbox/mapbox-gl-language": "^1.0.0",
     "@mapbox/polyline": "^1.1.1",
     "@svgr/plugin-svgo": "^8.1.0",
     "@vercel/analytics": "^0.1.6",

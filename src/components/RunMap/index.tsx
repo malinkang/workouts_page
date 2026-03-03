@@ -1,11 +1,8 @@
-import MapboxLanguage from '@mapbox/mapbox-gl-language';
 import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react';
 import Map, { Layer, Source, FullscreenControl, NavigationControl, MapRef } from 'react-map-gl';
 import useActivities from '@/hooks/useActivities';
 import {
-  MAP_LAYER_LIST,
   IS_CHINESE,
-  ROAD_LABEL_DISPLAY,
   MAPBOX_TOKEN,
   USE_DASH_LINE,
   LINE_OPACITY,
@@ -267,7 +264,7 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
       const bounds = getCoreBounds(geoData?.features || []);
 
       if (bounds) {
-        const cam = map.cameraForBounds(bounds, { padding: 60 });
+        const cam = map.cameraForBounds(bounds, { padding: 40 });
         if (cam) {
           addTimeout(() => {
             map.easeTo({ 
@@ -281,7 +278,7 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
             });
           }, 50);
         } else {
-          map.fitBounds(bounds, { padding: 40, duration: 2000, essential: true });
+          map.fitBounds(bounds, { padding: 30, duration: 2000, essential: true });
         }
       } else if (map.getPitch() > 0 || map.getBearing() !== 0) {
         map.easeTo({ pitch: 0, bearing: 0, duration: 800 }); 
@@ -326,19 +323,15 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
 
   const onMapLoad = useCallback((e: any) => {
     const map = e.target;
-    if (map && IS_CHINESE) {
-      map.addControl(new MapboxLanguage({ defaultLanguage: 'zh-Hans' }));
-    }
-    
-    if (map) {
-      const style = map.getStyle();
-      if (style && style.layers) {
-        style.layers.forEach((layer: any) => {
-          if (layer.type === 'symbol') {
-            map.setLayoutProperty(layer.id, 'visibility', 'none');
-          }
-        });
-      }
+    if (!map) return;
+
+    const style = map.getStyle();
+    if (style && style.layers) {
+      style.layers.forEach((layer: any) => {
+        if (layer.type === 'symbol') {
+          map.setLayoutProperty(layer.id, 'visibility', 'none');
+        }
+      });
     }
     
     setMapLoaded(true); 
@@ -350,7 +343,7 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
     <Map
       ref={mapRef}
       onLoad={onMapLoad}
-      initialViewState={{ bounds: initialBounds, fitBoundsOptions: { padding: 60 } }}
+      initialViewState={{ bounds: initialBounds, fitBoundsOptions: { padding: 40 } }}
       onZoom={(e) => setCurrentZoom(e.viewState.zoom)}
       style={{ width: '100%', height: MAP_HEIGHT }}
       mapStyle="mapbox://styles/mapbox/dark-v11"
