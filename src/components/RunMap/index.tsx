@@ -329,11 +329,18 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
     if (map && IS_CHINESE) {
       map.addControl(new MapboxLanguage({ defaultLanguage: 'zh-Hans' }));
     }
-    if (map && !ROAD_LABEL_DISPLAY) {
-      MAP_LAYER_LIST.forEach(layerId => {
-        if (map.getLayer(layerId)) map.removeLayer(layerId);
-      });
+    
+    if (map) {
+      const style = map.getStyle();
+      if (style && style.layers) {
+        style.layers.forEach((layer: any) => {
+          if (layer.type === 'symbol') {
+            map.setLayoutProperty(layer.id, 'visibility', 'none');
+          }
+        });
+      }
     }
+    
     setMapLoaded(true); 
   }, []);
 
