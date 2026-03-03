@@ -346,7 +346,7 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
       initialViewState={{ bounds: initialBounds, fitBoundsOptions: { padding: 60 } }}
       onZoom={(e) => setCurrentZoom(e.viewState.zoom)}
       style={{ width: '100%', height: MAP_HEIGHT }}
-      mapStyle="mapbox://styles/mapbox/dark-v11"
+      mapStyle="mapbox://styles/koobai/cmm9zb82c003p01sh2xm06s1u"
       mapboxAccessToken={MAPBOX_TOKEN}
       logoPosition="bottom-right"
       attributionControl={false} 
