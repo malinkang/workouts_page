@@ -9,20 +9,6 @@ const MUNICIPALITY_CITIES_ARR = [
   '香港特别行政区',
   '澳门特别行政区',
 ];
-const MAP_LAYER_LIST = [
-  'road-label',
-  'waterway-label',
-  'natural-line-label',
-  'natural-point-label',
-  'water-line-label',
-  'water-point-label',
-  'poi-label',
-  'airport-label',
-  'settlement-subdivision-label',
-  'settlement-label',
-  'state-label',
-  'country-label',
-];
 
 const USE_GOOGLE_ANALYTICS = false;
 const GOOGLE_ANALYTICS_TRACKING_ID = '';
@@ -33,8 +19,6 @@ const USE_DASH_LINE = false;
 const LINE_OPACITY = 0.8;
 // styling: map height
 const MAP_HEIGHT = 800;
-//set to `false` if you want to hide the road label characters
-const ROAD_LABEL_DISPLAY = false;
 //set to `true` if you want to display only the routes without showing the map.
 const PRIVACY_MODE = false;
 //set to `false` if you want to make light off as default, only effect when `PRIVACY_MODE` = false
@@ -98,9 +82,7 @@ export {
   CHINESE_LOCATION_INFO_MESSAGE_SECOND,
   MAPBOX_TOKEN,
   MUNICIPALITY_CITIES_ARR,
-  MAP_LAYER_LIST,
   IS_CHINESE,
-  ROAD_LABEL_DISPLAY,
   INFO_MESSAGE,
   RUN_TITLES,
   USE_ANIMATION_FOR_GRID,
