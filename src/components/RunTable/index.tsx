@@ -108,7 +108,7 @@ const RunTable = ({
               className={`${styles.filterPill} ${filterMonth === 'All' ? styles.activePill : ''}`}
               onClick={() => { setFilterMonth('All'); setRunIndex(-1); }}
             >
-              All
+              全部
             </div>
             {availableMonths.map(m => (
               <div 
