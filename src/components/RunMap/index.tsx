@@ -121,11 +121,16 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
     const map = mapRef.current?.getMap();
     if (map && mapLoaded) {
       map.resize();
-      const t1 = setTimeout(() => map.resize(), 150);
-      const t2 = setTimeout(() => map.resize(), 350);
-      return () => { clearTimeout(t1); clearTimeout(t2); };
+      const t1 = setTimeout(() => map.resize(), 100);
+      const t2 = setTimeout(() => map.resize(), 300);
+      const t3 = setTimeout(() => map.resize(), 600);
+      return () => { 
+        clearTimeout(t1); 
+        clearTimeout(t2); 
+        clearTimeout(t3); 
+      };
     }
-  }, [isSticky, mapLoaded]);
+  }, [isSticky, mapLoaded, geoData, thisYear]);
 
   useEffect(() => {
     const map = mapRef.current?.getMap();

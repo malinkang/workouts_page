@@ -1,3 +1,5 @@
+@import '../../styles/variables.scss';
+
 .boardContainer {
   background: transparent;
   border: none;
@@ -11,7 +13,7 @@
 }
 
 /* =========================================
-   1. 顶部全局面板 (🌟 阶梯层级 1)
+   1. 顶部全局面板
 ========================================= */
 .globalSection {
   position: relative;
@@ -87,7 +89,7 @@
 }
 
 /* =========================================
-   2. 底部日历区 (🌟 阶梯层级 2)
+   2. 底部日历区
 ========================================= */
 .calendarSection {
   position: relative;
@@ -218,7 +220,7 @@
 }
 
 /* =========================================
-   3. 月度洞察双卡片 (时段 & 心率) (🌟 阶梯层级 3)
+   3. 月度洞察双卡片
 ========================================= */
 .monthlyInsights {
   position: relative;
@@ -345,7 +347,7 @@
 }
 
 /* =========================================
-   🌟 4. 背景呼吸曲线 (静态精简版)
+   4. 背景呼吸曲线 
 ========================================= */
 .sparkline {
   position: absolute;
@@ -371,7 +373,7 @@
 }
 
 /* =========================================
-   5. 通用高级富文本悬浮提示 (Tooltip)
+   5. 通用悬浮提示 (Tooltip)
 ========================================= */
 .runTooltip {
   visibility: hidden;
@@ -413,16 +415,16 @@
         margin-left: 2px;
       }
     }
-  .ttVal {
-    font-size: 0.95rem;
+    .ttVal {
+      font-size: 0.95rem;
 
-    small {
-      font-size: 0.65rem;
-      color: #8E8E93;
-      font-weight: normal;
+      small {
+        font-size: 0.65rem;
+        color: #8E8E93;
+        font-weight: normal;
+      }
     }
   }
-}
   .ttAchievement {
     padding-top: 8px;
     margin-top: 2px;
@@ -442,7 +444,6 @@
   transform: translateX(-50%) translateY(0);
 }
 
-/* 🌟 智能边缘避让：处理最左侧和最右侧防截断 */
 .dayCell:nth-child(7n) .runTooltip,
 .dayCell:nth-child(7n - 1) .runTooltip {
   left: auto;
@@ -470,7 +471,7 @@
 }
 
 /* =========================================
-   6. 成就系统勋章 (Badges) & 其他杂项
+   🌟 6. 成就系统勋章 (统一移植自列表圆环)
 ========================================= */
 .maxDay {
   z-index: 2;
@@ -484,22 +485,37 @@
   }
 }
 
-.yearlyBadge,
-.monthlyBadge {
-  width: 26px;
-  height: 26px;
-  z-index: 5;
-  pointer-events: none;
-  color: transparent;
+/* 🌟 日历专属尺寸的圆环，让外圈更紧凑，内标更饱满 */
+.calIconRing {
+  width: 25px;      
+  height: 25px;     
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 2px;
-  animation: badgePopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  box-sizing: border-box;
+
+  svg {
+    width: 16px; 
+    height: 16px;    
+  }
 }
 
-@keyframes badgePopIn {
-  0% { opacity: 0; transform: scale(0) rotate(-45deg); }
-  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+/* 🌟 沿用 A 方案：极微弱底色 + 锐利同色系边框 */
+.goldRing {
+  background: linear-gradient(135deg, rgba(255, 212, 71, 0.18) 0%, rgba(217, 148, 20, 0.05) 100%) !important; 
+  border: 1px solid rgba(255, 212, 71, 0.2) !important;
+  color: #FFD447 !important; /* 强制图标亮金色 */
 }
 
+.silverRing {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(152, 152, 157, 0.05) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #E2E8F0 !important; /* 强制图标亮银色 */
+}
+
+/* 针对一天多次普通运动（非最高纪录）保留的小点点 */
 .multiDot {
   position: absolute;
   top: 5px;
@@ -509,12 +525,6 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.35);
   pointer-events: none;
-  &.dotRunWalkYear {
-    background-color: #FFD700;
-  }
-  &.dotRunWalkMonth {
-    background-color: #00E5FF;
-  }
 }
 
 /* =========================================

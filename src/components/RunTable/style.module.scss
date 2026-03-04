@@ -8,7 +8,7 @@
 }
 
 /* =========================================
-   🌟 1. 全宽控制卡片与大气胶囊导航
+   1. 控制导航栏
 ========================================= */
 .controlsArea {
   display: flex;
@@ -70,7 +70,7 @@
 }
 
 /* =========================================
-   2. 独立的卡片列表 (双列 Grid 布局)
+   2. 卡片列表 
 ========================================= */
 .cardList {
   display: grid;
@@ -102,7 +102,7 @@
 }
 
 /* =========================================
-   3. 行内排版：左右分置
+   3. 行内排版与左侧奖牌光圈 (方案A: 高奢微光+同色边框)
 ========================================= */
 .iconRing {
   width: 40px;
@@ -115,6 +115,20 @@
   font-size: 1.4rem;
   margin-right: 14px;
   flex-shrink: 0;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.goldRing {
+  background: linear-gradient(135deg, rgba(255, 212, 71, 0.18) 0%, rgba(217, 148, 20, 0.05) 100%) !important; 
+  color: #FFD447 !important;
+  border: 1px solid rgba(255, 212, 71, 0.2) !important;
+}
+
+.silverRing {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(152, 152, 157, 0.05) 100%) !important;
+  color: #E2E8F0 !important; 
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
 
 .cardContent {
@@ -172,17 +186,8 @@
   font-style: normal;
 }
 
-/* 🌟 修改了这里：删除了发光滤镜，尺寸微调配合新奖牌 */
-.badgeIcon {
-  width: 24px; 
-  height: 24px;
-  margin-left: 8px;
-  align-self: center;
-  flex-shrink: 0;
-}
-
 /* =========================================
-   4. 悬浮提示框 Tooltip (胶囊单位排版)
+   4. 悬浮提示框 Tooltip 
 ========================================= */
 .runTooltip {
   visibility: hidden;
@@ -251,10 +256,17 @@
   padding-top: 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   font-size: 0.8rem;
-  display: flex;
-  justify-content: center; 
-  align-items: center;
-  letter-spacing: 2px; 
+  letter-spacing: 1px; 
+}
+
+.titleTag {
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  font-size: 0.65rem;
+  color: #dfdfdf;
+  font-weight: normal;
+  letter-spacing: 0.5px;
 }
 
 .runCard:hover .runTooltip {
