@@ -75,6 +75,9 @@ TYPE_DICT = {
     "resort_skiing_snowboarding_ws": "Ski",  # garmin
     "AlpineSki": "Ski",  # strava
     "Ski": "Ski",
+    "Walk": "Walk",
+    "Treadmill": "Treadmill",
+    "VirtualRun": "VirtualRun",
 }
 
 MAPPING_TYPE = [
@@ -89,6 +92,9 @@ MAPPING_TYPE = [
     "Kayaking",
     "Snowboard",
     "Ski",
+    "Walk",
+    "Treadmill",
+    "VirtualRun",
 ]
 
 STRAVA_GARMIN_TYPE_DICT = {

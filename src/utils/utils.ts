@@ -19,6 +19,10 @@ import {
   KAYAKING_COLOR,
   SNOWBOARD_COLOR,
   TRAIL_RUN_COLOR,
+  // 🌟 引入新增的颜色常量
+  WALK_COLOR,
+  VIRTUAL_RUN_COLOR,
+  TREADMILL_COLOR,
 } from './const';
 import { FeatureCollection, LineString } from 'geojson';
 
@@ -224,6 +228,13 @@ const titleForType = (type: string): string => {
       return RUN_TITLES.HALF_MARATHON_RUN_TITLE;
     case 'Trail Run':
       return RUN_TITLES.TRAIL_RUN_TITLE;
+    // 🌟 新增类型匹配
+    case 'Walk':
+      return RUN_TITLES.WALK_TITLE;
+    case 'VirtualRun':
+      return RUN_TITLES.VIRTUAL_RUN_TITLE;
+    case 'Treadmill':
+      return RUN_TITLES.TREADMILL_TITLE;
     case 'Ride':
       return RUN_TITLES.RIDE_TITLE;
     case 'Indoor Ride':
@@ -271,6 +282,13 @@ const typeForRun = (run: Activity): string => {
         return 'Half Marathon';
       }
       return 'Trail Run';
+    // 🌟 补充类型的直出
+    case 'Walk':
+      return 'Walk';
+    case 'VirtualRun':
+      return 'VirtualRun';
+    case 'Treadmill':
+      return 'Treadmill';
     case 'Ride':
       return 'Ride';
     case 'Indoor Ride':
@@ -318,6 +336,13 @@ const colorFromType = (workoutType: string): string => {
       return RUN_COLOR;
     case 'Trail Run':
       return TRAIL_RUN_COLOR;
+    // 🌟 为新增的跑走类型赋予颜色
+    case 'Walk':
+      return WALK_COLOR;
+    case 'VirtualRun':
+      return VIRTUAL_RUN_COLOR;
+    case 'Treadmill':
+      return TREADMILL_COLOR;
     case 'Ride':
     case 'Indoor Ride':
       return RIDE_COLOR;
@@ -437,42 +462,34 @@ const sortDateFunc = (a: Activity, b: Activity) => {
 const sortDateFuncReverse = (a: Activity, b: Activity) => sortDateFunc(b, a);
 
 const getHeartRateColor = (bpm: number): string => {
-  if (bpm < 100) return '#00CC00'; // 沉稳绿 (热身：比纯绿稍深，代表平静)
-  if (bpm < 115) return '#99FF00'; // 荧光柠 (Zone 1：带有明显黄调的青柠色，和沉稳绿彻底拉开差距)
-  if (bpm < 130) return '#FFFF00'; // 纯正黄 (Zone 2：最亮的明黄，代表身体彻底热开)
-  if (bpm < 145) return '#FF9900'; // 活力橙 (Zone 3：标准的橙色，去掉了黄色里的亮光，一看就上强度了)
-  if (bpm < 160) return '#FF3300'; // 激进橘红 (Zone 4：红中带橙，像烧红的木炭，警示感强)
-  return '#FF0000';                // 纯正红 (Zone 5：极致的深红，视觉上最重，代表拉爆)
+  if (bpm < 100) return '#00CC00'; 
+  if (bpm < 115) return '#99FF00'; 
+  if (bpm < 130) return '#FFFF00'; 
+  if (bpm < 145) return '#FF9900'; 
+  if (bpm < 160) return '#FF3300'; 
+  return '#FF0000';                
 };
 
 const formatRunName = (name: string, startDateLocal: string, type: string): string => {
-  // 1. 获取运动的小时数 (把空格替换为T是为了兼容不同浏览器的日期解析)
   const date = new Date(startDateLocal.replace(' ', 'T'));
   const hour = date.getHours();
 
-  // 2. 咱们自己定义的精准时段划分
   let timePrefix = '';
-  // 晚上 23点到24点，或者 凌晨 0点到2点
   if (hour >= 23 || hour < 2) timePrefix = '深夜'; 
-  // 凌晨 2点到5点
   else if (hour >= 2 && hour < 5) timePrefix = '凌晨'; 
-  // 早上 5点到7点
   else if (hour >= 5 && hour < 7) timePrefix = '清晨'; 
-  // 上午 7点到11点
   else if (hour >= 7 && hour < 11) timePrefix = '上午'; 
-  // 中午 11点到13点
   else if (hour >= 11 && hour < 13) timePrefix = '中午'; 
-  // 下午 13点到18点
   else if (hour >= 13 && hour < 18) timePrefix = '下午'; 
-  // 傍晚 18点到20点
   else if (hour >= 18 && hour < 20) timePrefix = '傍晚'; 
-  // 剩下的就是晚上 20点到23点
   else timePrefix = '夜间';
 
-  // 3. 定义运动的中文名称
   let typeStr = '';
   switch (type) {
-    case 'Run': typeStr = '跑步'; break;
+    // 🌟 统一将新增的这几类翻译成“跑步”或“步行”
+    case 'Run':
+    case 'VirtualRun':
+    case 'Treadmill': typeStr = '跑步'; break;
     case 'Ride': typeStr = '骑行'; break;
     case 'Swim': typeStr = '游泳'; break;
     case 'Hike':
@@ -480,18 +497,16 @@ const formatRunName = (name: string, startDateLocal: string, type: string): stri
     default: typeStr = '运动';
   }
 
-  // 4. 判断原名称是否是 Strava 的“系统流水线名字”
+  // 🌟 将新增的类型单词加入拦截白名单正则
   const isDefaultName =
     /^(晨间|上午|午间|午后|下午|傍晚|晚间|夜间|凌晨|清晨|Morning|Afternoon|Evening|Night|Lunch)/.test(name) &&
-    /(跑步|骑行|行走|徒步|游泳|运动|Run|Ride|Walk|Swim|Hike)$/.test(name) &&
+    /(跑步|骑行|行走|徒步|游泳|运动|Run|Ride|Walk|Swim|Hike|Treadmill|VirtualRun)$/.test(name) &&
     name.length <= 15;
 
-  // 如果是系统默认的没营养的名字，就换成咱们自己精准定义的名字
   if (isDefaultName || name === 'Run' || name === 'Ride') {
     return `${timePrefix}${typeStr}`;
   }
 
-  // 如果是你自己手动改过的特殊名字（比如“千岛湖骑行”），就原样保留
   return name;
 };
 

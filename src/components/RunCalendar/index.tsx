@@ -10,12 +10,14 @@ interface IRunCalendarProps {
   year: string;
 }
 
+// 🌟 优化点 1：补全所有运动大类（增加 Treadmill 跑步机 和 VirtualRun 虚拟跑）
 const RIDE_TYPES = new Set(['Ride', 'VirtualRide', 'EBikeRide']);
-const RUN_TYPES = new Set(['Run', 'Hike', 'TrailRun', 'Walk']);
+const RUN_TYPES = new Set(['Run', 'Hike', 'TrailRun', 'Walk', 'Treadmill', 'VirtualRun']);
 
 function useRunDataEngine(runs: Activity[], year: string, monthIndex: number) {
   const displayYear = Number(year);
 
+  // 1. 基础数据清洗 & 归档 (仅在初始加载和切换年份时运行)
   const { normalizedRuns, runIdIndexMap, runsByMonth } = useMemo(() => {
     const indexMap = new Map<number, number>();
     const monthMap = new Map<number, { runs: any[], runsByDate: Map<string, any[]> }>();
@@ -43,9 +45,19 @@ function useRunDataEngine(runs: Activity[], year: string, monthIndex: number) {
       m.runsByDate.get(r.dateStr)!.push(r);
     });
 
+    // 🌟 优化点 2：将排序前置到数据初始化阶段，避免下游 hook 污染缓存并节省性能
+    monthMap.forEach(m => {
+      m.runsByDate.forEach(dayRuns => {
+        if (dayRuns.length > 1) {
+          dayRuns.sort((a, b) => a.exactTime - b.exactTime);
+        }
+      });
+    });
+
     return { normalizedRuns: normRuns, runIdIndexMap: indexMap, runsByMonth: monthMap };
   }, [runs]);
 
+  // 2. 全局/年度统计
   const globalData = useMemo(() => {
     let totalDist = 0, rideDist = 0, runDist = 0;
     const datesSet = new Set<number>();
@@ -54,7 +66,9 @@ function useRunDataEngine(runs: Activity[], year: string, monthIndex: number) {
     const lastDayUTC = Date.UTC(displayYear, 11, 31);
     const totalWeeks = Math.ceil((lastDayUTC - firstDayUTC) / 86400000 / 7) + 1;
     const weekData = new Array(totalWeeks).fill(0);
-    const distMap = new Map<string, number>();
+    
+    const rideDistMap = new Map<string, number>(); 
+    const rwDistMap = new Map<string, number>();
 
     normalizedRuns.forEach(r => {
       totalDist += r.distance;
@@ -65,7 +79,13 @@ function useRunDataEngine(runs: Activity[], year: string, monthIndex: number) {
       const diffDays = Math.floor((r.utcDayTimestamp - firstDayUTC) / 86400000);
       const week = Math.max(0, Math.min(totalWeeks - 1, Math.floor(diffDays / 7)));
       weekData[week] += r.distance;
-      distMap.set(r.dateStr, (distMap.get(r.dateStr) || 0) + r.distance);
+      
+      if (RIDE_TYPES.has(r.type)) {
+        rideDistMap.set(r.dateStr, (rideDistMap.get(r.dateStr) || 0) + r.distance);
+      }
+      if (RUN_TYPES.has(r.type)) {
+        rwDistMap.set(r.dateStr, (rwDistMap.get(r.dateStr) || 0) + r.distance);
+      }
     });
 
     const activeDays = datesSet.size;
@@ -88,23 +108,34 @@ function useRunDataEngine(runs: Activity[], year: string, monthIndex: number) {
 
     const sparklineMax = Math.max(...sparklineData, 1);
 
-    let yMax = 0, yDate = '';
-    const mMax = new Map<number, number>(), mDate = new Map<number, string>();
-    distMap.forEach((dist, dateStr) => {
+    let rideYMax = 0, rideYDate = '';
+    const rideMMax = new Map<number, number>(), rideMDate = new Map<number, string>();
+    rideDistMap.forEach((dist, dateStr) => {
       const month = Number(dateStr.slice(5, 7)) - 1;
-      if (dist > yMax) { yMax = dist; yDate = dateStr; }
-      if (dist > (mMax.get(month) || 0)) { mMax.set(month, dist); mDate.set(month, dateStr); }
+      if (dist > rideYMax) { rideYMax = dist; rideYDate = dateStr; }
+      if (dist > (rideMMax.get(month) || 0)) { rideMMax.set(month, dist); rideMDate.set(month, dateStr); }
+    });
+
+    let rwYMax = 0, rwYDate = '';
+    const rwMMax = new Map<number, number>(), rwMDate = new Map<number, string>();
+    rwDistMap.forEach((dist, dateStr) => {
+      const month = Number(dateStr.slice(5, 7)) - 1;
+      if (dist > rwYMax) { rwYMax = dist; rwYDate = dateStr; }
+      if (dist > (rwMMax.get(month) || 0)) { rwMMax.set(month, dist); rwMDate.set(month, dateStr); }
     });
 
     return {
       stats: { totalDist: totalDist / 1000, rideDist: rideDist / 1000, runDist: runDist / 1000, activeDays, maxStreak },
       sparklineData,
       sparklineMax,
-      yearlyMaxDate: yDate,
-      monthlyMaxDates: mDate
+      rideYearlyMaxDate: rideYDate,    
+      rideMonthlyMaxDates: rideMDate,
+      runWalkYearlyMaxDate: rwYDate,   
+      runWalkMonthlyMaxDates: rwMDate  
     };
   }, [normalizedRuns, displayYear]);
 
+  // 3. 动态月度统计 (跟随用户切换月份变动)
   const monthlyData = useMemo(() => {
     const monthData = runsByMonth.get(monthIndex) || { runs: [], runsByDate: new Map() };
     const { runs: currentRuns, runsByDate: runsMap } = monthData;
@@ -136,8 +167,6 @@ function useRunDataEngine(runs: Activity[], year: string, monthIndex: number) {
         else hrCounts[4]++;
       }
     });
-
-    runsMap.forEach(dayRuns => { if (dayRuns.length > 1) dayRuns.sort((a, b) => b.exactTime - a.exactTime); });
 
     const personas = [
       { name: '午夜潜行', time: '00:00-03:00' }, { name: '破晓先锋', time: '03:00-06:00' },
@@ -219,14 +248,12 @@ const RunCalendar = ({ runs, locateActivity, runIndex, setRunIndex, year }: IRun
   return (
     <div className={styles.boardContainer}>
       
-      {/* 🌟 渐变色定义中心 */}
       <svg style={{ width: 0, height: 0, position: 'absolute' }} aria-hidden="true">
         <defs>
           <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#FFD447" /> 
             <stop offset="100%" stopColor="#D99414" /> 
           </linearGradient>
-          {/* 🌟 银灰色渐变：经典的成就配色 */}
           <linearGradient id="silverGrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#E5E5EA" />
             <stop offset="100%" stopColor="#98989D" />
@@ -246,7 +273,6 @@ const RunCalendar = ({ runs, locateActivity, runIndex, setRunIndex, year }: IRun
         <div className={styles.globalTitle}>年度总里程</div>
 
         <div className={styles.globalMainStat}>
-          {/* 🌟 直接读取固定数据，移除所有动画状态 */}
           <span className={styles.val}>{engine.globalData.stats.totalDist.toFixed(1)}</span>
           <span className={styles.unit}>KM</span>
         </div>
@@ -280,9 +306,42 @@ const RunCalendar = ({ runs, locateActivity, runIndex, setRunIndex, year }: IRun
             const runColor = primaryRun ? colorFromType(primaryRun.type) : '#32D74B';
             const isSelected = hasRun && runs[runIndex]?.run_id === primaryRun?.run_id;
             
-            const isYearlyMax = dateStr === engine.globalData.yearlyMaxDate;
-            const isMonthlyMax = !isYearlyMax && dateStr === engine.globalData.monthlyMaxDates.get(monthIndex);
-            const isMaxDay = isYearlyMax || isMonthlyMax;
+            const isRawRideYearlyMax = dateStr === engine.globalData.rideYearlyMaxDate;
+            const isRawRideMonthlyMax = dateStr === engine.globalData.rideMonthlyMaxDates.get(monthIndex);
+            const isRawRwYearlyMax = dateStr === engine.globalData.runWalkYearlyMaxDate;
+            const isRawRwMonthlyMax = dateStr === engine.globalData.runWalkMonthlyMaxDates.get(monthIndex);
+
+            const isRideYearlyMax = isRawRideYearlyMax;
+            const isRideMonthlyMax = !isRideYearlyMax && isRawRideMonthlyMax;
+            const isRunWalkYearlyMax = isRawRwYearlyMax; 
+            const isRunWalkMonthlyMax = !isRunWalkYearlyMax && isRawRwMonthlyMax;
+            
+            const isMaxDay = isRideYearlyMax || isRideMonthlyMax;
+
+            let indicatorDom = null;
+            if (isRideYearlyMax) {
+              indicatorDom = (
+                <svg className={styles.yearlyBadge} viewBox="0 0 24 24" fill="none">
+                  <path fill="url(#goldGrad)" d="M13 2h-2c-1.886 0-2.828 0-3.414.586S7 4.114 7 6v4h10V6c0-1.886 0-2.828-.586-3.414S14.886 2 13 2" opacity=".5"/>
+                  <path fill="url(#goldGrad)" fillRule="evenodd" d="M12 22a8 8 0 1 0 0-16a8 8 0 0 0 0 16m0-11c-.284 0-.474.34-.854 1.023l-.098.176c-.108.194-.162.29-.246.354c-.085.064-.19.088-.4.135l-.19.044c-.738.167-1.107.25-1.195.532s.164.577.667 1.165l.13.152c.143.167.215.25.247.354s.021.215 0 .438l-.02.203c-.076.785-.114 1.178.115 1.352c.23.174.576.015 1.267-.303l.178-.082c.197-.09.295-.136.399-.136s.202.046.399.136l.178.082c.691.319 1.037.477 1.267.303s.191-.567.115-1.352l-.02-.203c-.021-.223-.032-.334 0-.438s.104-.187.247-.354l.13-.152c.503-.588.755-.882.667-1.165c-.088-.282-.457-.365-1.195-.532l-.19-.044c-.21-.047-.315-.07-.4-.135c-.084-.064-.138-.16-.246-.354l-.098-.176C12.474 11.34 12.284 11 12 11" clipRule="evenodd"/>
+                </svg>
+              );
+            } else if (isRideMonthlyMax) {
+              indicatorDom = (
+                <svg className={styles.monthlyBadge} viewBox="0 0 24 24" fill="none">
+                  <path fill="url(#silverGrad)" d="M13 2h-2c-1.886 0-2.828 0-3.414.586S7 4.114 7 6v4h10V6c0-1.886 0-2.828-.586-3.414S14.886 2 13 2" opacity=".5"/>
+                  <path fill="url(#silverGrad)" fillRule="evenodd" d="M12 22a8 8 0 1 0 0-16a8 8 0 0 0 0 16m0-11c-.284 0-.474.34-.854 1.023l-.098.176c-.108.194-.162.29-.246.354c-.085.064-.19.088-.4.135l-.19.044c-.738.167-1.107.25-1.195.532s.164.577.667 1.165l.13.152c.143.167.215.25.247.354s.021.215 0 .438l-.02.203c-.076.785-.114 1.178.115 1.352c.23.174.576.015 1.267-.303l.178-.082c.197-.09.295-.136.399-.136s.202.046.399.136l.178.082c.691.319 1.037.477 1.267.303s.191-.567.115-1.352l-.02-.203c-.021-.223-.032-.334 0-.438s.104-.187.247-.354l.13-.152c.503-.588.755-.882.667-1.165c-.088-.282-.457-.365-1.195-.532l-.19-.044c-.21-.047-.315-.07-.4-.135c-.084-.064-.138-.16-.246-.354l-.098-.176C12.474 11.34 12.284 11 12 11" clipRule="evenodd"/>
+                </svg>
+              );
+            } else if (isRunWalkYearlyMax) {
+              indicatorDom = <span className={`${styles.multiDot} ${styles.dotRunWalkYear}`} />;
+            } else if (isRunWalkMonthlyMax) {
+              indicatorDom = <span className={`${styles.multiDot} ${styles.dotRunWalkMonth}`} />;
+            } else if (dayRuns.length > 1) {
+              indicatorDom = <span className={styles.multiDot} />;
+            }
+
+            const hasAnyAchievement = isRideYearlyMax || isRideMonthlyMax || isRunWalkYearlyMax || isRunWalkMonthlyMax;
 
             return (
               <div 
@@ -304,55 +363,41 @@ const RunCalendar = ({ runs, locateActivity, runIndex, setRunIndex, year }: IRun
                         </div>
                       ))}
                     </div>
-                    {isMaxDay && (
-                      <div className={styles.ttAchievement} style={{ color: isYearlyMax ? '#FFD447' : '#E5E5EA' }}>
-                        <span>{isYearlyMax ? '年度最远' : '月度最远'}</span>
-                        <span className={styles.ttVal}>{(dayRuns.reduce((sum, r) => sum + r.distance, 0) / 1000).toFixed(1)} <small>km</small></span>
+                    
+                    {hasAnyAchievement && (
+                      <div className={styles.ttAchievement} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '6px' }}>
+                        {isRideYearlyMax && (
+                          <span style={{ color: '#FFD447', display: 'flex', alignItems: 'center' }}>
+                            年度最远 <span className={styles.titleTag} style={{ marginLeft: '6px' }}>骑行</span>
+                          </span>
+                        )}
+                        {isRideMonthlyMax && (
+                          <span style={{ color: '#E5E5EA', display: 'flex', alignItems: 'center' }}>
+                            月度最远 <span className={styles.titleTag} style={{ marginLeft: '6px' }}>骑行</span>
+                          </span>
+                        )}
+                        {isRunWalkYearlyMax && (
+                          <span style={{ color: '#FFD700', display: 'flex', alignItems: 'center' }}>
+                            年度最远 <span className={styles.titleTag} style={{ marginLeft: '6px' }}>跑走</span>
+                          </span>
+                        )}
+                        {isRunWalkMonthlyMax && (
+                          <span style={{ color: '#00E5FF', display: 'flex', alignItems: 'center' }}>
+                            月度最远 <span className={styles.titleTag} style={{ marginLeft: '6px' }}>跑走</span>
+                          </span>
+                        )}
                       </div>
                     )}
                   </div>
                 )}
 
-                {isMaxDay ? (
-                  isYearlyMax ? (
-                    /* 🌟 年度勋章：金色奖牌图标 */
-                    <svg className={styles.yearlyBadge} viewBox="0 0 24 24" fill="none">
-                      <path 
-                        fill="url(#goldGrad)" 
-                        d="M13 2h-2c-1.886 0-2.828 0-3.414.586S7 4.114 7 6v4h10V6c0-1.886 0-2.828-.586-3.414S14.886 2 13 2" 
-                        opacity=".5"
-                      />
-                      <path 
-                        fill="url(#goldGrad)" 
-                        fillRule="evenodd" 
-                        d="M12 22a8 8 0 1 0 0-16a8 8 0 0 0 0 16m0-11c-.284 0-.474.34-.854 1.023l-.098.176c-.108.194-.162.29-.246.354c-.085.064-.19.088-.4.135l-.19.044c-.738.167-1.107.25-1.195.532s.164.577.667 1.165l.13.152c.143.167.215.25.247.354s.021.215 0 .438l-.02.203c-.076.785-.114 1.178.115 1.352c.23.174.576.015 1.267-.303l.178-.082c.197-.09.295-.136.399-.136s.202.046.399.136l.178.082c.691.319 1.037.477 1.267.303s.191-.567.115-1.352l-.02-.203c-.021-.223-.032-.334 0-.438s.104-.187.247-.354l.13-.152c.503-.588.755-.882.667-1.165c-.088-.282-.457-.365-1.195-.532l-.19-.044c-.21-.047-.315-.07-.4-.135c-.084-.064-.138-.16-.246-.354l-.098-.176C12.474 11.34 12.284 11 12 11" 
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  ) : (
-                    /* 🌟 月度勋章：银灰色奖牌图标 */
-                    <svg className={styles.monthlyBadge} viewBox="0 0 24 24" fill="none">
-                      <path 
-                        fill="url(#silverGrad)" 
-                        d="M13 2h-2c-1.886 0-2.828 0-3.414.586S7 4.114 7 6v4h10V6c0-1.886 0-2.828-.586-3.414S14.886 2 13 2" 
-                        opacity=".5"
-                      />
-                      <path 
-                        fill="url(#silverGrad)" 
-                        fillRule="evenodd" 
-                        d="M12 22a8 8 0 1 0 0-16a8 8 0 0 0 0 16m0-11c-.284 0-.474.34-.854 1.023l-.098.176c-.108.194-.162.29-.246.354c-.085.064-.19.088-.4.135l-.19.044c-.738.167-1.107.25-1.195.532s.164.577.667 1.165l.13.152c.143.167.215.25.247.354s.021.215 0 .438l-.02.203c-.076.785-.114 1.178.115 1.352c.23.174.576.015 1.267-.303l.178-.082c.197-.09.295-.136.399-.136s.202.046.399.136l.178.082c.691.319 1.037.477 1.267.303s.191-.567.115-1.352l-.02-.203c-.021-.223-.032-.334 0-.438s.104-.187.247-.354l.13-.152c.503-.588.755-.882.667-1.165c-.088-.282-.457-.365-1.195-.532l-.19-.044c-.21-.047-.315-.07-.4-.135c-.084-.064-.138-.16-.246-.354l-.098-.176C12.474 11.34 12.284 11 12 11" 
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  )
-                ) : (
+                {!isMaxDay && (
                   <span className={styles.dateNum} style={{ color: hasRun ? runColor : 'inherit', opacity: hasRun ? 1 : 0.3, fontWeight: hasRun ? 800 : 500, textShadow: hasRun ? `0 0 8px ${runColor}40` : 'none' }}>
                     {day}
                   </span>
                 )}
-                {!isMaxDay && dayRuns.length > 1 && (
-                  <span className={styles.multiDot} />
-                )}
+                
+                {indicatorDom}
               </div>
             );
           })}

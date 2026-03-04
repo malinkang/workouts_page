@@ -56,11 +56,21 @@ const SKI_TITLE = IS_CHINESE ? '双板滑雪' : 'Ski';
 const ROAD_TRIP_TITLE = IS_CHINESE ? '自驾' : 'RoadTrip';
 const FLIGHT_TITLE = IS_CHINESE ? '飞行' : 'Flight';
 
+// 🌟 新增：跑走相关类型翻译
+const WALK_TITLE = IS_CHINESE ? '健走' : 'Walk';
+const VIRTUAL_RUN_TITLE = IS_CHINESE ? '虚拟跑' : 'Virtual Run';
+const TREADMILL_TITLE = IS_CHINESE ? '跑步机' : 'Treadmill';
+
 const RUN_TITLES = {
   FULL_MARATHON_RUN_TITLE,
   HALF_MARATHON_RUN_TITLE,
   RUN_TITLE,
   TRAIL_RUN_TITLE,
+  
+  // 🌟 将新增的翻译加入字典
+  WALK_TITLE,
+  VIRTUAL_RUN_TITLE,
+  TREADMILL_TITLE,
 
   RIDE_TITLE,
   INDOOR_RIDE_TITLE,
@@ -122,3 +132,8 @@ export const COUNTRY_FILL_COLOR = wpink;
 export const KAYAKING_COLOR = red;
 export const SNOWBOARD_COLOR = wpink;
 export const TRAIL_RUN_COLOR = IKB;
+
+// 🌟 新增：为跑走类型分配极客颜色
+export const WALK_COLOR = purple;
+export const VIRTUAL_RUN_COLOR = veryPeri;
+export const TREADMILL_COLOR = cyan;

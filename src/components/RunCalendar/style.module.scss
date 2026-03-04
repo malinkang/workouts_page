@@ -46,9 +46,6 @@
     font-style: italic;
     color: #32D74B;
     line-height: 1;
-    letter-spacing: -1px;
-    text-shadow: 0 0 20px rgba(50, 215, 75, 0.15);
-    font-variant-numeric: tabular-nums; 
   }
 
   .unit {
@@ -512,6 +509,12 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.35);
   pointer-events: none;
+  &.dotRunWalkYear {
+    background-color: #FFD700;
+  }
+  &.dotRunWalkMonth {
+    background-color: #00E5FF;
+  }
 }
 
 /* =========================================
