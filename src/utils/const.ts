@@ -134,6 +134,6 @@ export const SNOWBOARD_COLOR = wpink;
 export const TRAIL_RUN_COLOR = IKB;
 
 // 🌟 新增：为跑走类型分配极客颜色
-export const WALK_COLOR = purple;
+export const WALK_COLOR = pink;
 export const VIRTUAL_RUN_COLOR = veryPeri;
 export const TREADMILL_COLOR = cyan;
