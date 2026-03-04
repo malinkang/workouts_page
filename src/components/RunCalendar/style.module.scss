@@ -497,22 +497,17 @@
   box-sizing: border-box;
 
   svg {
-    width: 16px; 
-    height: 16px;    
+    width: 20px; 
+    height: 20px;    
   }
 }
 
-/* 🌟 沿用 A 方案：极微弱底色 + 锐利同色系边框 */
 .goldRing {
-  background: linear-gradient(135deg, rgba(255, 212, 71, 0.18) 0%, rgba(217, 148, 20, 0.05) 100%) !important; 
-  border: 1px solid rgba(255, 212, 71, 0.2) !important;
-  color: #FFD447 !important; /* 强制图标亮金色 */
+  color: #FFD447 !important;
 }
 
 .silverRing {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(152, 152, 157, 0.05) 100%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  color: #E2E8F0 !important; /* 强制图标亮银色 */
+  color: #E2E8F0 !important;
 }
 
 /* 针对一天多次普通运动（非最高纪录）保留的小点点 */
