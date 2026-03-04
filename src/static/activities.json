@@ -4123,5 +4123,20 @@
 "average_speed": 2.134,
 "source": "strava",
 "streak": 5
+},
+{
+"run_id": 17600575735,
+"name": "\u508d\u665a\u884c\u8d70",
+"distance": 2110.9,
+"moving_time": "0:25:17",
+"type": "Walk",
+"start_date": "2026-03-04 12:59:02+00:00",
+"start_date_local": "2026-03-04 20:59:02",
+"location_country": "\uff0800013210200021\uff09\u56de\u6536\u7bb1\u5230\u4e1c\u5357\u95e8, \u91d1\u90fd\u590f\u5bab, \u4e34\u5e73\u8857\u9053, \u4e34\u5e73\u533a, \u676d\u5dde\u5e02, \u6d59\u6c5f\u7701, \u4e2d\u56fd",
+"summary_polyline": "wivxDyd_}UGRB^CtADt@CPEFQHeCj@{@V}@\\eAt@MBO@QGMMi@mBWm@g@{@oAaBcAuBIc@EeBS}@E_@[eFIe@w@gDSgACSBKLM`Ai@RGF?JBZ\\JFPDRC`@SfBiAFIJ_@G[g@gA@OJMlDkBVCLDFFf@tA|CnHl@|AdA`CdBfEv@tBd@xA@R",
+"average_heartrate": 98.6,
+"average_speed": 1.392,
+"source": "strava",
+"streak": 6
 }
 ]
