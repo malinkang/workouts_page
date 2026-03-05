@@ -19,6 +19,41 @@ interface IRunRowProperties {
   isRwMonthlyMax?: boolean;
 }
 
+// 🌟 进一步极致优化的相对时间引擎
+const formatRelativeDate = (timeStr: string) => {
+  if (!timeStr) return '';
+  const safeTimeStr = timeStr.replace(' ', 'T');
+  const ts = new Date(safeTimeStr).getTime();
+  const now = new Date();
+  const target = new Date(ts);
+  const diff = now.getTime() - ts;
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const M = pad(target.getMonth() + 1);
+  const D = pad(target.getDate());
+  const H = pad(target.getHours());
+  const m = pad(target.getMinutes());
+
+  const timeSuffix = ` ${H}:${m}`;
+
+  // 1. 判断“今天”
+  if (now.toDateString() === target.toDateString()) {
+    // 🌟 优化1：去掉秒的判断，直接用分钟，最小显示 1 分钟前
+    if (diff < 3600000) return `${Math.max(1, Math.floor(diff / 60000))} 分钟前`;
+    return `${Math.floor(diff / 3600000)} 小时前`;
+  }
+
+  // 2. 判断“昨天”
+  const yesterday = new Date(now.getTime() - 86400000);
+  if (yesterday.toDateString() === target.toDateString()) {
+    return `昨天${timeSuffix}`; 
+  }
+
+  // 3. 其他所有日期 
+  // 🌟 优化2：因为看板全局已有明确的年份筛选，所以彻底抛弃年份，统一采用极简的 MM-DD
+  return `${M}-${D}${timeSuffix}`;
+};
+
 const RunRow = ({ 
   elementIndex, locateActivity, run, runIndex, setRunIndex, 
   isRideYearlyMax, isRideMonthlyMax, isRwYearlyMax, isRwMonthlyMax 
@@ -41,9 +76,7 @@ const RunRow = ({
     locateActivity([run.run_id]);
   };
   
-  const dateStr = run.start_date_local || '';
-  const datePart = dateStr.length >= 10 ? dateStr.slice(5, 10) : ''; 
-  const timePart = dateStr.length >= 16 ? dateStr.slice(11, 16) : ''; 
+  const displayDate = formatRelativeDate(run.start_date_local || '');
 
   const getActivityIcon = () => {
     if (isRide) {
@@ -128,7 +161,7 @@ const RunRow = ({
         </div>
 
         <div className={styles.rightInfo}>
-          <div className={styles.runDate}>{datePart} {timePart}</div>
+          <div className={styles.runDate}>{displayDate}</div>
         </div>
       </div>
 
