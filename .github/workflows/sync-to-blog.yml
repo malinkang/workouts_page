@@ -1,0 +1,56 @@
+name: Sync Activities to Hugo Blog
+
+on:
+  push:
+    branches:
+      - master  # 1. 监听源项目 workouts_page 的 master 分支
+    paths:
+      - 'src/static/activities.json'  # 2. 准确监听源文件的路径
+  workflow_dispatch:
+
+jobs:
+  sync-and-trigger:
+    runs-on: ubuntu-latest
+    steps:
+      # 检出源仓库 (workouts_page)
+      - name: Checkout Source Repo
+        uses: actions/checkout@v4
+        with:
+          path: 'source-repo'
+
+      # 检出目标仓库 (blog)
+      - name: Checkout Target Repo
+        uses: actions/checkout@v4
+        with:
+          repository: 'koobai/blog'
+          token: ${{ secrets.PAT_TOKEN }}
+          path: 'target-repo'
+
+      # 复制并推送到 blog 的 main 分支
+      - name: Copy File and Push
+        run: |
+          # 安全机制：确保目标仓库里有 assets 文件夹
+          mkdir -p target-repo/assets
+          
+          # 3. 从源项目的真实路径，复制到 blog 的 assets 下
+          cp source-repo/src/static/activities.json target-repo/assets/activities.json
+
+          # 进入 blog 仓库准备提交
+          cd target-repo
+
+          # 设置机器人身份
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 追踪文件的变更
+          git add assets/activities.json
+          
+          # 如果没有变化就跳过，有变化就推送到 main
+          if git diff-index --quiet HEAD --; then
+            echo "activities.json 内容无变化，跳过推送。"
+          else
+            git commit -m "Auto-sync: update activities.json from workouts_page"
+            # 4. 准确推送到目标项目 blog 的 main 分支
+            git push origin main
+            echo "文件跨仓库推送成功！已唤醒 koobai/blog 的部署流。"
+          fi
