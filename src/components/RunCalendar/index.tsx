@@ -307,7 +307,7 @@ const RunCalendar = ({ runs, locateActivity, runIndex, setRunIndex, year }: IRun
           <div className={styles.metricBlock}><span className={styles.metricLabel}>骑行</span><span className={styles.metricValue}>{engine.globalData.stats.rideDist.toFixed(0)}<small>km</small></span></div>
           <div className={styles.metricBlock}><span className={styles.metricLabel}>跑步</span><span className={styles.metricValue}>{engine.globalData.stats.runDist.toFixed(0)}<small>km</small></span></div>
           <div className={styles.metricBlock}><span className={styles.metricLabel}>行走</span><span className={styles.metricValue}>{engine.globalData.stats.walkDist.toFixed(0)}<small>km</small></span></div>
-          <div className={styles.metricBlock}><span className={styles.metricLabel}>出勤</span><span className={styles.metricValue}>{engine.globalData.stats.activeDays}<small>天</small></span></div>
+          <div className={styles.metricBlock}><span className={styles.metricLabel}>运动</span><span className={styles.metricValue}>{engine.globalData.stats.activeDays}<small>天</small></span></div>
         </div>
       </div>
 
@@ -422,10 +422,14 @@ const RunCalendar = ({ runs, locateActivity, runIndex, setRunIndex, year }: IRun
         </div>
 
         <div className={styles.monthFooter}>
-          里程 <span>{engine.monthlyData.monthDetailStats.totalDist.toFixed(1)}</span> km 
-          <span className={styles.dot}>•</span> 骑行 <span>{engine.monthlyData.monthDetailStats.rideDist.toFixed(1)}</span> km 
-          <span className={styles.dot}>•</span> 跑步 <span>{engine.monthlyData.monthDetailStats.runDist.toFixed(1)}</span> km
-          <span className={styles.dot}>•</span> 行走 <span>{engine.monthlyData.monthDetailStats.walkDist.toFixed(1)}</span> km
+          <div className={styles.monthFooterLine}>
+            里程 <span>{engine.monthlyData.monthDetailStats.totalDist.toFixed(1)}</span> km 
+            <span className={styles.dot}>•</span> 骑行 <span>{engine.monthlyData.monthDetailStats.rideDist.toFixed(1)}</span> km
+          </div>
+          <div className={styles.monthFooterLine}>
+            跑步 <span>{engine.monthlyData.monthDetailStats.runDist.toFixed(1)}</span> km
+            <span className={styles.dot}>•</span> 行走 <span>{engine.monthlyData.monthDetailStats.walkDist.toFixed(1)}</span> km
+          </div>
         </div>
       </div>
 
