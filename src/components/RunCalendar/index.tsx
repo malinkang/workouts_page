@@ -150,7 +150,7 @@ function useRunDataEngine(runs: Activity[], year: string, monthIndex: number) {
     const monthData = runsByMonth.get(monthIndex) || { runs: [], runsByDate: new Map() };
     const { runs: currentRuns, runsByDate: runsMap } = monthData;
     
-    let mTotal = 0, mRide = 0, mRun = 0; 
+    let mTotal = 0, mRide = 0, mRun = 0, mWalk = 0; 
     const timeBlocks = new Array(8).fill(0);
     const hrCounts = new Array(5).fill(0);
     let validHrRuns = 0;
@@ -159,7 +159,8 @@ function useRunDataEngine(runs: Activity[], year: string, monthIndex: number) {
     currentRuns.forEach(r => {
       mTotal += r.distance;
       if (RIDE_TYPES.has(r.type)) mRide += r.distance; 
-      else if (RUN_WALK_TYPES.has(r.type)) mRun += r.distance; 
+      else if (RUN_TYPES.has(r.type)) mRun += r.distance; 
+      else if (WALK_TYPES.has(r.type)) mWalk += r.distance; 
 
       const blockIndex = Math.floor(r.hour / 3);
       timeBlocks[blockIndex]++;
@@ -194,7 +195,12 @@ function useRunDataEngine(runs: Activity[], year: string, monthIndex: number) {
 
     return {
       runsByDate: runsMap,
-      monthDetailStats: { totalDist: mTotal / 1000, rideDist: mRide / 1000, runDist: mRun / 1000 },
+      monthDetailStats: {
+        totalDist: mTotal / 1000,
+        rideDist: mRide / 1000,
+        runDist: mRun / 1000,
+        walkDist: mWalk / 1000,
+      },
       insights: {
         hasActivities: currentRuns.length > 0, timeBlocks, maxTimeBlockCount: Math.max(maxTimeBlockCount, 1),
         peakPersona, personas, validHrRuns, hrCounts, hrZonesInfo, hrMaxZone: hrZonesInfo[hrMaxIndex]
@@ -418,7 +424,8 @@ const RunCalendar = ({ runs, locateActivity, runIndex, setRunIndex, year }: IRun
         <div className={styles.monthFooter}>
           里程 <span>{engine.monthlyData.monthDetailStats.totalDist.toFixed(1)}</span> km 
           <span className={styles.dot}>•</span> 骑行 <span>{engine.monthlyData.monthDetailStats.rideDist.toFixed(1)}</span> km 
-          <span className={styles.dot}>•</span> 跑走 <span>{engine.monthlyData.monthDetailStats.runDist.toFixed(1)}</span> km
+          <span className={styles.dot}>•</span> 跑步 <span>{engine.monthlyData.monthDetailStats.runDist.toFixed(1)}</span> km
+          <span className={styles.dot}>•</span> 行走 <span>{engine.monthlyData.monthDetailStats.walkDist.toFixed(1)}</span> km
         </div>
       </div>
 

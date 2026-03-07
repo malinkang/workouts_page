@@ -36,13 +36,6 @@ const YEAR_WEEK_COLUMNS = 53;
 const getThemeMode = () =>
   (typeof document !== 'undefined' && document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
 
-const formatDateKey = (date: Date) => {
-  const yearValue = date.getFullYear();
-  const monthValue = String(date.getMonth() + 1).padStart(2, '0');
-  const dayValue = String(date.getDate()).padStart(2, '0');
-  return `${yearValue}-${monthValue}-${dayValue}`;
-};
-
 const formatUtcDateKey = (timestamp: number) => {
   const date = new Date(timestamp);
   const yearValue = date.getUTCFullYear();
@@ -100,22 +93,40 @@ const buildTooltipHtml = (dateKey: string, breakdown: DayActivityBreakdown[]) =>
   return [dateKey, ...lines].join('<br />');
 };
 
-const getMonthLabelPositions = (displayYear: number, weekdayLabelWidth: number, cellSize: number, gutter: number) => {
+const getMonthLabelPositions = (
+  displayYear: number,
+  weekdayLabelWidth: number,
+  cellSize: number,
+  gutter: number,
+  contentWidth: number,
+) => {
   const januaryFirst = new Date(Date.UTC(displayYear, 0, 1, 12));
   const yearStart = new Date(Date.UTC(displayYear, 0, 1, 12));
+  const labelPadding = 6;
+  const positions: Array<{ label: string; left: number }> = [];
 
-  return MONTH_LABELS.map((label, monthIndex) => {
+  MONTH_LABELS.forEach((label, monthIndex) => {
     const monthStart = new Date(Date.UTC(displayYear, monthIndex, 1, 12));
     const daysSinceYearStart = Math.floor(
       (monthStart.getTime() - yearStart.getTime()) / (24 * 60 * 60 * 1000),
     );
     const columnIndex = Math.floor((januaryFirst.getUTCDay() + daysSinceYearStart) / 7);
+    const rawLeft = weekdayLabelWidth + columnIndex * (cellSize + gutter);
+    const estimatedLabelWidth = label.length * 6.4;
+    const clampedLeft = Math.min(
+      Math.max(Math.round(rawLeft), weekdayLabelWidth),
+      Math.max(weekdayLabelWidth, Math.round(contentWidth - estimatedLabelWidth)),
+    );
 
-    return {
-      label,
-      left: Math.round(weekdayLabelWidth + columnIndex * (cellSize + gutter)),
-    };
+    const previous = positions[positions.length - 1];
+    if (previous && clampedLeft - previous.left < estimatedLabelWidth + labelPadding) {
+      return;
+    }
+
+    positions.push({ label, left: clampedLeft });
   });
+
+  return positions;
 };
 
 const RunHeatmap = ({ runs, year, locateActivity, setRunIndex }: RunHeatmapProps) => {
@@ -224,8 +235,14 @@ const RunHeatmap = ({ runs, year, locateActivity, setRunIndex }: RunHeatmapProps
   }, [containerWidth, totalColumns]);
 
   const monthLabelPositions = useMemo(
-    () => getMonthLabelPositions(Number(year), layout.weekdayLabelWidth, layout.cellSize, layout.gutter),
-    [layout.cellSize, layout.gutter, layout.weekdayLabelWidth, year],
+    () => getMonthLabelPositions(
+      Number(year),
+      layout.weekdayLabelWidth,
+      layout.cellSize,
+      layout.gutter,
+      layout.contentWidth,
+    ),
+    [layout.cellSize, layout.contentWidth, layout.gutter, layout.weekdayLabelWidth, year],
   );
 
   useEffect(() => {
@@ -382,14 +399,14 @@ const RunHeatmap = ({ runs, year, locateActivity, setRunIndex }: RunHeatmapProps
       </div>
 
       <div className={styles.legend}>
-        <span>Less</span>
+        <span>少</span>
         <div className={styles.legendCells}>
           <span className={styles.legendCellMuted} />
           {legendColors.map((color) => (
             <span key={color} className={styles.legendCell} style={{ backgroundColor: color }} />
           ))}
         </div>
-        <span>More</span>
+        <span>多</span>
       </div>
     </div>
   );
