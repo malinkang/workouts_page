@@ -107,24 +107,16 @@ html[data-theme='light'] .heatmapRoot :global(.ch-subdomain-bg) {
 
 :global(#ch-tooltip) {
   max-width: 220px;
-  border: 1px solid var(--border-card);
+  border: 1px solid rgba(99, 110, 123, 0.45);
   border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.16);
-  color: var(--text-primary);
+  background: rgba(22, 27, 34, 0.96);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  color: #e6edf3;
   line-height: 1.45;
   padding: 8px 10px;
   text-align: left;
   white-space: normal;
   backdrop-filter: blur(10px);
-}
-
-html[data-theme='light'] :global(#ch-tooltip) {
-  background: rgba(255, 255, 255, 0.96);
-}
-
-html[data-theme='dark'] :global(#ch-tooltip) {
-  background: rgba(22, 27, 34, 0.96);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
 :global(#ch-tooltip-arrow),
