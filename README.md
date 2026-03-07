@@ -18,6 +18,32 @@ This project is based on [running_page](https://github.com/yihong0618/running_pa
    - **[Xingzhe（行者）](#xingzhe行者)**
 1. support [RoadTrip(GoogleMaps)](#roadtripgooglemaps), show Road Trip on maps
 
+### Notion
+
+You can also use a Notion workout database as the source of `src/static/activities.json`.
+
+Required env vars:
+
+```bash
+export NOTION_TOKEN=...
+export WORKOUT_DATABASE_ID=...
+export TYPE_DATABASE_ID=...
+```
+
+Then run:
+
+```bash
+python3 run_page/notion_sync.py
+```
+
+Or use:
+
+```bash
+pnpm run data:download:notion
+```
+
+This sync path reads workouts from Notion, rebuilds `run_page/data.db`, and regenerates `src/static/activities.json` using the existing frontend schema.
+
 ## Custom your page
 
 ### Change Sports Color

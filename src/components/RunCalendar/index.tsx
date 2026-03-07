@@ -58,7 +58,7 @@ function useRunDataEngine(runs: Activity[], year: string, monthIndex: number) {
   }, [runs]);
 
   const globalData = useMemo(() => {
-    let totalDist = 0, rideDist = 0, runDist = 0;
+    let totalDist = 0, rideDist = 0, runDist = 0, walkDist = 0;
     const datesSet = new Set<number>();
     
     const firstDayUTC = Date.UTC(displayYear, 0, 1);
@@ -71,8 +71,13 @@ function useRunDataEngine(runs: Activity[], year: string, monthIndex: number) {
 
     normalizedRuns.forEach(r => {
       totalDist += r.distance;
-      if (RIDE_TYPES.has(r.type)) rideDist += r.distance;
-      else if (RUN_WALK_TYPES.has(r.type)) runDist += r.distance;
+      if (RIDE_TYPES.has(r.type)) {
+        rideDist += r.distance;
+      } else if (RUN_TYPES.has(r.type)) {
+        runDist += r.distance;
+      } else if (WALK_TYPES.has(r.type)) {
+        walkDist += r.distance;
+      }
       datesSet.add(r.utcDayTimestamp);
 
       const diffDays = Math.floor((r.utcDayTimestamp - firstDayUTC) / 86400000);
@@ -124,7 +129,14 @@ function useRunDataEngine(runs: Activity[], year: string, monthIndex: number) {
     });
 
     return {
-      stats: { totalDist: totalDist / 1000, rideDist: rideDist / 1000, runDist: runDist / 1000, activeDays, maxStreak },
+      stats: {
+        totalDist: totalDist / 1000,
+        rideDist: rideDist / 1000,
+        runDist: runDist / 1000,
+        walkDist: walkDist / 1000,
+        activeDays,
+        maxStreak
+      },
       sparklineData,
       sparklineMax,
       rideYearlyMaxDate: rideYDate,    
@@ -287,9 +299,9 @@ const RunCalendar = ({ runs, locateActivity, runIndex, setRunIndex, year }: IRun
         
         <div className={styles.metricsRow}>
           <div className={styles.metricBlock}><span className={styles.metricLabel}>骑行</span><span className={styles.metricValue}>{engine.globalData.stats.rideDist.toFixed(0)}<small>km</small></span></div>
-          <div className={styles.metricBlock}><span className={styles.metricLabel}>跑走</span><span className={styles.metricValue}>{engine.globalData.stats.runDist.toFixed(0)}<small>km</small></span></div>
+          <div className={styles.metricBlock}><span className={styles.metricLabel}>跑步</span><span className={styles.metricValue}>{engine.globalData.stats.runDist.toFixed(0)}<small>km</small></span></div>
+          <div className={styles.metricBlock}><span className={styles.metricLabel}>行走</span><span className={styles.metricValue}>{engine.globalData.stats.walkDist.toFixed(0)}<small>km</small></span></div>
           <div className={styles.metricBlock}><span className={styles.metricLabel}>出勤</span><span className={styles.metricValue}>{engine.globalData.stats.activeDays}<small>天</small></span></div>
-          <div className={styles.metricBlock}><span className={styles.metricLabel}>连签</span><span className={styles.metricValue}>{engine.globalData.stats.maxStreak}<small>天</small></span></div>
         </div>
       </div>
 

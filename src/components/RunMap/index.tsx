@@ -25,6 +25,19 @@ interface IRunMapProps {
 
 const RIDE_TYPES = new Set(['Ride', 'VirtualRide', 'EBikeRide']);
 
+const formatCoordinate = (lat: number, lon: number) => `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+const LABEL_TEXT_FIELD = ['coalesce', ['get', 'name_zh-Hans'], ['get', 'name_zh-Hant'], ['get', 'name']] as const;
+
+const getThemeMode = () =>
+  (typeof document !== 'undefined' && document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
+
+const getFirstLabelLayerId = (map: any) => {
+  const style = map?.getStyle?.();
+  const layers = style?.layers || [];
+  const firstSymbolLayer = layers.find((layer: any) => layer.type === 'symbol' && layer.layout?.['text-field']);
+  return firstSymbolLayer?.id || undefined;
+};
+
 const calculateBearing = (start: number[], end: number[]) => {
   const PI = Math.PI;
   const lat1 = (start[1] * PI) / 180;
@@ -68,6 +81,8 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
   const [animationProgress, setAnimationProgress] = useState(0);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [currentZoom, setCurrentZoom] = useState(3);
+  const [themeMode, setThemeMode] = useState<'light' | 'dark'>(getThemeMode);
+  const [labelLayerId, setLabelLayerId] = useState<string | undefined>(undefined);
 
   const isSingleRun = geoData.features.length === 1 && geoData.features[0].geometry.coordinates.length;
   const isBigMap = currentZoom <= 3;
@@ -76,6 +91,12 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
     const b = getCoreBounds(geoData?.features || []);
     return b ? b : [[70, 10], [140, 60]] as [[number, number], [number, number]];
   }, []); // 仅挂载时计算一次即可，因为后续全靠 easeTo 飞行
+
+  const mapStyleUrl = themeMode === 'light'
+    ? 'mapbox://styles/mapbox/light-v11'
+    : 'mapbox://styles/mapbox/dark-v11';
+  const buildingColor = themeMode === 'light' ? '#d9e1ec' : '#1C1C1E';
+  const buildingOpacity = themeMode === 'light' ? 0.55 : 0.85;
 
   const runStats = useMemo(() => {
     if (!isSingleRun || !geoData || !geoData.features.length) return null;
@@ -100,6 +121,10 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
     const type = fullRun?.type ?? runProps?.type ?? 'Run';
     const averageSpeed = fullRun?.average_speed ?? runProps?.average_speed;
     const movingTime = fullRun?.moving_time ?? runProps?.moving_time;
+    const locationParts = [
+      fullRun?.location_city ?? runProps?.location_city,
+      fullRun?.location_country ?? runProps?.location_country,
+    ].filter(Boolean);
 
     return {
       name: runProps?.name || '',
@@ -112,6 +137,9 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
       paceParts: averageSpeed ? formatSpeedOrPace(averageSpeed, type) : null,
       heartRate: fullRun?.average_heartrate ?? runProps?.average_heartrate,
       displayDate: (fullRun?.start_date_local || runProps?.start_date_local || '').slice(0, 10),
+      locationLabel: locationParts.join(' · '),
+      startCoordText: formatCoordinate(points[0][1], points[0][0]),
+      endCoordText: formatCoordinate(points[points.length - 1][1], points[points.length - 1][0]),
       isRide: RIDE_TYPES.has(type),
       runColor: colorFromType(type) || runProps?.color || '#32D74B'
     };
@@ -326,11 +354,50 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
     return dataToRender; 
   }, [geoData, animationProgress, isBigMap]);
 
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+
+    const root = document.documentElement;
+    const observer = new MutationObserver(() => {
+      setThemeMode(getThemeMode());
+    });
+
+    observer.observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => observer.disconnect();
+  }, []);
+
   const onMapLoad = useCallback((e: any) => {
+    setLabelLayerId(getFirstLabelLayerId(e?.target));
     setMapLoaded(true); 
   }, []);
 
+  useEffect(() => {
+    const map = mapRef.current?.getMap();
+    if (!map) return;
+
+    const syncLabelLayer = () => {
+      setLabelLayerId(getFirstLabelLayerId(map));
+    };
+
+    map.on('styledata', syncLabelLayer);
+    return () => {
+      map.off('styledata', syncLabelLayer);
+    };
+  }, [themeMode]);
+
   const dash = USE_DASH_LINE && !isSingleRun && !isBigMap ? [2, 2] : [2, 0];
+
+  if (!MAPBOX_TOKEN) {
+    return (
+      <div className={styles.mapEmptyState}>
+        <div className={styles.mapEmptyCard}>
+          <div className={styles.mapEmptyTitle}>地图暂时不可用</div>
+          <div className={styles.mapEmptyText}>当前开发环境缺少 `VITE_MAPBOX_TOKEN`，所以 Mapbox 样式和瓦片无法加载。</div>
+          <div className={styles.mapEmptyHint}>在 `workouts_page/.env.local` 里加入 `VITE_MAPBOX_TOKEN=你的 Mapbox public token`，然后重启预览即可。</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Map
@@ -339,7 +406,7 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
       initialViewState={{ bounds: initialBounds, fitBoundsOptions: { padding: 40 } }}
       onZoom={(e) => setCurrentZoom(e.viewState.zoom)}
       style={{ width: '100%', height: MAP_HEIGHT }}
-      mapStyle="mapbox://styles/koobai/cmma8mwce001v01sge7e0dx1w"
+      mapStyle={mapStyleUrl}
       mapboxAccessToken={MAPBOX_TOKEN}
       logoPosition="bottom-right"
       attributionControl={false} 
@@ -348,22 +415,24 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
     >
       <Layer
         id="3d-buildings"
+        beforeId={labelLayerId}
         source="composite"
         source-layer="building"
         filter={['==', 'extrude', 'true']}
         type="fill-extrusion"
         minzoom={14}
         paint={{
-          'fill-extrusion-color': '#1C1C1E', 
+          'fill-extrusion-color': buildingColor,
           'fill-extrusion-height': ['*', ['get', 'height'], 4.0],
           'fill-extrusion-base': ['*', ['get', 'min_height'], 4.0],
-          'fill-extrusion-opacity': 0.85,
+          'fill-extrusion-opacity': buildingOpacity,
         }}
       />
       <Source id="mapbox-dem" type="raster-dem" url="mapbox://mapbox.mapbox-terrain-dem-v1" tileSize={512} maxzoom={14} />
       <Source id="data" type="geojson" data={displayData}>
         <Layer
           id="runs2"
+          beforeId={labelLayerId}
           type="line"
           paint={{
             'line-color': ['get', 'color'],
@@ -375,9 +444,73 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
           layout={{ 'line-join': 'round', 'line-cap': 'round' }}
         />
       </Source>
+      <Layer
+        id="city-label-overlay"
+        source="composite"
+        source-layer="place_label"
+        type="symbol"
+        minzoom={2}
+        filter={['match', ['get', 'class'], ['city', 'town', 'village'], true, false]}
+        layout={{
+          'text-field': LABEL_TEXT_FIELD,
+          'text-font': ['DIN Offc Pro Bold', 'Arial Unicode MS Bold'],
+          'text-size': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            2, 10,
+            4, 12,
+            6, 14,
+            8, 16
+          ],
+          'text-letter-spacing': 0.03,
+          'text-max-width': 8,
+          'text-allow-overlap': true,
+          'text-ignore-placement': true,
+        }}
+        paint={{
+          'text-color': themeMode === 'light' ? 'rgba(22,32,51,0.92)' : 'rgba(255,255,255,0.96)',
+          'text-halo-color': themeMode === 'light' ? 'rgba(255,255,255,0.92)' : 'rgba(12,12,14,0.96)',
+          'text-halo-width': 1.8,
+        }}
+      />
+      <Layer
+        id="region-label-overlay"
+        source="composite"
+        source-layer="place_label"
+        type="symbol"
+        minzoom={1}
+        filter={['match', ['get', 'class'], ['country', 'state', 'province'], true, false]}
+        layout={{
+          'text-field': LABEL_TEXT_FIELD,
+          'text-font': ['DIN Offc Pro Bold', 'Arial Unicode MS Bold'],
+          'text-size': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            1, 11,
+            3, 13,
+            5, 15,
+            7, 18
+          ],
+          'text-letter-spacing': 0.05,
+          'text-transform': 'uppercase',
+          'text-allow-overlap': true,
+          'text-ignore-placement': true,
+        }}
+        paint={{
+          'text-color': themeMode === 'light' ? 'rgba(22,32,51,0.86)' : 'rgba(244,244,246,0.9)',
+          'text-halo-color': themeMode === 'light' ? 'rgba(255,255,255,0.94)' : 'rgba(12,12,14,0.98)',
+          'text-halo-width': 2,
+        }}
+      />
 
       {isSingleRun && runStats && (
         <RunMarker startLat={runStats.startLat} startLon={runStats.startLon} endLat={runStats.endLat} endLon={runStats.endLon} />
+      )}
+
+      {!isSingleRun && title && (
+        <div className={styles.runTitle}>{title}</div>
       )}
       
       <FullscreenControl position="top-left" />
@@ -389,6 +522,14 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
             <span>{runStats.name}</span>
             {runStats.displayDate && <span className={styles.detailDate}>{runStats.displayDate}</span>}
           </div>
+          {runStats.locationLabel && (
+            <div className={styles.detailGeo}>
+              <div className={styles.geoLine}>
+                <span className={styles.geoLabel}>位置</span>
+                <span className={styles.geoText}>{runStats.locationLabel}</span>
+              </div>
+            </div>
+          )}
           <div className={styles.detailStatsRow}>
             <div className={styles.detailStatBlock}>
               <span className={styles.statLabel}>里程</span>

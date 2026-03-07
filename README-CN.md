@@ -18,6 +18,32 @@
    - **[行者](#行者)**
 1. 支持 [自驾(Google 路书)](#自驾google路书) , 把自驾路线也展示在地图上
 
+### Notion
+
+也可以把 Notion 运动数据库作为 `src/static/activities.json` 的数据源。
+
+需要的环境变量：
+
+```bash
+export NOTION_TOKEN=...
+export WORKOUT_DATABASE_ID=...
+export TYPE_DATABASE_ID=...
+```
+
+执行：
+
+```bash
+python3 run_page/notion_sync.py
+```
+
+或者：
+
+```bash
+pnpm run data:download:notion
+```
+
+这条同步链路会从 Notion 读取运动数据，重建 `run_page/data.db`，并按现有前端需要的格式重新生成 `src/static/activities.json`。
+
 ## 一些个性化选项
 
 ### 自定义运动颜色

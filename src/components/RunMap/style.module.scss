@@ -9,13 +9,26 @@
 }
 
 .runTitle {
-  height: 29px;
-  width: 710px;
   position: absolute;
-  bottom: 0px;
-  left: 120px;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  max-width: calc(100% - 132px);
+  padding: 8px 14px;
   font-family: $global-font-family;
-  cursor: pointer;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--text-primary);
+  background: var(--surface-strong);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
 }
 
 /* =========================================
@@ -28,10 +41,10 @@
   right: 0;
   margin: 0 auto;
   width: max-content;
-  background: rgba(28, 28, 30, 0.85);
+  background: var(--surface-strong);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px; 
   padding: 12px; 
   display: flex;
@@ -51,7 +64,7 @@
 
 .detailName {
   font-size: 0.7rem; 
-  color: #dfdfdf;
+  color: var(--text-primary);
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -61,9 +74,39 @@
 
 .detailDate {
   font-size: 0.65rem;
-  color: #8E8E93;
+  color: var(--text-secondary);
   font-weight: normal;
   font-family: monospace;
+}
+
+.detailGeo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 2px;
+}
+
+.geoLine {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.geoLabel {
+  flex: 0 0 auto;
+  font-size: 0.64rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.06em;
+}
+
+.geoText {
+  min-width: 0;
+  font-size: 0.68rem;
+  color: var(--text-primary);
+  font-family: monospace;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .detailStatsRow {
@@ -80,7 +123,7 @@
 
 .statLabel {
   font-size: 0.65rem; 
-  color: #8E8E93;
+  color: var(--text-secondary);
   letter-spacing: 0.5px;
   line-height: 1; 
   margin-bottom: 5px; 
@@ -88,7 +131,7 @@
 
 .statVal {
   font-size: 0.85rem; 
-  color: #E5E5EA; 
+  color: var(--text-primary); 
   font-weight: 800;
   font-style: italic;
   letter-spacing: 0.5px; 
@@ -101,7 +144,7 @@
   
   small {
     font-size: 0.65rem; 
-    color: #8E8E93;
+    color: var(--text-secondary);
     font-style: normal;
     font-weight: normal;
     letter-spacing: 0; 
@@ -112,6 +155,13 @@
    📱 手机端自适应排版
 ========================================= */
 @media (max-width: 768px) {
+  .runTitle {
+    top: 12px;
+    max-width: calc(100% - 84px);
+    padding: 7px 12px;
+    font-size: 0.68rem;
+  }
+
   .runDetailCard {
     display: none !important; 
   }
@@ -123,4 +173,42 @@
     align-items: center;
     justify-content: center; 
   }
+}
+
+
+.mapEmptyState {
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 92%, transparent) 0%, var(--page-bg) 100%);
+}
+
+.mapEmptyCard {
+  max-width: 520px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: var(--surface-strong);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.mapEmptyTitle {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.mapEmptyText,
+.mapEmptyHint {
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
 }

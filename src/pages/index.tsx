@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import Layout from '@/components/Layout';
 import RunMap from '@/components/RunMap';
@@ -6,6 +6,7 @@ import RunTable from '@/components/RunTable';
 import useActivities from '@/hooks/useActivities';
 import useSiteMetadata from '@/hooks/useSiteMetadata';
 import RunCalendar from '@/components/RunCalendar';
+import RunHeatmap from '@/components/RunHeatmap';
 import {
   Activity,
   filterAndSortRuns,
@@ -96,26 +97,31 @@ const Index = () => {
     setGeoData(geoJsonForRuns(runs));
   }, [runs]);
   
-  const yearArray = Array.from(new Set(activities.map((a: Activity) => a.start_date_local.slice(0, 4))));
-  yearArray.sort((a, b) => b.localeCompare(a)); 
+  const yearArray = useMemo(() => {
+    const years = Array.from(new Set(activities.map((a: Activity) => a.start_date_local.slice(0, 4))));
+    years.sort((a, b) => b.localeCompare(a));
+    return years;
+  }, [activities]);
   
   return (
-    <Layout>
-        <div className="pagetitle">
-          2025 年检查出来二型糖尿病，经过饮食及运动结合，已减重二十多斤。但随着不运动及饮食的不控制，体重开始反弹～今年的目标体重 130-140斤。
+    <Layout
+      toolbarContent={
+        <div className="year-switcher">
+          <select
+            id="year-select"
+            className="year-select"
+            value={year}
+            onChange={(e) => changeYear(e.target.value)}
+          >
+            {yearArray.map((y) => (
+              <option key={y} value={y}>
+                {y} 年
+              </option>
+            ))}
+          </select>
         </div>
-        <ul className="buttons">
-          {yearArray.map((y) => (
-            <li
-              key={y}
-              className={`button ${year === y ? 'selected' : ''}`}
-              onClick={() => changeYear(y)}
-            >
-              {y}
-            </li>
-          ))}
-        </ul>
-        
+      }
+    >
         <div className="bento-hero" ref={bentoRef}>
           <div className="bento-map-placeholder">
             <div className={`page-map bento-card-map ${isSticky ? 'sticky-map' : ''}`}>
@@ -139,6 +145,14 @@ const Index = () => {
               year={year} 
             />
           </div>
+        </div>
+        <div className="annual-heatmap-board">
+          <RunHeatmap
+            runs={runs}
+            locateActivity={locateActivity}
+            setRunIndex={setRunIndex}
+            year={year}
+          />
         </div>
         <div className="shuju-list">
           <RunTable

@@ -23,11 +23,6 @@ const data: ISiteMetadataResult = {
       icon: 'home'
     },
     {
-      name: '博文',
-      url: 'https://koobai.com/posts/',
-      icon: 'bowen'
-    },
-    {
       name: '观影',
       url: 'https://koobai.com/movies/',
       icon: 'guany'

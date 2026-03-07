@@ -8,7 +8,7 @@
   flex-direction: column;
   gap: 10px; 
   height: 100%;
-  color: #dfdfdf;
+  color: var(--text-primary);
   user-select: none;
 }
 
@@ -21,16 +21,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #1C1C1E;
+  background: var(--surface);
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-card);
   padding: 20px 15px 16px;
   overflow: hidden; 
 }
 
 .globalTitle {
   font-size: 0.75rem;
-  color: #8E8E93;
+  color: var(--text-secondary);
   letter-spacing: 2px;
   margin-bottom: 4px; 
 }
@@ -46,13 +46,13 @@
     font-size: 3rem;
     font-weight: 800;
     font-style: italic;
-    color: #32D74B;
+    color: var(--accent);
     line-height: 1;
   }
 
   .unit {
     font-size: 0.9rem;
-    color: #8E8E93;
+    color: var(--text-secondary);
   }
 }
 
@@ -72,18 +72,18 @@
 
 .metricLabel {
   font-size: 0.65rem;
-  color: #8E8E93;
+  color: var(--text-secondary);
   letter-spacing: 1px;
 }
 
 .metricValue {
   font-size: 1rem;
-  color: #dfdfdf;
+  color: var(--text-primary);
   line-height: 1;
 
   small {
     font-size: 0.6rem;
-    color: #8E8E93;
+    color: var(--text-secondary);
     margin-left: 2px;
   }
 }
@@ -96,9 +96,9 @@
   z-index: 2; 
   display: flex;
   flex-direction: column;
-  background: #1C1C1E;
+  background: var(--surface);
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-card);
   padding: 15px;
 }
 
@@ -116,7 +116,7 @@
 
   span {
     font-size: 0.85rem;
-    color: #dfdfdf;
+    color: var(--text-primary);
     opacity: 0.7;
     letter-spacing: 1px;
   }
@@ -124,7 +124,7 @@
   button {
     background: transparent;
     border: none;
-    color: #8E8E93;
+    color: var(--text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -139,7 +139,7 @@
       height: 16px;
     }
 
-    &:hover:not(:disabled) { color: #fff; }
+    &:hover:not(:disabled) { color: var(--text-primary); }
     &:disabled { opacity: 0.15; cursor: not-allowed; }
   }
 }
@@ -151,7 +151,7 @@
   justify-items: center; 
   text-align: center;
   font-size: 0.7rem;
-  color: #8E8E93;
+  color: var(--text-secondary);
   margin-bottom: 6px;
 }
 
@@ -190,7 +190,7 @@
 
   &.hasRun {
     cursor: pointer;
-    &:hover { background: rgba(255, 255, 255, 0.04); }
+    &:hover { background: var(--surface-hover); }
   }
 }
 
@@ -204,11 +204,11 @@
   padding-top: 10px;
   text-align: center;
   font-size: 0.65rem;
-  color: #8E8E93;
+  color: var(--text-secondary);
   letter-spacing: 0.5px;
 
   span {
-    color: #dfdfdf;
+    color: var(--text-primary);
     font-style: italic;
     font-weight: 800;
   }
@@ -234,9 +234,9 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #1C1C1E;
+  background: var(--surface);
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-card);
   padding: 15px;
   gap: 10px;
 }
@@ -250,7 +250,7 @@
 
 .insightTitle {
   font-size: 0.75rem;
-  color: #dfdfdf;
+  color: var(--text-primary);
   letter-spacing: 0.5px;
   display: flex;
   align-items: center;
@@ -259,8 +259,8 @@
 
 .titleTag {
   font-size: 0.55rem;
-  color: #8E8E93;
-  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  background: var(--surface-hover);
   padding: 3px 6px; 
   border-radius: 4px;
 }
@@ -277,7 +277,7 @@
   display: flex;
   justify-content: space-between;
   font-size: 0.55rem;
-  color: #666;
+  color: var(--text-muted);
   margin-top: 2px;
   
   .zLabel {
@@ -365,7 +365,7 @@
 }
 
 .sparklineLine {
-  stroke: #32D74B;
+  stroke: var(--accent);
   stroke-width: 0.8;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -382,10 +382,10 @@
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%) translateY(4px);
-  background: rgba(28, 28, 30, 0.85);
+  background: var(--surface-strong);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
   border-radius: 10px;
   padding: 10px 14px;
   width: max-content;
@@ -409,7 +409,7 @@
 
     .ttName {
       font-size: 0.75rem; 
-      color: #8E8E93;
+      color: var(--text-secondary);
       
       small {
         margin-left: 2px;
@@ -420,7 +420,7 @@
 
       small {
         font-size: 0.65rem;
-        color: #8E8E93;
+        color: var(--text-secondary);
         font-weight: normal;
       }
     }
@@ -428,7 +428,7 @@
   .ttAchievement {
     padding-top: 8px;
     margin-top: 2px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid var(--border-subtle);
     font-size: 0.85rem;
     display: flex;
     justify-content: space-between;
@@ -518,7 +518,7 @@
   width: 3px;
   height: 3px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.35);
+  background: color-mix(in srgb, var(--text-primary) 35%, transparent);
   pointer-events: none;
 }
 

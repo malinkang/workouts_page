@@ -1,0 +1,149 @@
+@import '../../styles/variables.scss';
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border-card);
+  border-radius: 16px;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.title {
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  letter-spacing: 0.06em;
+}
+
+.subtitle {
+  margin-top: 4px;
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+}
+
+.summary {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+
+  span {
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+}
+
+.heatmapWrap {
+  position: relative;
+  width: 100%;
+  padding-top: 18px;
+}
+
+.monthLabels {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 14px;
+  pointer-events: none;
+}
+
+.monthLabel {
+  position: absolute;
+  top: 0;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.heatmapRoot {
+  color: var(--text-secondary);
+}
+
+.heatmapRoot :global(.ch-container) {
+  display: block;
+}
+
+.heatmapRoot :global(.ch-domain-text) {
+  fill: var(--text-secondary);
+  font-size: 11px;
+}
+
+.heatmapRoot :global(.ch-subdomain-bg) {
+  fill: color-mix(in srgb, var(--surface) 82%, var(--text-muted) 18%);
+  transition: stroke 0.16s ease, opacity 0.16s ease;
+  shape-rendering: geometricPrecision;
+}
+
+html[data-theme='dark'] .heatmapRoot :global(.ch-subdomain-bg) {
+  fill: #161b22;
+}
+
+html[data-theme='light'] .heatmapRoot :global(.ch-subdomain-bg) {
+  fill: #ebedf0;
+}
+
+.heatmapRoot :global(.ch-subdomain-bg:hover) {
+  stroke: color-mix(in srgb, var(--text-primary) 45%, transparent);
+  stroke-width: 1px;
+}
+
+.heatmapRoot :global(.ch-plugin-calendar-label text) {
+  fill: var(--text-secondary);
+  font-size: 9px;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+}
+
+.legendCells {
+  display: flex;
+  gap: 3px;
+}
+
+.legendCell,
+.legendCellMuted {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.legendCellMuted {
+  background: #ebedf0;
+}
+
+html[data-theme='dark'] .legendCellMuted {
+  background: #161b22;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 14px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .summary {
+    justify-content: flex-start;
+  }
+
+}

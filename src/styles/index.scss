@@ -3,6 +3,37 @@
 @import './variables';
 @import './themes';
 
+:root,
+html[data-theme='dark'],
+body[data-theme='dark'] {
+  --page-bg: #151516;
+  --surface: #1c1c1e;
+  --surface-strong: rgba(28, 28, 30, 0.85);
+  --surface-hover: rgba(255, 255, 255, 0.06);
+  --border-card: rgba(255, 255, 255, 0.05);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --text-primary: #dfdfdf;
+  --text-secondary: #8e8e93;
+  --text-muted: #666666;
+  --accent: #32d74b;
+  --accent-contrast: #151516;
+}
+
+html[data-theme='light'],
+body[data-theme='light'] {
+  --page-bg: #f4f5ef;
+  --surface: #ffffff;
+  --surface-strong: rgba(255, 255, 255, 0.92);
+  --surface-hover: rgba(15, 23, 42, 0.06);
+  --border-card: rgba(15, 23, 42, 0.08);
+  --border-subtle: rgba(15, 23, 42, 0.12);
+  --text-primary: #162033;
+  --text-secondary: #607086;
+  --text-muted: #94a3b8;
+  --accent: #22b14c;
+  --accent-contrast: #ffffff;
+}
+
 /* 🌟 优化：合并 img 选中状态的伪类 */
 img::selection,
 img::-moz-selection { 
@@ -11,7 +42,7 @@ img::-moz-selection {
 
 html, body {
   width: 100%;
-  background: #151516;
+  background: var(--page-bg);
 }
 
 * {
@@ -24,10 +55,12 @@ body {
   padding: 0 20px 20px 20px; 
   max-width: 900px; 
   margin: auto;
+  color: var(--text-primary);
   font-weight: normal;
   text-rendering: optimizeLegibility;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 iframe { 
@@ -48,14 +81,14 @@ b, strong {
 }
 
 nav a { 
-  @extend .dark-gray; 
+  color: var(--text-secondary);
   &.active { 
-    @extend .silver; 
+    color: var(--text-primary);
   } 
 }
 
 p { 
-  @extend .dark-gray; 
+  color: var(--text-secondary);
   @extend .lh-copy; 
   a { 
     @extend .link; 
@@ -84,7 +117,7 @@ ul, ol {
 }
 
 time { 
-  @extend .gray; 
+  color: var(--text-secondary);
 }
 
 a.post-colophon-link, 
@@ -276,7 +309,7 @@ h5 .header-link {
   max-width: 640px; 
   margin: 60px auto 15px auto; 
   text-align: center; 
-  color: #8E8E93; 
+  color: var(--text-secondary); 
   position: relative; 
   z-index: 85;
 }
@@ -284,41 +317,41 @@ h5 .header-link {
 // ------------------------------------
 // 🌟 2. 全局年份切换器 🌟
 // ------------------------------------
-.buttons {
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
-  gap: 10px; 
-  padding: 4px; 
-  margin: 0 auto 20px auto; 
-  list-style: none;
-  z-index: 90;
-  background: rgba(30, 30, 32, 0.75); 
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-radius: 99px; 
-  width: fit-content; 
-  border: 1px solid rgba(255, 255, 255, 0.08);
+.year-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  margin: 0;
+  padding: 0;
 }
 
-.button {
-  display: inline-block; 
-  cursor: pointer; 
-  font-size: 0.85rem; 
-  text-align: center; 
-  color: #8E8E93; 
-  border-radius: 99px; 
-  padding: 8px 20px; 
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  &:hover { 
-    color: #dfdfdf; 
-  }
+.year-select {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  border-radius: 999px;
+  padding: 9px 38px 9px 14px;
+  min-width: 116px;
+  background:
+    linear-gradient(45deg, transparent 50%, var(--text-secondary) 50%) calc(100% - 18px) calc(50% - 2px) / 6px 6px no-repeat,
+    linear-gradient(135deg, var(--text-secondary) 50%, transparent 50%) calc(100% - 12px) calc(50% - 2px) / 6px 6px no-repeat,
+    var(--surface);
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.buttons .selected {
-  color: #151516; 
-  background: #32D74B; 
+.year-select:hover {
+  background:
+    linear-gradient(45deg, transparent 50%, var(--text-primary) 50%) calc(100% - 18px) calc(50% - 2px) / 6px 6px no-repeat,
+    linear-gradient(135deg, var(--text-primary) 50%, transparent 50%) calc(100% - 12px) calc(50% - 2px) / 6px 6px no-repeat,
+    var(--surface-hover);
+}
+
+.year-select:focus-visible {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 // ------------------------------------
@@ -333,8 +366,8 @@ h5 .header-link {
 }
 
 .bento-card {
-  background: #1C1C1E; 
-  border: 1px solid rgba(255, 255, 255, 0.05); 
+  background: var(--surface); 
+  border: 1px solid var(--border-card); 
   border-radius: 16px; 
   display: flex; 
   flex-direction: column;
@@ -364,6 +397,7 @@ h5 .header-link {
   padding: 0;
   transition: border-radius 0.3s ease;
   background: #151516 !important;
+  background: var(--page-bg) !important;
   
   > div { 
     height: 100% !important; 
@@ -385,6 +419,10 @@ h5 .header-link {
 // ------------------------------------
 // 🌟 运动列表 🌟
 // ------------------------------------
+.annual-heatmap-board {
+  margin-bottom: 10px;
+}
+
 .shuju-list{
   position: relative;
   z-index: 90;
@@ -405,8 +443,9 @@ h5 .header-link {
   z-index: 100 !important;
   border-radius: 16px !important; 
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid var(--border-card) !important;
   box-shadow: none !important; 
-  background: #1C1C1E;
+  background: var(--surface);
   
   animation: mapSlideDown 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
 }
@@ -422,6 +461,46 @@ h5 .header-link {
   }
 }
 
+.top-toolbar {
+  position: sticky;
+  top: 12px;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px;
+  width: fit-content;
+  margin: 16px auto 18px auto;
+  background: var(--surface-strong);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.theme-toggle:hover {
+  transform: translateY(-1px);
+  background: var(--surface-hover);
+}
+
+.theme-toggle span {
+  font-size: 0.85rem;
+}
+
 // ------------------------------------
 // 📱 手机端响应式适配
 // ------------------------------------
@@ -432,6 +511,17 @@ h5 .header-link {
   
   body {
     padding: 0 15px 20px 15px; 
+  }
+
+  .top-toolbar {
+    top: 8px;
+    gap: 6px;
+    padding: 5px;
+    margin: 10px auto 12px auto;
+  }
+
+  .theme-toggle {
+    padding: 9px 12px;
   }
   
   .header { 
@@ -515,17 +605,14 @@ h5 .header-link {
     margin-bottom: 10px;
   }
   
-  .buttons { 
-    overflow-x: auto; 
-    justify-content: flex-start; 
-    padding: 4px; 
-    margin: 10px auto 12px auto; 
-    max-width: 100%; 
-    scrollbar-width: none;
-    
-    &::-webkit-scrollbar {
-      display: none;
-    }
+  .year-switcher {
+    padding: 0;
+  }
+
+  .year-select {
+    min-width: 108px;
+    padding: 8px 34px 8px 12px;
+    font-size: 0.88rem;
   }
   
   .bento-hero {
