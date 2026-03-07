@@ -341,7 +341,7 @@ const RunHeatmap = ({ runs, year, locateActivity, setRunIndex }: RunHeatmapProps
             if (Number(dateKey.slice(0, 4)) !== Number(year)) return '';
 
             const dayBucket = runsByDate.get(dateKey);
-            if (!dayBucket) return '';
+            if (!dayBucket) return dateKey;
 
             const breakdown = Array.from(dayBucket.breakdown.entries())
               .map(([label, distanceKm]) => ({ label, distanceKm }))
