@@ -55,7 +55,7 @@ const contributionColorsForTheme = (themeMode: 'light' | 'dark') => (
     : ['#0e4429', '#006d32', '#26a641', '#39d353']
 );
 
-const emptyColorForTheme = (themeMode: 'light' | 'dark') => (themeMode === 'light' ? '#ebedf0' : '#161b22');
+const emptyColorForTheme = (themeMode: 'light' | 'dark') => (themeMode === 'light' ? '#ebedf0' : '#21262d');
 
 const fillColorForDistance = (distanceKm: number, thresholds: number[], colors: string[]) => {
   if (distanceKm <= 0) return colors[0];
