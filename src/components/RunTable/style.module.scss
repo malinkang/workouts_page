@@ -213,62 +213,125 @@
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-subtle);
-  border-radius: 10px;
-  padding: 12px 18px;
-  width: max-content;
+  border-radius: 8px;
+  padding: 12px;
+  min-width: 240px;
+  max-width: 280px;
   z-index: 100;
   pointer-events: none;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+  box-shadow: none;
+  white-space: nowrap;
   transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+
+  .ttHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .ttHeaderTitle {
+    color: var(--text-primary);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .ttHeaderMeta {
+    color: var(--text-secondary);
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+  }
 
   .ttList {
     display: flex;
     flex-direction: column;
-    gap: 8px; 
+    gap: 10px; 
   }
 
   .ttItem {
     display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 2px 0;
+
+    &:not(:last-child) {
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(127, 127, 127, 0.08);
+    }
+  }
+
+  .ttNameRow {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
     justify-content: space-between;
-    align-items: center; 
-    gap: 32px; 
+  }
 
-    .ttNameWrap {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+  .ttName {
+    color: var(--text-primary);
+    font-size: 0.7rem;
+    line-height: 1.2;
+  }
 
-    .ttName {
-      color: var(--text-secondary);
-      font-size: 0.75rem;
-    }
+  .ttSubMeta {
+    color: var(--text-secondary);
+    font-size: 0.65rem;
+    font-weight: normal;
+    font-family: monospace;
+  }
 
-    .ttUnitTag {
-      padding: 2px 6px;
-      background: var(--surface-hover); 
-      border-radius: 4px;
-      color: var(--text-secondary);
+  .ttStatsRow {
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+  }
+
+  .ttStatBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .ttStatLabel {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+    line-height: 1;
+    margin-bottom: 5px;
+  }
+
+  .ttStatVal {
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    font-weight: 800;
+    font-style: italic;
+    letter-spacing: 0.5px;
+    line-height: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 3px;
+
+    small {
       font-size: 0.65rem;
-      letter-spacing: 0.5px;
-    }
-
-    .ttNum {
-      color: var(--text-primary);
-      font-size: 0.9rem;
-      font-variant-numeric: tabular-nums; 
-      letter-spacing: 0.5px;
-      text-align: right;
+      color: var(--text-secondary);
+      font-style: normal;
+      font-weight: normal;
+      letter-spacing: 0;
     }
   }
 }
 
 .ttEmpty {
   color: var(--text-secondary);
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   text-align: center;
+  padding: 8px 4px 4px;
 }
 
 .runCard:hover .runTooltip {
