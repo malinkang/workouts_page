@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatSpeedOrPace, formatRunName, colorFromType, formatRunTime, Activity, RunIds } from '@/utils/utils';
+import { formatRunName, colorFromType, formatRunTime, Activity, RunIds, ActivitySplit } from '@/utils/utils';
 import styles from './style.module.scss';
 
 const RIDE_TYPES = new Set(['Ride', 'VirtualRide', 'EBikeRide']);
@@ -20,6 +20,31 @@ interface IRunRowProperties {
 }
 
 // 🌟 进一步极致优化的相对时间引擎
+const formatSplitPace = (paceSeconds?: number | null) => {
+  if (!paceSeconds || paceSeconds <= 0) return '';
+  const minutes = Math.floor(paceSeconds / 60);
+  const seconds = Math.round(paceSeconds % 60);
+  return `${minutes}'${String(seconds).padStart(2, '0')}"`;
+};
+
+const formatSplitDuration = (durationSeconds?: number | null) => {
+  if (!durationSeconds || durationSeconds <= 0) return '';
+  const total = Math.round(durationSeconds);
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const seconds = total % 60;
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
+
+const getSplitLabel = (split: ActivitySplit, fallbackIndex: number) => {
+  if (split.index && split.index > 0) return `${split.index} km`;
+  if (split.name) return split.name;
+  return `${fallbackIndex + 1} km`;
+};
+
 const formatRelativeDate = (timeStr: string) => {
   if (!timeStr) return '';
   const safeTimeStr = timeStr.replace(' ', 'T');
@@ -59,12 +84,19 @@ const RunRow = ({
   isRideYearlyMax, isRideMonthlyMax, isRwYearlyMax, isRwMonthlyMax 
 }: IRunRowProperties) => {
   const distance = (run.distance / 1000.0).toFixed(2);
-  const paceParts = run.average_speed ? formatSpeedOrPace(run.average_speed, run.type) : null;
-  const heartRate = run.average_heartrate;
   const type = run.type;
   const isRide = RIDE_TYPES.has(type);
   const runTime = formatRunTime(run.moving_time);
   const themeColor = colorFromType(type);
+  const splitRows = (run.splits || []).map((split, index) => {
+    const durationText = formatSplitDuration(split.duration);
+    const paceText = formatSplitPace(split.average_pace);
+    return {
+      key: split.notion_page_id || split.split_id || `${run.run_id}-${index}`,
+      label: getSplitLabel(split, index),
+      value: [durationText, paceText].filter(Boolean).join(' · ') || `${(split.distance / 1000).toFixed(2)} km`,
+    };
+  });
   
   const handleClick = () => {
     if (runIndex === elementIndex) {
@@ -104,33 +136,6 @@ const RunRow = ({
     return '🏅';
   };
 
-  let paceNum: React.ReactNode = '';
-  let paceUnit = '';
-
-  if (paceParts) {
-    if (Array.isArray(paceParts)) {
-      paceNum = paceParts[0];
-      paceUnit = paceParts[1] as string;
-    } else if (typeof paceParts === 'string') {
-      if (paceParts.includes('km/h')) {
-        paceNum = paceParts.replace(/km\/h/i, '').trim();
-        paceUnit = 'km/h';
-      } else if (paceParts.includes('/100m')) {
-        paceNum = paceParts.replace(/\/100m/i, '').trim();
-        paceUnit = '/100m';
-      } else {
-        paceNum = paceParts.replace(' ', '');
-        paceUnit = '';
-      }
-    }
-  }
-
-  const stats = [
-    { label: '用时', num: runTime, unit: '' }
-  ];
-  if (paceNum) stats.push({ label: isRide ? '均速' : '配速', num: paceNum, unit: paceUnit });
-  
-  if (heartRate && heartRate > 0) stats.push({ label: '心率', num: heartRate.toFixed(0), unit: '' });
 
   let ringClass = styles.iconRing;
   let iconColor = themeColor;
@@ -140,8 +145,6 @@ const RunRow = ({
   } else if (isRideMonthlyMax || isRwMonthlyMax) {
     ringClass = `${styles.iconRing} ${styles.silverRing}`;
   }
-
-  const hasAnyAchievement = isRideYearlyMax || isRideMonthlyMax || isRwYearlyMax || isRwMonthlyMax;
 
   return (
     <div
@@ -161,47 +164,28 @@ const RunRow = ({
         </div>
 
         <div className={styles.rightInfo}>
-          <div className={styles.runDate}>{displayDate}</div>
+          <div className={styles.rightStack}>
+            <div className={styles.runDate}>{displayDate}</div>
+            <div className={styles.runTime}>{runTime}</div>
+          </div>
         </div>
       </div>
 
       <div className={styles.runTooltip}>
         <div className={styles.ttList}>
-          {stats.map((s, i) => (
-            <div key={i} className={styles.ttItem}>
-              <div className={styles.ttNameWrap}>
-                <span className={styles.ttName}>{s.label}</span>
-                {s.unit && <span className={styles.ttUnitTag}>{s.unit}</span>}
+          {splitRows.length > 0 ? (
+            splitRows.map((split) => (
+              <div key={split.key} className={styles.ttItem}>
+                <div className={styles.ttNameWrap}>
+                  <span className={styles.ttName}>{split.label}</span>
+                </div>
+                <span className={styles.ttNum}>{split.value}</span>
               </div>
-              <span className={styles.ttNum}>{s.num}</span>
-            </div>
-          ))}
+            ))
+          ) : (
+            <div className={styles.ttEmpty}>暂无分段数据</div>
+          )}
         </div>
-        
-        {hasAnyAchievement && (
-          <div className={styles.ttAchievement} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '6px' }}>
-            {isRideYearlyMax && (
-              <span style={{ color: '#FFD447', display: 'flex', alignItems: 'center' }}>
-                年度单次最远 <span className={styles.titleTag} style={{ marginLeft: '6px' }}>骑行</span>
-              </span>
-            )}
-            {isRideMonthlyMax && !isRideYearlyMax && (
-              <span style={{ color: '#E5E5EA', display: 'flex', alignItems: 'center' }}>
-                月度单次最远 <span className={styles.titleTag} style={{ marginLeft: '6px' }}>骑行</span>
-              </span>
-            )}
-            {isRwYearlyMax && (
-              <span style={{ color: '#FFD447', display: 'flex', alignItems: 'center' }}>
-                年度单次最远 <span className={styles.titleTag} style={{ marginLeft: '6px' }}>跑走</span>
-              </span>
-            )}
-            {isRwMonthlyMax && !isRwYearlyMax && (
-              <span style={{ color: '#E5E5EA', display: 'flex', alignItems: 'center' }}>
-                月度单次最远 <span className={styles.titleTag} style={{ marginLeft: '6px' }}>跑走</span>
-              </span>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );

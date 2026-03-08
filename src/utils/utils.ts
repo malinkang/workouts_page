@@ -30,6 +30,18 @@ export type Coordinate = [number, number];
 
 export type RunIds = Array<number> | [];
 
+export interface ActivitySplit {
+  notion_page_id?: string;
+  notion_last_edited_time?: string;
+  split_id: string;
+  name: string;
+  index?: number | null;
+  distance: number;
+  duration: number;
+  average_heartrate?: number | null;
+  average_pace?: number | null;
+}
+
 export interface Activity {
   run_id: number;
   name: string;
@@ -41,8 +53,13 @@ export interface Activity {
   location_country: string;
   summary_polyline: string;
   average_heartrate?: number;
+  max_heartrate?: number;
+  calories?: number;
   average_speed: number;
   streak: number;
+  notion_page_id?: string;
+  notion_last_edited_time?: string;
+  splits?: ActivitySplit[];
 }
 
 const titleForShow = (run: Activity): string => {
