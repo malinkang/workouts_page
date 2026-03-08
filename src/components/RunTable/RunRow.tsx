@@ -201,7 +201,7 @@ const RunRow = ({
                   )}
                 </div>
                 <div className={styles.ttStatsRow}>
-                  <div className={styles.ttStatBlock}>
+                  <div className={`${styles.ttStatBlock} ${styles.ttStatPrimary}`}>
                     <span className={styles.ttStatLabel}>配速</span>
                     <span className={styles.ttStatVal}>
                       {split.pace}

@@ -42,6 +42,7 @@ TYPE_ALIASES = {
     "walk": "Walk",
     "walking": "Walk",
     "步行": "Walk",
+    "行走": "Walk",
     "hike": "Hike",
     "hiking": "Hike",
     "徒步": "Hike",
@@ -155,9 +156,13 @@ def extract_date(prop: Optional[dict], local_tz: ZoneInfo) -> Optional[datetime]
     value = prop.get("date", {}).get("start")
     if not value:
         return None
-    dt = parse_notion_datetime(value)
-    if dt is None:
+    try:
+        normalized = str(value).replace("Z", "+00:00")
+        dt = datetime.fromisoformat(normalized)
+    except ValueError:
         return None
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=local_tz)
     return dt.astimezone(local_tz)
 
 
@@ -246,6 +251,7 @@ def map_type_name(name: str) -> Optional[str]:
         ("游泳", "Swim"),
         ("划船", "Rowing"),
         ("rowing", "Rowing"),
+        ("行走", "Walk"),
         ("步行", "Walk"),
         ("walk", "Walk"),
         ("跑", "Run"),

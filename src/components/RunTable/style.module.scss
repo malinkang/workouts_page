@@ -216,7 +216,7 @@
   border-radius: 8px;
   padding: 12px;
   min-width: 240px;
-  max-width: 280px;
+  max-width: 300px;
   z-index: 100;
   pointer-events: none;
   display: flex;
@@ -236,9 +236,9 @@
 
   .ttHeaderTitle {
     color: var(--text-primary);
-    font-size: 0.82rem;
+    font-size: 0.72rem;
     font-weight: 600;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.08em;
   }
 
   .ttHeaderMeta {
@@ -290,12 +290,17 @@
     display: flex;
     align-items: flex-end;
     gap: 20px;
+    justify-content: space-between;
   }
 
   .ttStatBlock {
     display: flex;
     flex-direction: column;
     gap: 0;
+  }
+
+  .ttStatPrimary {
+    min-width: 82px;
   }
 
   .ttStatLabel {
@@ -324,6 +329,11 @@
       font-weight: normal;
       letter-spacing: 0;
     }
+  }
+
+  .ttStatPrimary .ttStatVal {
+    font-size: 1rem;
+    letter-spacing: 0.02em;
   }
 }
 
