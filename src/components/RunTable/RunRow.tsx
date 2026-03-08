@@ -40,14 +40,14 @@ const formatSplitDuration = (durationSeconds?: number | null) => {
 };
 
 const formatSplitHeartRate = (heartRate?: number | null) => {
-  if (!heartRate || heartRate <= 0) return '';
-  return `${Math.round(heartRate)} bpm`;
+  if (!heartRate || heartRate <= 0) return '--次/分';
+  return `${Math.round(heartRate)}次/分`;
 };
 
 const getSplitLabel = (split: ActivitySplit, fallbackIndex: number) => {
-  if (split.index && split.index > 0) return `${split.index} km`;
-  if (split.name) return split.name;
-  return `${fallbackIndex + 1} km`;
+  if (split.index && split.index > 0) return `${split.index}km`;
+  if (split.name) return split.name.replace(/\s+/g, '');
+  return `${fallbackIndex + 1}km`;
 };
 
 const formatRelativeDate = (timeStr: string) => {
@@ -94,19 +94,16 @@ const RunRow = ({
   const runTime = formatRunTime(run.moving_time);
   const themeColor = colorFromType(type);
   const splitRows = (run.splits || []).map((split, index) => {
-    const durationText = formatSplitDuration(split.duration);
-    const paceText = formatSplitPace(split.average_pace);
+    const durationText = formatSplitDuration(split.duration) || '--:--';
+    const paceText = formatSplitPace(split.average_pace) || `--'--"`;
     const heartRateText = formatSplitHeartRate(split.average_heartrate);
-    const distanceText = split.distance > 0 ? `${(split.distance / 1000).toFixed(split.distance >= 1000 ? 1 : 2)} km` : '';
 
     return {
       key: split.notion_page_id || split.split_id || `${run.run_id}-${index}`,
       label: getSplitLabel(split, index),
-      pace: paceText || distanceText || '--',
-      paceUnit: paceText ? '/km' : '',
+      pace: paceText,
       duration: durationText,
       heartRate: heartRateText,
-      distance: distanceText,
     };
   });
   
@@ -184,49 +181,28 @@ const RunRow = ({
       </div>
 
       <div className={styles.runTooltip}>
-        {splitRows.length > 0 && (
-          <div className={styles.ttHeader}>
-            <span className={styles.ttHeaderTitle}>分段</span>
-            <span className={styles.ttHeaderMeta}>{splitRows.length} 组</span>
+        {splitRows.length > 0 ? (
+          <div className={styles.ttTable}>
+            <div className={styles.ttHeaderRow}>
+              <span className={styles.ttHeaderGhost}>#</span>
+              <span className={styles.ttHeaderCell}>时间</span>
+              <span className={styles.ttHeaderCell}>配速</span>
+              <span className={styles.ttHeaderCell}>心率</span>
+            </div>
+            <div className={styles.ttList}>
+              {splitRows.map((split) => (
+                <div key={split.key} className={styles.ttRow}>
+                  <span className={styles.ttSplitLabel}>{split.label}</span>
+                  <span className={`${styles.ttValue} ${styles.ttDurationValue}`}>{split.duration}</span>
+                  <span className={`${styles.ttValue} ${styles.ttPaceValue}`}>{split.pace}</span>
+                  <span className={`${styles.ttValue} ${styles.ttHeartRateValue}`}>{split.heartRate}</span>
+                </div>
+              ))}
+            </div>
           </div>
+        ) : (
+          <div className={styles.ttEmpty}>暂无分段数据</div>
         )}
-        <div className={styles.ttList}>
-          {splitRows.length > 0 ? (
-            splitRows.map((split) => (
-              <div key={split.key} className={styles.ttItem}>
-                <div className={styles.ttNameRow}>
-                  <span className={styles.ttName}>{split.label}</span>
-                  {split.distance && split.distance !== split.label && (
-                    <span className={styles.ttSubMeta}>{split.distance}</span>
-                  )}
-                </div>
-                <div className={styles.ttStatsRow}>
-                  <div className={`${styles.ttStatBlock} ${styles.ttStatPrimary}`}>
-                    <span className={styles.ttStatLabel}>配速</span>
-                    <span className={styles.ttStatVal}>
-                      {split.pace}
-                      {split.paceUnit && <small>{split.paceUnit}</small>}
-                    </span>
-                  </div>
-                  {split.duration && (
-                    <div className={styles.ttStatBlock}>
-                      <span className={styles.ttStatLabel}>用时</span>
-                      <span className={styles.ttStatVal}>{split.duration}</span>
-                    </div>
-                  )}
-                  {split.heartRate && (
-                    <div className={styles.ttStatBlock}>
-                      <span className={styles.ttStatLabel}>心率</span>
-                      <span className={styles.ttStatVal}>{split.heartRate}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className={styles.ttEmpty}>暂无分段数据</div>
-          )}
-        </div>
       </div>
     </div>
   );
