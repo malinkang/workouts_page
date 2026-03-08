@@ -33,8 +33,27 @@ const WEEKDAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const YEAR_WEEK_COLUMNS = 53;
 
-const getThemeMode = () =>
-  (typeof document !== 'undefined' && document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
+const getThemeMode = (): 'light' | 'dark' => {
+  if (typeof document !== 'undefined') {
+    const documentTheme = document.documentElement.dataset.theme;
+    if (documentTheme === 'light' || documentTheme === 'dark') {
+      return documentTheme;
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    const storedTheme = window.localStorage.getItem('workouts-page-theme');
+    if (storedTheme === 'light' || storedTheme === 'dark') {
+      return storedTheme;
+    }
+
+    if (typeof window.matchMedia === 'function') {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+  }
+
+  return 'dark';
+};
 
 const formatUtcDateKey = (timestamp: number) => {
   const date = new Date(timestamp);
@@ -234,6 +253,8 @@ const RunHeatmap = ({ runs, year, locateActivity, setRunIndex }: RunHeatmapProps
     };
   }, [containerWidth, totalColumns]);
 
+  const renderKey = `${year}-${themeMode}-${layout.cellSize}-${layout.contentWidth}`;
+
   const monthLabelPositions = useMemo(
     () => getMonthLabelPositions(
       Number(year),
@@ -275,6 +296,7 @@ const RunHeatmap = ({ runs, year, locateActivity, setRunIndex }: RunHeatmapProps
     const host = containerRef.current;
     if (!host) return undefined;
 
+    let disposed = false;
     host.innerHTML = '';
 
     const heatmap = new CalHeatmap();
@@ -291,7 +313,7 @@ const RunHeatmap = ({ runs, year, locateActivity, setRunIndex }: RunHeatmapProps
       setRunIndex(-1);
     });
 
-    void heatmap.paint(
+    const paintPromise = heatmap.paint(
       {
         itemSelector: host as unknown as string,
         range: 1,
@@ -361,11 +383,18 @@ const RunHeatmap = ({ runs, year, locateActivity, setRunIndex }: RunHeatmapProps
       ],
     );
 
+    void paintPromise.then(() => {
+      if (!disposed) return;
+      void heatmap.destroy();
+      host.innerHTML = '';
+    });
+
     return () => {
-      heatmap.destroy();
+      disposed = true;
+      void heatmap.destroy();
       host.innerHTML = '';
     };
-  }, [chartData, layout, locateActivity, runsByDate, setRunIndex, themeMode, year]);
+  }, [chartData, layout, locateActivity, runsByDate, setRunIndex, themeMode, year, renderKey]);
 
   const legendColors = contributionColorsForTheme(themeMode);
 
@@ -392,6 +421,7 @@ const RunHeatmap = ({ runs, year, locateActivity, setRunIndex }: RunHeatmapProps
           ))}
         </div>
         <div
+          key={renderKey}
           ref={containerRef}
           className={styles.heatmapRoot}
           style={{ width: layout.contentWidth }}
