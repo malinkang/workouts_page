@@ -613,7 +613,7 @@ def sync_from_notion(full_sync: bool = False) -> int:
                 return {}
             raise
 
-    with httpx.Client(timeout=30.0, follow_redirects=True) as client:
+    with httpx.Client(timeout=30.0) as client:
         type_name_by_id = build_type_map(client, type_database_id)
         split_map: Dict[str, List[dict]] = {}
 
