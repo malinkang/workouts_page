@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Activity, RunIds, colorFromType, formatRunName } from '@/utils/utils';
 import styles from './style.module.scss';
+import ProfileCard from '@/components/ProfileCard';
 
 interface IRunCalendarProps {
   runs: Activity[];
@@ -183,49 +184,15 @@ function useRunDataEngine(runs: Activity[], year: string, monthIndex: number) {
   const monthlyData = useMemo(() => {
     const monthData = runsByMonth.get(monthIndex) || { runs: [], runsByDate: new Map() };
     const { runs: currentRuns, runsByDate: runsMap } = monthData;
-    
-    let mTotal = 0, mRide = 0, mRun = 0, mWalk = 0; 
-    const timeBlocks = new Array(8).fill(0);
-    const hrCounts = new Array(5).fill(0);
-    let validHrRuns = 0;
-    let maxTimeBlockCount = 0;
+
+    let mTotal = 0, mRide = 0, mRun = 0, mWalk = 0;
 
     currentRuns.forEach(r => {
       mTotal += r.distance;
-      if (RIDE_TYPES.has(r.type)) mRide += r.distance; 
-      else if (RUN_TYPES.has(r.type)) mRun += r.distance; 
-      else if (WALK_TYPES.has(r.type)) mWalk += r.distance; 
-
-      const blockIndex = Math.floor(r.hour / 3);
-      timeBlocks[blockIndex]++;
-      if (timeBlocks[blockIndex] > maxTimeBlockCount) maxTimeBlockCount = timeBlocks[blockIndex];
-
-      const hr = r.average_heartrate;
-      if (hr && hr > 0) {
-        validHrRuns++;
-        if (hr < 115) hrCounts[0]++; else if (hr < 130) hrCounts[1]++;
-        else if (hr < 145) hrCounts[2]++; else if (hr < 160) hrCounts[3]++;
-        else hrCounts[4]++;
-      }
+      if (RIDE_TYPES.has(r.type)) mRide += r.distance;
+      else if (RUN_TYPES.has(r.type)) mRun += r.distance;
+      else if (WALK_TYPES.has(r.type)) mWalk += r.distance;
     });
-
-    const personas = [
-      { name: '午夜潜行', time: '00:00-03:00' }, { name: '破晓先锋', time: '03:00-06:00' },
-      { name: '晨光逐风', time: '06:00-09:00' }, { name: '骄阳行者', time: '09:00-12:00' },
-      { name: '烈日独行', time: '12:00-15:00' }, { name: '午后追风', time: '15:00-18:00' },
-      { name: '暮色掠影', time: '18:00-21:00' }, { name: '暗夜游侠', time: '21:00-24:00' }
-    ];
-    let peakPersona = '等待记录';
-    if (maxTimeBlockCount > 0) peakPersona = personas[timeBlocks.indexOf(maxTimeBlockCount)].name;
-
-    const hrMaxIndex = hrCounts.indexOf(Math.max(...hrCounts));
-    const hrZonesInfo = [
-      { color: '#99FF00', title: '舒缓有氧', name: 'Z1', range: '<115' },
-      { color: '#FFFF00', title: '稳态燃脂', name: 'Z2', range: '115-129' },
-      { color: '#FF9900', title: '有氧强化', name: 'Z3', range: '130-144' },
-      { color: '#FF3300', title: '乳酸阈值', name: 'Z4', range: '145-159' },
-      { color: '#FF0000', title: '无氧极限', name: 'Z5', range: '≥160' },
-    ];
 
     return {
       runsByDate: runsMap,
@@ -235,10 +202,6 @@ function useRunDataEngine(runs: Activity[], year: string, monthIndex: number) {
         runDist: mRun / 1000,
         walkDist: mWalk / 1000,
       },
-      insights: {
-        hasActivities: currentRuns.length > 0, timeBlocks, maxTimeBlockCount: Math.max(maxTimeBlockCount, 1),
-        peakPersona, personas, validHrRuns, hrCounts, hrZonesInfo, hrMaxZone: hrZonesInfo[hrMaxIndex]
-      }
     };
   }, [runsByMonth, monthIndex]);
 
@@ -323,6 +286,8 @@ const RunCalendar = ({ runs, locateActivity, runIndex, setRunIndex, year }: IRun
   return (
     <div className={styles.boardContainer}>
       {/* 🌟 去掉了原本占用 DOM 却不再使用的 SVG <defs> 渐变代码，更干净了！ */}
+
+      <ProfileCard />
 
       <div className={styles.globalSection}>
         {sparklinePath && (
@@ -470,48 +435,6 @@ const RunCalendar = ({ runs, locateActivity, runIndex, setRunIndex, year }: IRun
         </div>
       </div>
 
-      <div className={styles.monthlyInsights}>
-        <div className={styles.insightCard}>
-          <div className={styles.insightHeader}>
-            <span className={styles.insightTitle}>{engine.monthlyData.insights.hasActivities ? engine.monthlyData.insights.peakPersona : '等待记录'}<span className={styles.titleTag}>时段</span></span>
-          </div>
-          <div className={styles.insightContent}>
-            <div className={styles.punchCard}>
-              {engine.monthlyData.insights.timeBlocks.map((count, i) => (
-                <div key={i} className={styles.barWrapper}>
-                  <div className={styles.punchHole} style={{ backgroundColor: count > 0 ? `rgba(50, 215, 75, ${0.3 + 0.7 * (count / engine.monthlyData.insights.maxTimeBlockCount)})` : 'rgba(255,255,255,0.04)' }} />
-                  <div className={styles.runTooltip}>
-                    <div className={styles.ttItem}><span className={styles.ttName} style={{ color: '#8E8E93', fontSize: '0.8rem' }}>{engine.monthlyData.insights.personas[i].time}</span><span className={styles.ttVal}>{count} <small>趟</small></span></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className={styles.insightLabels}><span>00:00</span><span>12:00</span><span>24:00</span></div>
-          </div>
-        </div>
-
-        <div className={styles.insightCard}>
-          <div className={styles.insightHeader}>
-            <span className={styles.insightTitle}>{engine.monthlyData.insights.validHrRuns ? engine.monthlyData.insights.hrMaxZone.title : '等待记录'}<span className={styles.titleTag}>心率</span></span>
-          </div>
-          <div className={styles.insightContent}>
-            <div className={styles.zoneChart}>
-              {engine.monthlyData.insights.hrCounts.map((count, i) => (
-                <div key={i} className={styles.zoneCol}>
-                  <div className={styles.zoneBar} style={{ height: engine.monthlyData.insights.validHrRuns > 0 ? `${Math.max(12, (count / engine.monthlyData.insights.validHrRuns) * 100)}%` : '12%', backgroundColor: count > 0 ? engine.monthlyData.insights.hrZonesInfo[i].color : 'rgba(255,255,255,0.05)' }} />
-                  <div className={styles.runTooltip}>
-                    <div className={styles.ttItem}>
-                      <span className={styles.ttName} style={{ color: engine.monthlyData.insights.hrZonesInfo[i].color, fontSize: '0.8rem' }}>{engine.monthlyData.insights.hrZonesInfo[i].range} <small style={{ color: engine.monthlyData.insights.hrZonesInfo[i].color }}>BPM</small></span>
-                      <span className={styles.ttVal}>{count} <small>趟</small></span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className={styles.insightLabels}>{engine.monthlyData.insights.hrZonesInfo.map((info, i) => (<span key={i} className={styles.zLabel}>{info.name}</span>))}</div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
