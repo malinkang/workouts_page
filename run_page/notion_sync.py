@@ -17,6 +17,7 @@ SYNC_OVERLAP_SECONDS = int(os.getenv("NOTION_SYNC_OVERLAP_SECONDS", "300") or "3
 PROPERTY_CANDIDATES = {
     "title": ["标题", "Name", "名字", "名称"],
     "id": ["Id", "ID", "id"],
+    "link": ["链接", "Link", "URL", "url"],
     "distance": ["距离", "Distance", "distance"],
     "duration": ["运动时长", "Duration", "duration"],
     "avg_hr": ["平均心率", "Average Heart Rate", "average_heartrate"],
@@ -380,7 +381,17 @@ def load_route_from_gpx(
 def extract_run_id_from_page(page: dict) -> Optional[int]:
     properties = page.get("properties", {})
     run_id_prop = pick_property(properties, "id")
-    return parse_run_id(extract_plain_text(run_id_prop))
+    run_id = parse_run_id(extract_plain_text(run_id_prop))
+    if run_id is not None:
+        return run_id
+
+    link_prop = pick_property(properties, "link", "url")
+    run_id = parse_run_id(extract_plain_text(link_prop))
+    if run_id is not None:
+        return run_id
+
+    fallback_url_prop = pick_property(properties, "link")
+    return parse_run_id(extract_plain_text(fallback_url_prop))
 
 
 
