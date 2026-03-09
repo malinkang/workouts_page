@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Activity, RunIds } from '@/utils/utils';
 import RunRow from './RunRow';
+import WorkoutDetailPanel from '@/components/WorkoutDetailPanel';
 import styles from './style.module.scss';
 
 interface IRunTableProperties {
@@ -13,6 +14,7 @@ interface IRunTableProperties {
 
 const RIDE_TYPES = new Set(['Ride', 'VirtualRide', 'EBikeRide']);
 const RUN_WALK_TYPES = new Set(['Run', 'Hike', 'Trail Run', 'Walk', 'Treadmill', 'VirtualRun']);
+const ITEMS_PER_ROW = 1;
 
 const RunTable = ({
   runs,
@@ -88,6 +90,21 @@ const RunTable = ({
     return [...result].sort((a, b) => b.start_date_local.localeCompare(a.start_date_local));
   }, [runs, filterMonth]);
 
+  const groupedRuns = useMemo(() => {
+    const groups: Array<Array<{ run: Activity; elementIndex: number }>> = [];
+
+    filteredRuns.forEach((run, elementIndex) => {
+      const rowIndex = Math.floor(elementIndex / ITEMS_PER_ROW);
+      if (!groups[rowIndex]) {
+        groups[rowIndex] = [];
+      }
+
+      groups[rowIndex].push({ run, elementIndex });
+    });
+
+    return groups;
+  }, [filteredRuns]);
+
   return (
     <div className={styles.tableContainer}>
       <div className={styles.controlsArea}>
@@ -115,20 +132,36 @@ const RunTable = ({
       </div>
 
       <div className={styles.cardList}>
-        {filteredRuns.map((run, elementIndex) => (
-          <RunRow
-            key={run.run_id}
-            elementIndex={elementIndex}
-            locateActivity={locateActivity}
-            run={run}
-            runIndex={runIndex}
-            setRunIndex={setRunIndex}
-            isRideYearlyMax={run.run_id === rideYearlyMaxId}
-            isRideMonthlyMax={rideMonthlyMaxIds.has(run.run_id)}
-            isRwYearlyMax={run.run_id === rwYearlyMaxId}
-            isRwMonthlyMax={rwMonthlyMaxIds.has(run.run_id)}
-          />
-        ))}
+        {groupedRuns.map((group, groupIndex) => {
+          const expandedRun = group.find(item => item.elementIndex === runIndex)?.run;
+
+          return (
+            <div className={styles.cardGroup} key={group[0]?.run.run_id ?? groupIndex}>
+              <div className={styles.cardRow}>
+                {group.map(({ run, elementIndex }) => (
+                  <RunRow
+                    key={run.run_id}
+                    elementIndex={elementIndex}
+                    locateActivity={locateActivity}
+                    run={run}
+                    runIndex={runIndex}
+                    setRunIndex={setRunIndex}
+                    isRideYearlyMax={run.run_id === rideYearlyMaxId}
+                    isRideMonthlyMax={rideMonthlyMaxIds.has(run.run_id)}
+                    isRwYearlyMax={run.run_id === rwYearlyMaxId}
+                    isRwMonthlyMax={rwMonthlyMaxIds.has(run.run_id)}
+                  />
+                ))}
+              </div>
+
+              {expandedRun && (
+                <div className={styles.expandedDetail}>
+                  <WorkoutDetailPanel run={expandedRun} />
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

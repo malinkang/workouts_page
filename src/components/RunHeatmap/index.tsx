@@ -151,6 +151,7 @@ const getMonthLabelPositions = (
 const RunHeatmap = ({ runs, year, locateActivity, setRunIndex }: RunHeatmapProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const locateActivityRef = useRef(locateActivity);
   const [themeMode, setThemeMode] = useState<'light' | 'dark'>(getThemeMode);
   const [containerWidth, setContainerWidth] = useState(0);
 
@@ -267,6 +268,10 @@ const RunHeatmap = ({ runs, year, locateActivity, setRunIndex }: RunHeatmapProps
   );
 
   useEffect(() => {
+    locateActivityRef.current = locateActivity;
+  }, [locateActivity]);
+
+  useEffect(() => {
     if (typeof document === 'undefined') return undefined;
 
     const root = document.documentElement;
@@ -309,7 +314,7 @@ const RunHeatmap = ({ runs, year, locateActivity, setRunIndex }: RunHeatmapProps
       const runIds = runsByDate.get(dateKey)?.runIds || [];
       if (!runIds.length) return;
 
-      locateActivity(runIds);
+      locateActivityRef.current(runIds);
       setRunIndex(-1);
     });
 
@@ -394,7 +399,7 @@ const RunHeatmap = ({ runs, year, locateActivity, setRunIndex }: RunHeatmapProps
       void heatmap.destroy();
       host.innerHTML = '';
     };
-  }, [chartData, layout, locateActivity, runsByDate, setRunIndex, themeMode, year, renderKey]);
+  }, [chartData, layout, runsByDate, setRunIndex, themeMode, year, renderKey]);
 
   const legendColors = contributionColorsForTheme(themeMode);
 

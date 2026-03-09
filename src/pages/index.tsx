@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import Layout from '@/components/Layout';
 import RunMap from '@/components/RunMap';
@@ -74,7 +74,7 @@ const Index = () => {
     changeByItem(y, 'Year', filterYearRuns);
   };
 
-  const locateActivity = (runIds: RunIds) => {
+  const selectActivityRuns = useCallback((runIds: RunIds, shouldScroll: boolean) => {
     const ids = new Set(runIds);
     const selectedRuns = !runIds.length
       ? runs
@@ -82,7 +82,7 @@ const Index = () => {
 
     if (!selectedRuns.length) return;
 
-    const lastRun = selectedRuns.reduce((acc: Activity, curr: Activity) => 
+    const lastRun = selectedRuns.reduce((acc: Activity, curr: Activity) =>
       sortDateFunc(acc, curr) <= 0 ? acc : curr
     );
 
@@ -90,8 +90,16 @@ const Index = () => {
 
     setGeoData(geoJsonForRuns(selectedRuns));
     setTitle(titleForShow(lastRun));
-    if (!isSticky) scrollToMap();
-  };
+    if (shouldScroll && !isSticky) scrollToMap();
+  }, [isSticky, runs]);
+
+  const locateActivity = useCallback((runIds: RunIds) => {
+    selectActivityRuns(runIds, true);
+  }, [selectActivityRuns]);
+
+  const locateActivityInline = useCallback((runIds: RunIds) => {
+    selectActivityRuns(runIds, false);
+  }, [selectActivityRuns]);
 
   useEffect(() => {
     setGeoData(geoJsonForRuns(runs));
@@ -157,7 +165,7 @@ const Index = () => {
         <div className="shuju-list">
           <RunTable
             runs={runs}
-            locateActivity={locateActivity}
+            locateActivity={locateActivityInline}
             setActivity={setActivity}
             runIndex={runIndex}
             setRunIndex={setRunIndex}

@@ -1,0 +1,240 @@
+@import '../../styles/variables.scss';
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.topGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.9fr);
+  gap: 12px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border-card);
+  border-radius: 18px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.sectionTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.sectionSubtitle {
+  margin-top: 4px;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.runType {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.runTitle {
+  font-size: 1rem;
+  line-height: 1.35;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.runMeta {
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.metricCard {
+  padding: 12px 12px 10px;
+  border-radius: 14px;
+  background: var(--surface-hover);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.metricCard[data-accent='distance'] .metricValue {
+  color: #34c759;
+}
+
+.metricCard[data-accent='pace'] .metricValue {
+  color: #64d2ff;
+}
+
+.metricCard[data-accent='heart'] .metricValue {
+  color: #ff6a3d;
+}
+
+.metricLabel {
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+}
+
+.metricValue {
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--text-primary);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+
+  small {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+}
+
+.insightList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.insightItem,
+.insightHint,
+.emptyState {
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.insightItem {
+  padding-left: 14px;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--text-primary) 55%, transparent);
+  }
+}
+
+.splitsTable {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.splitsHeader,
+.splitsRow {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) minmax(0, 1fr) 72px;
+  gap: 12px;
+  align-items: center;
+}
+
+.splitsHeader {
+  padding: 0 4px 8px;
+  border-bottom: 1px solid var(--border-subtle);
+
+  span {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.03em;
+  }
+}
+
+.splitsBody {
+  display: flex;
+  flex-direction: column;
+}
+
+.splitsRow {
+  padding: 10px 4px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-subtle) 72%, transparent);
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+}
+
+.splitLabel,
+.splitDuration,
+.splitPace,
+.splitHeartRate {
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.splitLabel {
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.splitDuration {
+  color: #f5c94a;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.splitPace {
+  color: #64d2ff;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.splitHeartRate {
+  color: #ff6a3d;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+@media (max-width: 960px) {
+  .topGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .metricsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .splitsHeader,
+  .splitsRow {
+    grid-template-columns: 48px minmax(0, 1fr) minmax(0, 1fr) 60px;
+    gap: 10px;
+  }
+}

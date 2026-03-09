@@ -104,8 +104,32 @@ const RunRow = ({
       pace: paceText,
       duration: durationText,
       heartRate: heartRateText,
+      paceSeconds: split.average_pace ?? null,
+      heartRateValue: split.average_heartrate ?? null,
     };
   });
+
+  const splitPreview = (() => {
+    if (!splitRows.length) return null;
+
+    const fastest = splitRows
+      .filter((item) => item.paceSeconds && item.paceSeconds > 0)
+      .sort((left, right) => Number(left.paceSeconds) - Number(right.paceSeconds))[0];
+
+    const heartRateValues = splitRows
+      .map((item) => item.heartRateValue)
+      .filter((value): value is number => Boolean(value && value > 0));
+
+    const avgHeartRate = heartRateValues.length
+      ? Math.round(heartRateValues.reduce((sum, value) => sum + value, 0) / heartRateValues.length)
+      : null;
+
+    return [
+      { label: '分段', value: `${splitRows.length} 段` },
+      { label: '最快', value: fastest ? fastest.pace : '--' },
+      { label: '均心率', value: avgHeartRate ? `${avgHeartRate} bpm` : '--' },
+    ];
+  })();
   
   const handleClick = () => {
     if (runIndex === elementIndex) {
@@ -181,24 +205,18 @@ const RunRow = ({
       </div>
 
       <div className={styles.runTooltip}>
-        {splitRows.length > 0 ? (
-          <div className={styles.ttTable}>
-            <div className={styles.ttHeaderRow}>
-              <span className={styles.ttHeaderGhost}>#</span>
-              <span className={styles.ttHeaderCell}>时间</span>
-              <span className={styles.ttHeaderCell}>配速</span>
-              <span className={styles.ttHeaderCell}>心率</span>
-            </div>
-            <div className={styles.ttList}>
-              {splitRows.map((split) => (
-                <div key={split.key} className={styles.ttRow}>
-                  <span className={styles.ttSplitLabel}>{split.label}</span>
-                  <span className={`${styles.ttValue} ${styles.ttDurationValue}`}>{split.duration}</span>
-                  <span className={`${styles.ttValue} ${styles.ttPaceValue}`}>{split.pace}</span>
-                  <span className={`${styles.ttValue} ${styles.ttHeartRateValue}`}>{split.heartRate}</span>
+        {splitPreview ? (
+          <div className={styles.ttSummary}>
+            <div className={styles.ttSummaryTitle}>分段速览</div>
+            <div className={styles.ttSummaryList}>
+              {splitPreview.map((item) => (
+                <div key={item.label} className={styles.ttSummaryItem}>
+                  <span className={styles.ttSummaryLabel}>{item.label}</span>
+                  <span className={styles.ttSummaryValue}>{item.value}</span>
                 </div>
               ))}
             </div>
+            <div className={styles.ttSummaryHint}>完整分段已移到地图下方详情卡</div>
           </div>
         ) : (
           <div className={styles.ttEmpty}>暂无分段数据</div>

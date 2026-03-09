@@ -73,10 +73,27 @@
    2. 卡片列表 
 ========================================= */
 .cardList {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 10px;
   width: 100%;
+}
+
+.cardGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cardRow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  width: 100%;
+}
+
+.expandedDetail {
+  margin-top: -2px;
 }
 
 .runCard {
@@ -213,91 +230,59 @@
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 22px;
-  padding: 18px 18px 16px;
-  min-width: 280px;
-  max-width: 320px;
+  border-radius: 18px;
+  padding: 14px;
+  min-width: 220px;
+  max-width: 260px;
   z-index: 100;
   pointer-events: none;
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.38);
   white-space: nowrap;
   transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
-  .ttTable {
+  .ttSummary {
     display: flex;
     flex-direction: column;
+    gap: 10px;
+  }
+
+  .ttSummaryTitle {
+    font-size: 0.72rem;
+    color: rgba(235, 236, 240, 0.86);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .ttSummaryList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ttSummaryItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 12px;
   }
 
-  .ttHeaderRow,
-  .ttRow {
-    display: grid;
-    grid-template-columns: 44px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.1fr);
-    align-items: center;
-    column-gap: 14px;
+  .ttSummaryLabel {
+    font-size: 0.72rem;
+    color: rgba(235, 236, 240, 0.48);
   }
 
-  .ttHeaderRow {
-    padding: 0 2px;
+  .ttSummaryValue {
+    font-size: 0.84rem;
+    color: #f5f7fa;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
   }
 
-  .ttHeaderGhost,
-  .ttHeaderCell {
-    color: rgba(235, 236, 240, 0.34);
+  .ttSummaryHint {
     font-size: 0.68rem;
-    line-height: 1;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .ttHeaderGhost {
-    text-indent: -9999px;
-    overflow: hidden;
-  }
-
-  .ttList {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .ttRow {
-    padding: 7px 2px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  }
-
-  .ttRow:last-child {
-    border-bottom: none;
-    padding-bottom: 2px;
-  }
-
-  .ttSplitLabel {
-    color: rgba(235, 236, 240, 0.72);
-    font-size: 0.9rem;
-    line-height: 1;
-    font-weight: 500;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .ttValue {
-    font-size: 0.98rem;
-    line-height: 1;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -0.01em;
-  }
-
-  .ttDurationValue {
-    color: #f5c94a;
-  }
-
-  .ttPaceValue {
-    color: #74e5f1;
-  }
-
-  .ttHeartRateValue {
-    color: #ff6a3d;
+    line-height: 1.45;
+    color: rgba(235, 236, 240, 0.42);
+    white-space: normal;
   }
 }
 
@@ -324,7 +309,4 @@
   .runDistance { font-size: 1.35rem; }
   .tableContainer { margin-bottom: 60px; }
   
-  .cardList {
-    grid-template-columns: 1fr;
-  }
 }

@@ -8,7 +8,7 @@ import {
   LINE_OPACITY,
   MAP_HEIGHT,
 } from '@/utils/const';
-import { Coordinate, geoJsonForMap, colorFromType, formatRunTime, formatSpeedOrPace } from '@/utils/utils';
+import { Activity, Coordinate, geoJsonForMap, colorFromType, formatRunTime, formatSpeedOrPace } from '@/utils/utils';
 import RunMarker from './RunMarker';
 import styles from './style.module.scss';
 import { FeatureCollection } from 'geojson';
@@ -98,6 +98,26 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
   const buildingColor = themeMode === 'light' ? '#d9e1ec' : '#1C1C1E';
   const buildingOpacity = themeMode === 'light' ? 0.55 : 0.85;
 
+  const selectedRun = useMemo<Activity | null>(() => {
+    if (!isSingleRun || !geoData || !geoData.features.length) return null;
+
+    const feature = geoData.features[0];
+    const runProps = feature.properties as any;
+    const targetId = runProps?.run_id || feature?.id;
+
+    if (targetId !== undefined && targetId !== null) {
+      const found = allRuns.find((r: any) => String(r.run_id) === String(targetId) || String(r.id) === String(targetId));
+      if (found) return found as Activity;
+    }
+
+    if (runProps?.start_date_local) {
+      const found = allRuns.find((r: any) => r.start_date_local === runProps.start_date_local);
+      if (found) return found as Activity;
+    }
+
+    return null;
+  }, [allRuns, geoData, isSingleRun]);
+
   const runStats = useMemo(() => {
     if (!isSingleRun || !geoData || !geoData.features.length) return null;
 
@@ -106,44 +126,32 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
     if (!points || points.length === 0) return null;
 
     const runProps = feature.properties as any;
-    const targetId = runProps?.run_id || feature?.id;
-
-    let fullRun: any = null;
-
-    if (targetId !== undefined && targetId !== null) {
-      fullRun = allRuns.find((r: any) => String(r.run_id) === String(targetId) || String(r.id) === String(targetId));
-    }
-    
-    if (!fullRun && runProps?.start_date_local) {
-      fullRun = allRuns.find((r: any) => r.start_date_local === runProps.start_date_local);
-    }
-
-    const type = fullRun?.type ?? runProps?.type ?? 'Run';
-    const averageSpeed = fullRun?.average_speed ?? runProps?.average_speed;
-    const movingTime = fullRun?.moving_time ?? runProps?.moving_time;
+    const type = selectedRun?.type ?? runProps?.type ?? 'Run';
+    const averageSpeed = selectedRun?.average_speed ?? runProps?.average_speed;
+    const movingTime = selectedRun?.moving_time ?? runProps?.moving_time;
     const locationParts = [
-      fullRun?.location_city ?? runProps?.location_city,
-      fullRun?.location_country ?? runProps?.location_country,
+      (selectedRun as any)?.location_city ?? runProps?.location_city,
+      selectedRun?.location_country ?? runProps?.location_country,
     ].filter(Boolean);
 
     return {
-      name: runProps?.name || '',
+      name: selectedRun?.name || runProps?.name || '',
       startLon: points[0][0],
       startLat: points[0][1],
       endLon: points[points.length - 1][0],
       endLat: points[points.length - 1][1],
-      distance: fullRun?.distance ?? runProps?.distance ?? 0,
+      distance: selectedRun?.distance ?? runProps?.distance ?? 0,
       runTimeStr: movingTime ? formatRunTime(movingTime) : '--:--',
       paceParts: averageSpeed ? formatSpeedOrPace(averageSpeed, type) : null,
-      heartRate: fullRun?.average_heartrate ?? runProps?.average_heartrate,
-      displayDate: (fullRun?.start_date_local || runProps?.start_date_local || '').slice(0, 10),
+      heartRate: selectedRun?.average_heartrate ?? runProps?.average_heartrate,
+      displayDate: (selectedRun?.start_date_local || runProps?.start_date_local || '').slice(0, 10),
       locationLabel: locationParts.join(' · '),
       startCoordText: formatCoordinate(points[0][1], points[0][0]),
       endCoordText: formatCoordinate(points[points.length - 1][1], points[points.length - 1][0]),
       isRide: RIDE_TYPES.has(type),
-      runColor: colorFromType(type) || runProps?.color || '#32D74B'
+      runColor: colorFromType(type) || runProps?.color || '#32D74B',
     };
-  }, [isSingleRun, geoData, allRuns]);
+  }, [geoData, isSingleRun, selectedRun]);
 
   useEffect(() => {
     const map = mapRef.current?.getMap();
@@ -516,52 +524,6 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
       <FullscreenControl position="top-left" />
       <NavigationControl showCompass={false} position="bottom-left" />
 
-      {isSingleRun && runStats && (
-        <div className={styles.runDetailCard}>
-          <div className={styles.detailName}>
-            <span>{runStats.name}</span>
-            {runStats.displayDate && <span className={styles.detailDate}>{runStats.displayDate}</span>}
-          </div>
-          {runStats.locationLabel && (
-            <div className={styles.detailGeo}>
-              <div className={styles.geoLine}>
-                <span className={styles.geoLabel}>位置</span>
-                <span className={styles.geoText}>{runStats.locationLabel}</span>
-              </div>
-            </div>
-          )}
-          <div className={styles.detailStatsRow}>
-            <div className={styles.detailStatBlock}>
-              <span className={styles.statLabel}>里程</span>
-              <span className={styles.statVal} style={{ color: runStats.runColor }}>
-                {(runStats.distance / 1000).toFixed(2)}<small>km</small>
-              </span>
-            </div>
-            <div className={styles.detailStatBlock}>
-              <span className={styles.statLabel}>用时</span>
-              <span className={styles.statVal}>{runStats.runTimeStr}</span>
-            </div>
-            <div className={styles.detailStatBlock}>
-              <span className={styles.statLabel}>{runStats.isRide ? '均速' : '配速'}</span>
-              <span className={styles.statVal}>
-                {runStats.paceParts ? (
-                  Array.isArray(runStats.paceParts) ? (
-                    <>{runStats.paceParts[0]}<small>{runStats.paceParts[1]}</small></>
-                  ) : (
-                    typeof runStats.paceParts === 'string' && runStats.paceParts.includes('km/h') ? (
-                      <>{runStats.paceParts.replace(/km\/h/i, '').trim()}<small>km/h</small></>
-                    ) : (runStats.paceParts.replace(' ', ''))
-                  )
-                ) : ("-'-''")}
-              </span>
-            </div>
-            <div className={styles.detailStatBlock}>
-              <span className={styles.statLabel}>心率</span>
-              <span className={styles.statVal}>{runStats.heartRate ? Math.round(runStats.heartRate) : '--'}</span>
-            </div>
-          </div>
-        </div>
-      )}
     </Map>
   );
 };
