@@ -16,8 +16,39 @@ const RUN_TYPES = new Set(['Run', 'TrailRun', 'Treadmill', 'VirtualRun']);
 const SWIM_TYPES = new Set(['Swim', 'WaterSport']); 
 const RUN_WALK_TYPES = new Set(['Run', 'Hike', 'TrailRun', 'Walk', 'Treadmill', 'VirtualRun']);
 
+const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+const getSafeDateKey = (value?: string, fallbackYear?: number) => {
+  if (typeof value === 'string') {
+    const dateKey = value.slice(0, 10);
+    if (DATE_KEY_PATTERN.test(dateKey)) {
+      return dateKey;
+    }
+  }
+  return `${fallbackYear || new Date().getFullYear()}-01-01`;
+};
+
+const getSafeExactDate = (value?: string, dateKey?: string) => {
+  const normalized = typeof value === 'string' ? value.replace(' ', 'T') : '';
+  const parsed = normalized ? new Date(normalized) : new Date('');
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed;
+  }
+  const fallback = dateKey ? new Date(`${dateKey}T00:00:00`) : new Date('');
+  if (!Number.isNaN(fallback.getTime())) {
+    return fallback;
+  }
+  return new Date();
+};
+
+const clampMonthIndex = (value: number) => {
+  if (!Number.isFinite(value)) return 0;
+  return Math.max(0, Math.min(11, value));
+};
+
 function useRunDataEngine(runs: Activity[], year: string, monthIndex: number) {
-  const displayYear = Number(year);
+  const parsedYear = Number(year);
+  const displayYear = Number.isFinite(parsedYear) ? parsedYear : new Date().getFullYear();
 
   const { normalizedRuns, runIdIndexMap, runsByMonth } = useMemo(() => {
     const indexMap = new Map<number, number>();
@@ -25,15 +56,17 @@ function useRunDataEngine(runs: Activity[], year: string, monthIndex: number) {
     
     const normRuns = runs.map((r, i) => {
       indexMap.set(r.run_id, i);
-      const dateStr = r.start_date_local.slice(0, 10);
-      const month = Number(dateStr.slice(5, 7)) - 1;
-      const cleanDateString = r.start_date_local.replace(' ', 'T');
+      const dateStr = getSafeDateKey(r.start_date_local || r.start_date, displayYear);
+      const month = clampMonthIndex(Number(dateStr.slice(5, 7)) - 1);
+      const exactDate = getSafeExactDate(r.start_date_local || r.start_date, dateStr);
+      const utcDayTimestamp = Date.parse(`${dateStr}T00:00:00Z`);
+      const safeDayTimestamp = Number.isFinite(utcDayTimestamp)
+        ? utcDayTimestamp
+        : Date.UTC(displayYear, month, 1);
+      const exactTime = exactDate.getTime();
+      const hour = Number.isFinite(exactTime) ? exactDate.getHours() : 0;
       
-      const utcDayTimestamp = new Date(`${dateStr}T00:00:00Z`).getTime();
-      const exactTime = new Date(cleanDateString).getTime();
-      const hour = new Date(cleanDateString).getHours(); 
-      
-      return { ...r, dateStr, month, utcDayTimestamp, exactTime, hour };
+      return { ...r, dateStr, month, utcDayTimestamp: safeDayTimestamp, exactTime, hour };
     });
 
     normRuns.forEach(r => {
@@ -63,7 +96,8 @@ function useRunDataEngine(runs: Activity[], year: string, monthIndex: number) {
     
     const firstDayUTC = Date.UTC(displayYear, 0, 1);
     const lastDayUTC = Date.UTC(displayYear, 11, 31);
-    const totalWeeks = Math.ceil((lastDayUTC - firstDayUTC) / 86400000 / 7) + 1;
+    const rawTotalWeeks = Math.ceil((lastDayUTC - firstDayUTC) / 86400000 / 7) + 1;
+    const totalWeeks = Number.isFinite(rawTotalWeeks) && rawTotalWeeks > 0 ? rawTotalWeeks : 53;
     const weekData = new Array(totalWeeks).fill(0);
     
     const rideDistMap = new Map<string, number>(); 
@@ -245,7 +279,8 @@ const RunCalendar = ({ runs, locateActivity, runIndex, setRunIndex, year }: IRun
 
   useEffect(() => {
     if (engine.normalizedRuns.length > 0) {
-      setMonthIndex(engine.normalizedRuns[0].month);
+      const nextMonthIndex = clampMonthIndex(engine.normalizedRuns[0].month);
+      setMonthIndex(nextMonthIndex);
       setDirection(0);
     }
   }, [engine.normalizedRuns]);
@@ -277,10 +312,12 @@ const RunCalendar = ({ runs, locateActivity, runIndex, setRunIndex, year }: IRun
   const handlePrevMonth = () => { setDirection(-1); setMonthIndex(prev => Math.max(0, prev - 1)); };
   const handleNextMonth = () => { setDirection(1); setMonthIndex(prev => Math.min(11, prev + 1)); };
 
-  const rawFirstDay = new Date(engine.displayYear, monthIndex, 1).getDay();
-  const firstDayOfMonth = rawFirstDay === 0 ? 6 : rawFirstDay - 1; 
+  const safeMonthIndex = clampMonthIndex(monthIndex);
+  const rawFirstDay = new Date(engine.displayYear, safeMonthIndex, 1).getDay();
+  const firstDayOfMonth = Number.isFinite(rawFirstDay) ? (rawFirstDay === 0 ? 6 : rawFirstDay - 1) : 0;
 
-  const daysInMonth = new Date(engine.displayYear, monthIndex + 1, 0).getDate();
+  const rawDaysInMonth = new Date(engine.displayYear, safeMonthIndex + 1, 0).getDate();
+  const daysInMonth = Number.isFinite(rawDaysInMonth) && rawDaysInMonth > 0 ? rawDaysInMonth : 31;
   const days = Array.from({ length: firstDayOfMonth }, () => null).concat(Array.from({ length: daysInMonth }, (_, i) => i + 1));
 
   return (
@@ -314,18 +351,18 @@ const RunCalendar = ({ runs, locateActivity, runIndex, setRunIndex, year }: IRun
       <div className={styles.calendarSection}>
         <div className={styles.monthHeader}>
           <div className={styles.monthNav}>
-            <button onClick={handlePrevMonth} disabled={monthIndex === 0} title="上个月"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg></button>
-            <span>{engine.displayYear}-{String(monthIndex + 1).padStart(2, '0')}</span>
-            <button onClick={handleNextMonth} disabled={monthIndex === 11} title="下个月"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg></button>
+            <button onClick={handlePrevMonth} disabled={safeMonthIndex === 0} title="上个月"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg></button>
+            <span>{engine.displayYear}-{String(safeMonthIndex + 1).padStart(2, '0')}</span>
+            <button onClick={handleNextMonth} disabled={safeMonthIndex === 11} title="下个月"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg></button>
           </div>
         </div>
         
         <div className={styles.weekdays}>{['一', '二', '三', '四', '五', '六', '日'].map((d, i) => (<div key={i}>{d}</div>))}</div>
         
-        <div key={`${engine.displayYear}-${monthIndex}`} className={styles.grid} data-direction={direction}>
+        <div key={`${engine.displayYear}-${safeMonthIndex}`} className={styles.grid} data-direction={direction}>
           {days.map((day, idx) => {
             if (!day) return <div key={`empty-${idx}`} className={styles.emptyDay} />;
-            const dateStr = `${engine.displayYear}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const dateStr = `${engine.displayYear}-${String(safeMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const dayRuns = engine.monthlyData.runsByDate.get(dateStr) || [];
             const hasRun = dayRuns.length > 0;
             const primaryRun = hasRun ? dayRuns[0] : null;
