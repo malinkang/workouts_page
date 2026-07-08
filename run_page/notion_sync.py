@@ -337,7 +337,16 @@ def build_type_map(
     if not type_database_id:
         return {}
     result: Dict[str, str] = {}
-    for page in fetch_database_pages(client, type_database_id):
+    try:
+        type_pages = fetch_database_pages(client, type_database_id)
+    except httpx.HTTPStatusError as exc:
+        if exc.response is not None and exc.response.status_code == 404:
+            print(
+                f"Warning: type database {type_database_id} is not accessible with the current Notion token; skip type sync."
+            )
+            return {}
+        raise
+    for page in type_pages:
         if page.get("archived") or page.get("in_trash"):
             continue
         properties = page.get("properties", {})
