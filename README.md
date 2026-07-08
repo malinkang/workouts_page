@@ -18,22 +18,24 @@ This project is based on [running_page](https://github.com/yihong0618/running_pa
    - **[Xingzhe（行者）](#xingzhe行者)**
 1. support [RoadTrip(GoogleMaps)](#roadtripgooglemaps), show Road Trip on maps
 
-### Notion
+### Notion / Ninebot
 
-You can also use a Notion workout database as the source of `src/static/activities.json`.
+This fork can use the Ninebot Trips Notion database as the source of
+`src/static/activities.json`. It reads each row's `GPX` file property, unwraps
+the `*_gcj02.gpx.json` payload, and renders the trip as a `Ride` route.
 
 Required env vars:
 
 ```bash
 export NOTION_TOKEN=...
-export WORKOUT_DATABASE_ID=...
-export TYPE_DATABASE_ID=...
+export NOTION_DATABASE_ID=...
+# WORKOUT_DATABASE_ID is also supported for compatibility.
 ```
 
 Then run:
 
 ```bash
-python3 run_page/notion_sync.py
+python3 run_page/notion_sync.py --full-sync
 ```
 
 Or use:
@@ -42,7 +44,8 @@ Or use:
 pnpm run data:download:notion
 ```
 
-This sync path reads workouts from Notion, rebuilds `run_page/data.db`, and regenerates `src/static/activities.json` using the existing frontend schema.
+This sync path reads trips from Notion and regenerates
+`src/static/activities.json` using the existing frontend schema.
 
 ## Custom your page
 

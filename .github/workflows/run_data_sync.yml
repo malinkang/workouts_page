@@ -20,8 +20,8 @@ permissions:
   contents: write
 
 env:
-  GITHUB_NAME: koobai
-  GITHUB_EMAIL: mekoobai@gmail.com
+  GITHUB_NAME: malinkang
+  GITHUB_EMAIL: linkang.ma@gmail.com
   WORKOUTS_PAGE_TIMEZONE: ${{ secrets.WORKOUTS_PAGE_TIMEZONE || 'Asia/Shanghai' }}
   NOTION_SYNC_OVERLAP_SECONDS: ${{ secrets.NOTION_SYNC_OVERLAP_SECONDS || '300' }}
 
@@ -31,7 +31,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-      WORKOUT_DATABASE_ID: ${{ secrets.WORKOUT_DATABASE_ID }}
+      NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+      WORKOUT_DATABASE_ID: ${{ secrets.WORKOUT_DATABASE_ID || secrets.NOTION_DATABASE_ID }}
       TYPE_DATABASE_ID: ${{ secrets.TYPE_DATABASE_ID }}
       SPLIT_DATABASE_ID: ${{ secrets.SPLIT_DATABASE_ID }}
     steps:

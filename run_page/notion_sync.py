@@ -16,16 +16,16 @@ SYNC_OVERLAP_SECONDS = int(os.getenv("NOTION_SYNC_OVERLAP_SECONDS", "300") or "3
 
 PROPERTY_CANDIDATES = {
     "title": ["标题", "Name", "名字", "名称"],
-    "id": ["Id", "ID", "id"],
+    "id": ["Id", "ID", "id", "Stable Key"],
     "link": ["链接", "Link", "URL", "url"],
-    "distance": ["距离", "Distance", "distance"],
-    "duration": ["运动时长", "Duration", "duration"],
+    "distance": ["距离", "Distance", "distance", "Mileage km"],
+    "duration": ["运动时长", "Duration", "duration", "Duration sec"],
     "avg_hr": ["平均心率", "Average Heart Rate", "average_heartrate"],
     "max_hr": ["最大心率", "Max Heart Rate", "max_heartrate"],
     "calories": ["消耗热量", "Calories", "calories"],
     "avg_pace": ["平均配速", "Average Pace", "average_pace"],
-    "start": ["开始时间", "Start", "start_date_local"],
-    "end": ["结束时间", "End", "end"],
+    "start": ["开始时间", "Start", "start_date_local", "Start Time"],
+    "end": ["结束时间", "End", "end", "End Time"],
     "type_relation": ["运动类型", "类型", "Type", "type"],
     "gpx": ["gpx", "GPX", "轨迹", "路线"],
     "location": ["位置", "地点", "Location", "location_country", "region"],
@@ -40,6 +40,9 @@ TYPE_ALIASES = {
     "ride": "Ride",
     "cycling": "Ride",
     "骑行": "Ride",
+    "ninebot": "Ride",
+    "九号": "Ride",
+    "电动车": "Ride",
     "walk": "Walk",
     "walking": "Walk",
     "步行": "Walk",
@@ -347,6 +350,19 @@ def build_type_map(
 
 
 
+def unwrap_gpx_text(text: str) -> str:
+    stripped = text.lstrip()
+    if not stripped.startswith("{"):
+        return text
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError:
+        return text
+    if isinstance(payload, dict) and isinstance(payload.get("gpx"), str):
+        return payload["gpx"]
+    return text
+
+
 def load_route_from_gpx(
     client: httpx.Client, urls: List[str]
 ) -> Tuple[str, Optional[Tuple[float, float]]]:
@@ -354,7 +370,7 @@ def load_route_from_gpx(
         try:
             response = client.get(url)
             response.raise_for_status()
-            gpx = gpxpy.parse(response.text)
+            gpx = gpxpy.parse(unwrap_gpx_text(response.text))
         except Exception:
             continue
 
@@ -378,12 +394,66 @@ def load_route_from_gpx(
 
 
 
+def is_ninebot_page(properties: Dict[str, dict]) -> bool:
+    return (
+        "Mileage km" in properties
+        or "Stable Key" in properties
+        or "GPX" in properties
+    )
+
+
+def parse_local_datetime(value: str, local_tz: ZoneInfo) -> Optional[datetime]:
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M"):
+        try:
+            return datetime.strptime(value.strip(), fmt).replace(tzinfo=local_tz)
+        except ValueError:
+            pass
+    return None
+
+
+def parse_stable_key_range(
+    properties: Dict[str, dict], local_tz: ZoneInfo
+) -> Tuple[Optional[datetime], Optional[datetime]]:
+    stable_key = extract_plain_text(properties.get("Stable Key"))
+    parts = stable_key.split("|")
+    if len(parts) < 2:
+        return None, None
+    return parse_local_datetime(parts[0], local_tz), parse_local_datetime(parts[1], local_tz)
+
+
+def run_id_from_stable_key(value: str) -> Optional[int]:
+    if not value:
+        return None
+    local_tz = ZoneInfo(os.getenv("WORKOUTS_PAGE_TIMEZONE", BASE_TIMEZONE))
+    start_time = parse_local_datetime(value.split("|", 1)[0], local_tz)
+    if start_time is None:
+        return None
+    return int(start_time.timestamp() * 1000)
+
+
+def run_id_from_start_property(prop: Optional[dict]) -> Optional[int]:
+    if not prop or prop.get("type") != "date":
+        return None
+    start = prop.get("date", {}).get("start")
+    parsed = parse_notion_datetime(start)
+    if parsed is None:
+        return None
+    return int(parsed.timestamp() * 1000)
+
+
 def extract_run_id_from_page(page: dict) -> Optional[int]:
     properties = page.get("properties", {})
     run_id_prop = pick_property(properties, "id")
-    run_id = parse_run_id(extract_plain_text(run_id_prop))
+    run_id_text = extract_plain_text(run_id_prop)
+    run_id = parse_run_id(run_id_text) or run_id_from_stable_key(run_id_text)
     if run_id is not None:
         return run_id
+
+    start_run_id = run_id_from_start_property(
+        pick_property(properties, "start", "date")
+    )
+    if start_run_id is not None:
+        return start_run_id
 
     link_prop = pick_property(properties, "link", "url")
     run_id = parse_run_id(extract_plain_text(link_prop))
@@ -465,13 +535,23 @@ def page_to_activity(
     if not title:
         title = f"Workout {run_id}"
 
-    distance = float(extract_number(pick_property(properties, "distance")) or 0)
-    duration_seconds = int(extract_number(pick_property(properties, "duration")) or 0)
+    is_ninebot = is_ninebot_page(properties)
+    if is_ninebot:
+        mileage_km = float(extract_number(properties.get("Mileage km")) or 0)
+        distance = mileage_km * 1000
+        duration_seconds = int(extract_number(properties.get("Duration sec")) or 0)
+    else:
+        distance = float(extract_number(pick_property(properties, "distance")) or 0)
+        duration_seconds = int(extract_number(pick_property(properties, "duration")) or 0)
     if distance <= 0 and duration_seconds <= 0:
         return None
 
     start_value = extract_date(pick_property(properties, "start", "date"), local_tz)
     end_value = extract_date(pick_property(properties, "end", "date"), local_tz)
+    if is_ninebot:
+        stable_start, stable_end = parse_stable_key_range(properties, local_tz)
+        start_value = stable_start or start_value
+        end_value = stable_end or end_value
     if start_value is None and end_value is not None and duration_seconds > 0:
         start_value = end_value - timedelta(seconds=duration_seconds)
     if end_value is None and start_value is not None and duration_seconds > 0:
@@ -487,7 +567,9 @@ def page_to_activity(
     type_relation_ids = extract_relation_ids(
         pick_property(properties, "type_relation", "relation")
     )
-    workout_type = resolve_type(type_relation_ids, type_name_by_id, title)
+    workout_type = (
+        "Ride" if is_ninebot else resolve_type(type_relation_ids, type_name_by_id, title)
+    )
 
     location_country = extract_plain_text(pick_property(properties, "location"))
     average_heartrate = extract_number(pick_property(properties, "avg_hr"))
@@ -512,7 +594,7 @@ def page_to_activity(
         "average_speed": (distance / duration_seconds) if duration_seconds > 0 else 0,
         "location_country": location_country,
         "summary_polyline": summary_polyline,
-        "source": "notion",
+        "source": "notion-ninebot" if is_ninebot else "notion",
         "notion_page_id": page.get("id"),
         "notion_last_edited_time": page.get("last_edited_time"),
         "splits": splits or [],
@@ -608,7 +690,9 @@ def write_activities_json(activities: List[dict]) -> int:
 
 
 def sync_from_notion(full_sync: bool = False) -> int:
-    workout_database_id = get_env("WORKOUT_DATABASE_ID")
+    workout_database_id = os.getenv("WORKOUT_DATABASE_ID") or get_env(
+        "NOTION_DATABASE_ID"
+    )
     type_database_id = os.getenv("TYPE_DATABASE_ID")
     split_database_id = os.getenv("SPLIT_DATABASE_ID")
     local_tz = ZoneInfo(os.getenv("WORKOUTS_PAGE_TIMEZONE", BASE_TIMEZONE))
