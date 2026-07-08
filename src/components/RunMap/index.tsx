@@ -92,9 +92,12 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
     return b ? b : [[70, 10], [140, 60]] as [[number, number], [number, number]];
   }, []); // 仅挂载时计算一次即可，因为后续全靠 easeTo 飞行
 
-  const mapStyleUrl = themeMode === 'light'
-    ? 'mapbox://styles/mapbox/light-v11'
-    : 'mapbox://styles/mapbox/dark-v11';
+  const hasMapboxToken = Boolean(MAPBOX_TOKEN);
+  const mapStyleUrl = hasMapboxToken
+    ? (themeMode === 'light'
+      ? 'mapbox://styles/mapbox/light-v11'
+      : 'mapbox://styles/mapbox/dark-v11')
+    : 'https://tiles.openfreemap.org/styles/liberty';
   const buildingColor = themeMode === 'light' ? '#d9e1ec' : '#1C1C1E';
   const buildingOpacity = themeMode === 'light' ? 0.55 : 0.85;
 
@@ -395,18 +398,6 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
 
   const dash = USE_DASH_LINE && !isSingleRun && !isBigMap ? [2, 2] : [2, 0];
 
-  if (!MAPBOX_TOKEN) {
-    return (
-      <div className={styles.mapEmptyState}>
-        <div className={styles.mapEmptyCard}>
-          <div className={styles.mapEmptyTitle}>地图暂时不可用</div>
-          <div className={styles.mapEmptyText}>当前开发环境缺少 `VITE_MAPBOX_TOKEN`，所以 Mapbox 样式和瓦片无法加载。</div>
-          <div className={styles.mapEmptyHint}>在 `workouts_page/.env.local` 里加入 `VITE_MAPBOX_TOKEN=你的 Mapbox public token`，然后重启预览即可。</div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <Map
       ref={mapRef}
@@ -415,28 +406,32 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
       onZoom={(e) => setCurrentZoom(e.viewState.zoom)}
       style={{ width: '100%', height: MAP_HEIGHT }}
       mapStyle={mapStyleUrl}
-      mapboxAccessToken={MAPBOX_TOKEN}
+      mapboxAccessToken={MAPBOX_TOKEN || undefined}
       logoPosition="bottom-right"
       attributionControl={false} 
       fog={{ range: [0.8, 3.5], color: "#151516", "horizon-blend": 0.15, "star-intensity": 0.2 }}
-      terrain={isSingleRun ? { source: 'mapbox-dem', exaggeration: 2.5 } : undefined}
+      terrain={hasMapboxToken && isSingleRun ? { source: 'mapbox-dem', exaggeration: 2.5 } : undefined}
     >
-      <Layer
-        id="3d-buildings"
-        beforeId={labelLayerId}
-        source="composite"
-        source-layer="building"
-        filter={['==', 'extrude', 'true']}
-        type="fill-extrusion"
-        minzoom={14}
-        paint={{
-          'fill-extrusion-color': buildingColor,
-          'fill-extrusion-height': ['*', ['get', 'height'], 4.0],
-          'fill-extrusion-base': ['*', ['get', 'min_height'], 4.0],
-          'fill-extrusion-opacity': buildingOpacity,
-        }}
-      />
-      <Source id="mapbox-dem" type="raster-dem" url="mapbox://mapbox.mapbox-terrain-dem-v1" tileSize={512} maxzoom={14} />
+      {hasMapboxToken && (
+        <Layer
+          id="3d-buildings"
+          beforeId={labelLayerId}
+          source="composite"
+          source-layer="building"
+          filter={['==', 'extrude', 'true']}
+          type="fill-extrusion"
+          minzoom={14}
+          paint={{
+            'fill-extrusion-color': buildingColor,
+            'fill-extrusion-height': ['*', ['get', 'height'], 4.0],
+            'fill-extrusion-base': ['*', ['get', 'min_height'], 4.0],
+            'fill-extrusion-opacity': buildingOpacity,
+          }}
+        />
+      )}
+      {hasMapboxToken && (
+        <Source id="mapbox-dem" type="raster-dem" url="mapbox://mapbox.mapbox-terrain-dem-v1" tileSize={512} maxzoom={14} />
+      )}
       <Source id="data" type="geojson" data={displayData}>
         <Layer
           id="runs2"
