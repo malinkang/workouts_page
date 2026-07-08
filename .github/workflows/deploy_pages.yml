@@ -1,0 +1,61 @@
+name: Deploy Pages
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - src/**
+      - assets/**
+      - public/**
+      - index.html
+      - package.json
+      - pnpm-lock.yaml
+      - vite.config.ts
+      - tsconfig.json
+      - .github/workflows/deploy_pages.yml
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npx pnpm@8.7.0 install --frozen-lockfile
+
+      - name: Build
+        env:
+          VITE_MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
+        run: npx pnpm@8.7.0 build
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
