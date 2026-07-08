@@ -47,6 +47,20 @@ pnpm run data:download:notion
 This sync path reads trips from Notion and regenerates
 `src/static/activities.json` using the existing frontend schema.
 
+
+## Personal Route Map Direction
+
+This fork is being adapted into my personal route coverage map, similar to a
+web-based world-fog view. The first synced source is Ninebot e-bike trips from
+Notion. Future sources should be normalized into the same route schema:
+
+- Ninebot / e-bike GPS tracks from Notion `GPX` files.
+- Workout tracks from sports apps or workout Notion databases.
+- Estimated subway / transit routes derived from station and time records.
+
+All sources should eventually render together as personal trajectory lines while
+keeping each route's `source` field explicit.
+
 ## Custom your page
 
 ### Change Sports Color
