@@ -366,7 +366,7 @@ const RunCalendar = ({ runs, locateActivity, runIndex, setRunIndex, year }: IRun
               <div 
                 key={dateStr} 
                 className={`${styles.dayCell} ${hasRun ? styles.hasRun : ''} ${isSelected ? styles.selected : ''} ${hasAnyAchievement ? styles.maxDay : ''}`} 
-                onClick={() => { if (hasRun && primaryRun) { if (isSelected) { locateActivity([]); setRunIndex(-1); } else { locateActivity([primaryRun.run_id]); setRunIndex(engine.runIdIndexMap.get(primaryRun.run_id) ?? -1); } } }} 
+                onClick={() => { if (hasRun && primaryRun) { if (isSelected) { locateActivity([]); setRunIndex(-1); } else { const selectedRunIds = dayRuns.map((r) => r.run_id); locateActivity(selectedRunIds); setRunIndex(dayRuns.length === 1 ? (engine.runIdIndexMap.get(primaryRun.run_id) ?? -1) : -1); } } }}
                 style={{ 
                   backgroundColor: (isSelected && !hasAnyAchievement) ? `${runColor}26` : undefined, 
                   boxShadow: (isSelected && !hasAnyAchievement) ? `inset 0 0 0 1px ${runColor}` : undefined 
