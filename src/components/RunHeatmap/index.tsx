@@ -86,6 +86,7 @@ const fillColorForDistance = (distanceKm: number, thresholds: number[], colors: 
 const labelForActivityType = (type: string) => {
   switch (type) {
     case 'Ride':
+    case 'Ninebot':
     case 'VirtualRide':
     case 'EBikeRide':
       return '骑行';

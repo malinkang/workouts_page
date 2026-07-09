@@ -8,6 +8,7 @@ import {
   NEED_FIX_MAP,
   RUN_TITLES,
   MAIN_COLOR,
+  NINEBOT_COLOR,
   RIDE_COLOR,
   VIRTUAL_RIDE_COLOR,
   HIKE_COLOR,
@@ -85,7 +86,7 @@ const formatPace = (d: number): string => {
 const formatSpeedOrPace = (speed: number, type: string): string => {
   if (Number.isNaN(speed) || speed === 0) return '0';
 
-  if (type === 'Ride') {
+  if (type === 'Ride' || type === 'Ninebot') {
     return `${(speed * 3.6).toFixed(2)}  km/h`;
   }
 
@@ -254,6 +255,8 @@ const titleForType = (type: string): string => {
       return RUN_TITLES.TREADMILL_TITLE;
     case 'Ride':
       return RUN_TITLES.RIDE_TITLE;
+    case 'Ninebot':
+      return RUN_TITLES.NINEBOT_TITLE;
     case 'Indoor Ride':
       return RUN_TITLES.INDOOR_RIDE_TITLE;
     case 'VirtualRide':
@@ -308,6 +311,8 @@ const typeForRun = (run: Activity): string => {
       return 'Treadmill';
     case 'Ride':
       return 'Ride';
+    case 'Ninebot':
+      return 'Ninebot';
     case 'Indoor Ride':
       return 'Indoor Ride';
     case 'VirtualRide':
@@ -360,6 +365,8 @@ const colorFromType = (workoutType: string): string => {
       return VIRTUAL_RUN_COLOR;
     case 'Treadmill':
       return TREADMILL_COLOR;
+    case 'Ninebot':
+      return NINEBOT_COLOR;
     case 'Ride':
     case 'Indoor Ride':
       return RIDE_COLOR;
@@ -508,6 +515,7 @@ const formatRunName = (name: string, startDateLocal: string, type: string): stri
     case 'VirtualRun':
     case 'Treadmill': typeStr = '跑步'; break;
     case 'Ride': typeStr = '骑行'; break;
+    case 'Ninebot': typeStr = '九号出行'; break;
     case 'Swim': typeStr = '游泳'; break;
     case 'Hike':
     case 'Walk': typeStr = '步行'; break;
@@ -517,10 +525,10 @@ const formatRunName = (name: string, startDateLocal: string, type: string): stri
   // 🌟 将新增的类型单词加入拦截白名单正则
   const isDefaultName =
     /^(晨间|上午|午间|午后|下午|傍晚|晚间|夜间|凌晨|清晨|Morning|Afternoon|Evening|Night|Lunch)/.test(name) &&
-    /(跑步|骑行|行走|徒步|游泳|运动|Run|Ride|Walk|Swim|Hike|Treadmill|VirtualRun)$/.test(name) &&
+    /(跑步|骑行|九号出行|行走|徒步|游泳|运动|Run|Ride|Ninebot|Walk|Swim|Hike|Treadmill|VirtualRun)$/.test(name) &&
     name.length <= 15;
 
-  if (isDefaultName || name === 'Run' || name === 'Ride') {
+  if (isDefaultName || name === 'Run' || name === 'Ride' || name === 'Ninebot') {
     return `${timePrefix}${typeStr}`;
   }
 

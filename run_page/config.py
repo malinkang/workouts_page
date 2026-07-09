@@ -59,6 +59,8 @@ TYPE_DICT = {
     "cycling": "Ride",
     "CYCLING": "Ride",
     "Ride": "Ride",
+    "Ninebot": "Ninebot",
+    "ninebot": "Ninebot",
     "road_biking": "Ride",
     "VirtualRide": "VirtualRide",
     "indoor_cycling": "Indoor Ride",
@@ -82,6 +84,7 @@ TYPE_DICT = {
 
 MAPPING_TYPE = [
     "Hike",
+    "Ninebot",
     "Ride",
     "VirtualRide",
     "Rowing",

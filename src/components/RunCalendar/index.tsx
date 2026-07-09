@@ -11,7 +11,7 @@ interface IRunCalendarProps {
   year: string;
 }
 
-const RIDE_TYPES = new Set(['Ride', 'VirtualRide', 'EBikeRide']);
+const RIDE_TYPES = new Set(['Ride', 'Ninebot', 'VirtualRide', 'EBikeRide']);
 const WALK_TYPES = new Set(['Walk', 'Hike']); 
 const RUN_TYPES = new Set(['Run', 'TrailRun', 'Treadmill', 'VirtualRun']);
 const SWIM_TYPES = new Set(['Swim', 'WaterSport']); 

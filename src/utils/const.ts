@@ -45,6 +45,7 @@ const TRAIL_RUN_TITLE = IS_CHINESE ? '越野跑' : 'Trail Run';
 const SWIM_TITLE = IS_CHINESE ? '游泳' : 'Swim';
 
 const RIDE_TITLE = IS_CHINESE ? '骑行' : 'Ride';
+const NINEBOT_TITLE = IS_CHINESE ? '九号出行' : 'Ninebot';
 const INDOOR_RIDE_TITLE = IS_CHINESE ? '室内骑行' : 'Indoor Ride';
 const VIRTUAL_RIDE_TITLE = IS_CHINESE ? '虚拟骑行' : 'Virtual Ride';
 const HIKE_TITLE = IS_CHINESE ? '徒步' : 'Hike';
@@ -72,6 +73,7 @@ const RUN_TITLES = {
   TREADMILL_TITLE,
 
   RIDE_TITLE,
+  NINEBOT_TITLE,
   INDOOR_RIDE_TITLE,
   VIRTUAL_RIDE_TITLE,
   HIKE_TITLE,
@@ -113,6 +115,7 @@ const gold = 'rgb(0, 199, 255)';
 const purple = 'rgb(154,118,252)';
 const veryPeri = 'rgb(105,106,173)';//长春花蓝
 const red = 'rgb(255,0,0)';//大红色
+const electricBlue = 'rgb(0,199,255)';
 
 // If your map has an offset please change this line
 // issues #92 and #198
@@ -120,6 +123,7 @@ export const NEED_FIX_MAP = false;
 export const MAIN_COLOR = green;
 export const RUN_COLOR = yellow;
 export const RIDE_COLOR = green;
+export const NINEBOT_COLOR = electricBlue;
 export const VIRTUAL_RIDE_COLOR = veryPeri;
 export const HIKE_COLOR = pink;
 export const SWIM_COLOR = gold;

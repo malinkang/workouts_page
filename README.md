@@ -22,7 +22,9 @@ This project is based on [running_page](https://github.com/yihong0618/running_pa
 
 This fork can use the Ninebot Trips Notion database as the source of
 `src/static/activities.json`. It reads each row's `GPX` file property, unwraps
-the `*_gcj02.gpx.json` payload, and renders the trip as a `Ride` route.
+the `*_wgs84.gpx.json` payload, and renders the trip as a `Ninebot` route type.
+`Ninebot` keeps its own color and label in the UI while being counted with ride
+routes in ride-oriented calendar/map statistics.
 
 Required env vars:
 

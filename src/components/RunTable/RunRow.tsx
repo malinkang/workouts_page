@@ -2,7 +2,7 @@ import React from 'react';
 import { formatRunName, colorFromType, formatRunTime, Activity, RunIds, ActivitySplit } from '@/utils/utils';
 import styles from './style.module.scss';
 
-const RIDE_TYPES = new Set(['Ride', 'VirtualRide', 'EBikeRide']);
+const RIDE_TYPES = new Set(['Ride', 'Ninebot', 'VirtualRide', 'EBikeRide']);
 const WALK_TYPES = new Set(['Walk', 'Hike']); 
 const RUN_TYPES = new Set(['Run', 'Trail Run', 'Treadmill', 'VirtualRun']);
 const SWIM_TYPES = new Set(['Swim', 'WaterSport']); 

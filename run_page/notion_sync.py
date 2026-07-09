@@ -40,9 +40,10 @@ TYPE_ALIASES = {
     "ride": "Ride",
     "cycling": "Ride",
     "骑行": "Ride",
-    "ninebot": "Ride",
-    "九号": "Ride",
-    "电动车": "Ride",
+    "ninebot": "Ninebot",
+    "九号": "Ninebot",
+    "九号出行": "Ninebot",
+    "电动车": "Ninebot",
     "walk": "Walk",
     "walking": "Walk",
     "步行": "Walk",
@@ -239,6 +240,9 @@ def map_type_name(name: str) -> Optional[str]:
         return TYPE_ALIASES[compact]
 
     fuzzy_rules = [
+        ("ninebot", "Ninebot"),
+        ("九号", "Ninebot"),
+        ("电动车", "Ninebot"),
         ("虚拟骑", "VirtualRide"),
         ("virtualride", "VirtualRide"),
         ("虚拟跑", "VirtualRun"),
@@ -577,7 +581,7 @@ def page_to_activity(
         pick_property(properties, "type_relation", "relation")
     )
     workout_type = (
-        "Ride" if is_ninebot else resolve_type(type_relation_ids, type_name_by_id, title)
+        "Ninebot" if is_ninebot else resolve_type(type_relation_ids, type_name_by_id, title)
     )
 
     location_country = extract_plain_text(pick_property(properties, "location"))

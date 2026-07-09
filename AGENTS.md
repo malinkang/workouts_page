@@ -23,7 +23,7 @@ The frontend consumes `src/static/activities.json`. Each route-like item should 
 
 - `run_id`: stable integer id.
 - `name`: display name.
-- `type`: normalized route type such as `Ride`, `Run`, `Walk`, `RoadTrip`, `Transit` if added later.
+- `type`: normalized route type such as `Ride`, `Ninebot`, `Run`, `Walk`, `RoadTrip`, `Transit` if added later.
 - `start_date` and `start_date_local`.
 - `distance`: meters.
 - `moving_time`: `H:MM:SS` string.
@@ -34,9 +34,11 @@ The frontend consumes `src/static/activities.json`. Each route-like item should 
 ## Notion / Ninebot Rules
 
 - Use `run_page/notion_sync.py` for Notion ingestion.
-- The Ninebot Trips Notion database stores GPX in the `GPX` files property as `*_gcj02.gpx.json`.
+- The Ninebot Trips Notion database stores GPX in the `GPX` files property as `*_wgs84.gpx.json`.
 - The JSON wrapper contains the original GPX XML under the `gpx` key.
-- Ninebot records should be normalized as `Ride`.
+- Ninebot records should be normalized as the separate `Ninebot` type. The
+  frontend treats `Ninebot` as ride-like for speed display, icons, and
+  ride-oriented calendar/map statistics.
 - Prefer the `Stable Key` property for local start/end times because Notion date properties may be timezone-normalized.
 - Do not print Notion tokens or private route URLs.
 

@@ -6,6 +6,8 @@ interface WorkoutDetailPanelProps {
   run: Activity;
 }
 
+const SPEED_TYPES = new Set(['Ride', 'Ninebot']);
+
 const formatSplitDuration = (durationSeconds?: number | null) => {
   if (!durationSeconds || durationSeconds <= 0) return '--:--';
   const total = Math.round(durationSeconds);
@@ -43,7 +45,7 @@ const WorkoutDetailPanel = ({ run }: WorkoutDetailPanelProps) => {
     return [
       { label: '里程', value: `${(run.distance / 1000).toFixed(2)}`, unit: 'km', accent: 'distance' },
       { label: '用时', value: formatRunTime(run.moving_time), unit: '', accent: 'default' },
-      { label: run.type === 'Ride' ? '均速' : '配速', value: primaryPace, unit: '', accent: 'pace' },
+      { label: SPEED_TYPES.has(run.type) ? '均速' : '配速', value: primaryPace, unit: '', accent: 'pace' },
       { label: '平均心率', value: run.average_heartrate ? `${Math.round(run.average_heartrate)}` : '--', unit: 'bpm', accent: 'heart' },
       { label: '最大心率', value: run.max_heartrate ? `${Math.round(run.max_heartrate)}` : '--', unit: 'bpm', accent: 'heart' },
       { label: '消耗热量', value: run.calories ? `${Math.round(run.calories)}` : '--', unit: 'kcal', accent: 'default' },

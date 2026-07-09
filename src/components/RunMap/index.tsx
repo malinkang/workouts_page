@@ -23,7 +23,7 @@ interface IRunMapProps {
   isSticky?: boolean; 
 }
 
-const RIDE_TYPES = new Set(['Ride', 'VirtualRide', 'EBikeRide']);
+const RIDE_TYPES = new Set(['Ride', 'Ninebot', 'VirtualRide', 'EBikeRide']);
 
 const formatCoordinate = (lat: number, lon: number) => `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
 const LABEL_TEXT_FIELD = ['coalesce', ['get', 'name_zh-Hans'], ['get', 'name_zh-Hant'], ['get', 'name']] as const;
