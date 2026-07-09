@@ -17462,7 +17462,7 @@
   {
     "run_id": 1781096028000,
     "name": "Ninebot 2026-06-10 20:53:48 - 1.6km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-10 12:53:48+00:00",
     "start_date_local": "2026-06-10 20:53:48",
     "distance": 1600.0,
@@ -17482,7 +17482,7 @@
   {
     "run_id": 1781144558000,
     "name": "Ninebot 2026-06-11 10:22:38 - 10.3km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-11 02:22:38+00:00",
     "start_date_local": "2026-06-11 10:22:38",
     "distance": 10300.0,
@@ -17502,7 +17502,7 @@
   {
     "run_id": 1781174688000,
     "name": "Ninebot 2026-06-11 18:44:48 - 10.4km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-11 10:44:48+00:00",
     "start_date_local": "2026-06-11 18:44:48",
     "distance": 10400.0,
@@ -17522,7 +17522,7 @@
   {
     "run_id": 1781178448000,
     "name": "Ninebot 2026-06-11 19:47:28 - 1.2km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-11 11:47:28+00:00",
     "start_date_local": "2026-06-11 19:47:28",
     "distance": 1200.0,
@@ -17542,7 +17542,7 @@
   {
     "run_id": 1781222194000,
     "name": "Ninebot 2026-06-12 07:56:34 - 5.4km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-11 23:56:34+00:00",
     "start_date_local": "2026-06-12 07:56:34",
     "distance": 5400.0,
@@ -17562,7 +17562,7 @@
   {
     "run_id": 1781223263000,
     "name": "Ninebot 2026-06-12 08:14:23 - 0.6km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-12 00:14:23+00:00",
     "start_date_local": "2026-06-12 08:14:23",
     "distance": 600.0,
@@ -17582,7 +17582,7 @@
   {
     "run_id": 1781231390000,
     "name": "Ninebot 2026-06-12 10:29:50 - 9.6km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-12 02:29:50+00:00",
     "start_date_local": "2026-06-12 10:29:50",
     "distance": 9600.0,
@@ -17602,7 +17602,7 @@
   {
     "run_id": 1781260962000,
     "name": "Ninebot 2026-06-12 18:42:42 - 10.4km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-12 10:42:42+00:00",
     "start_date_local": "2026-06-12 18:42:42",
     "distance": 10400.0,
@@ -17622,7 +17622,7 @@
   {
     "run_id": 1781264153000,
     "name": "Ninebot 2026-06-12 19:35:53 - 1.2km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-12 11:35:53+00:00",
     "start_date_local": "2026-06-12 19:35:53",
     "distance": 1200.0,
@@ -17642,7 +17642,7 @@
   {
     "run_id": 1781316826000,
     "name": "Ninebot 2026-06-13 10:13:46 - 1.9km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-13 02:13:46+00:00",
     "start_date_local": "2026-06-13 10:13:46",
     "distance": 1900.0,
@@ -17662,7 +17662,7 @@
   {
     "run_id": 1781331530000,
     "name": "Ninebot 2026-06-13 14:18:50 - 2.8km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-13 06:18:50+00:00",
     "start_date_local": "2026-06-13 14:18:50",
     "distance": 2800.0,
@@ -17682,7 +17682,7 @@
   {
     "run_id": 1781332351000,
     "name": "Ninebot 2026-06-13 14:32:31 - 1km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-13 06:32:31+00:00",
     "start_date_local": "2026-06-13 14:32:31",
     "distance": 1000.0,
@@ -17702,7 +17702,7 @@
   {
     "run_id": 1781337840000,
     "name": "Ninebot 2026-06-13 16:04:00 - 0.9km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-13 08:04:00+00:00",
     "start_date_local": "2026-06-13 16:04:00",
     "distance": 900.0,
@@ -17722,7 +17722,7 @@
   {
     "run_id": 1781340762000,
     "name": "Ninebot 2026-06-13 16:52:42 - 2.2km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-13 08:52:42+00:00",
     "start_date_local": "2026-06-13 16:52:42",
     "distance": 2200.0,
@@ -17742,7 +17742,7 @@
   {
     "run_id": 1781352687000,
     "name": "Ninebot 2026-06-13 20:11:27 - 1.4km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-13 12:11:27+00:00",
     "start_date_local": "2026-06-13 20:11:27",
     "distance": 1400.0,
@@ -17762,7 +17762,7 @@
   {
     "run_id": 1781397931000,
     "name": "Ninebot 2026-06-14 08:45:31 - 4.1km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-14 00:45:31+00:00",
     "start_date_local": "2026-06-14 08:45:31",
     "distance": 4100.0,
@@ -17782,7 +17782,7 @@
   {
     "run_id": 1781404756000,
     "name": "Ninebot 2026-06-14 10:39:16 - 4.8km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-14 02:39:16+00:00",
     "start_date_local": "2026-06-14 10:39:16",
     "distance": 4800.0,
@@ -17802,7 +17802,7 @@
   {
     "run_id": 1781405968000,
     "name": "Ninebot 2026-06-14 10:59:28 - 1.9km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-14 02:59:28+00:00",
     "start_date_local": "2026-06-14 10:59:28",
     "distance": 1900.0,
@@ -17822,7 +17822,7 @@
   {
     "run_id": 1781423523000,
     "name": "Ninebot 2026-06-14 15:52:03 - 7.4km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-14 07:52:03+00:00",
     "start_date_local": "2026-06-14 15:52:03",
     "distance": 7400.0,
@@ -17842,7 +17842,7 @@
   {
     "run_id": 1781429455000,
     "name": "Ninebot 2026-06-14 17:30:55 - 7.7km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-14 09:30:55+00:00",
     "start_date_local": "2026-06-14 17:30:55",
     "distance": 7700.0,
@@ -17862,7 +17862,7 @@
   {
     "run_id": 1781430900000,
     "name": "Ninebot 2026-06-14 17:55:00 - 0.2km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-14 09:55:00+00:00",
     "start_date_local": "2026-06-14 17:55:00",
     "distance": 200.0,
@@ -17882,7 +17882,7 @@
   {
     "run_id": 1781489932000,
     "name": "Ninebot 2026-06-15 10:18:52 - 10.5km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-15 02:18:52+00:00",
     "start_date_local": "2026-06-15 10:18:52",
     "distance": 10500.0,
@@ -17902,7 +17902,7 @@
   {
     "run_id": 1781520119000,
     "name": "Ninebot 2026-06-15 18:41:59 - 10.5km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-15 10:41:59+00:00",
     "start_date_local": "2026-06-15 18:41:59",
     "distance": 10500.0,
@@ -17922,7 +17922,7 @@
   {
     "run_id": 1781521737000,
     "name": "Ninebot 2026-06-15 19:08:57 - 1.2km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-15 11:08:57+00:00",
     "start_date_local": "2026-06-15 19:08:57",
     "distance": 1200.0,
@@ -17942,7 +17942,7 @@
   {
     "run_id": 1781567198000,
     "name": "Ninebot 2026-06-16 07:46:38 - 0.6km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-15 23:46:38+00:00",
     "start_date_local": "2026-06-16 07:46:38",
     "distance": 600.0,
@@ -17962,7 +17962,7 @@
   {
     "run_id": 1781567517000,
     "name": "Ninebot 2026-06-16 07:51:57 - 0.4km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-15 23:51:57+00:00",
     "start_date_local": "2026-06-16 07:51:57",
     "distance": 400.0,
@@ -17982,7 +17982,7 @@
   {
     "run_id": 1781575394000,
     "name": "Ninebot 2026-06-16 10:03:14 - 10.3km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-16 02:03:14+00:00",
     "start_date_local": "2026-06-16 10:03:14",
     "distance": 10300.0,
@@ -18002,7 +18002,7 @@
   {
     "run_id": 1781610629000,
     "name": "Ninebot 2026-06-16 19:50:29 - 10.5km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-16 11:50:29+00:00",
     "start_date_local": "2026-06-16 19:50:29",
     "distance": 10500.0,
@@ -18022,7 +18022,7 @@
   {
     "run_id": 1781655521000,
     "name": "Ninebot 2026-06-17 08:18:41 - 0.7km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-17 00:18:41+00:00",
     "start_date_local": "2026-06-17 08:18:41",
     "distance": 700.0,
@@ -18042,7 +18042,7 @@
   {
     "run_id": 1781669152000,
     "name": "Ninebot 2026-06-17 12:05:52 - 0.4km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-17 04:05:52+00:00",
     "start_date_local": "2026-06-17 12:05:52",
     "distance": 400.0,
@@ -18062,7 +18062,7 @@
   {
     "run_id": 1781675340000,
     "name": "Ninebot 2026-06-17 13:49:00 - 1.6km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-17 05:49:00+00:00",
     "start_date_local": "2026-06-17 13:49:00",
     "distance": 1600.0,
@@ -18082,7 +18082,7 @@
   {
     "run_id": 1781701419000,
     "name": "Ninebot 2026-06-17 21:03:39 - 2km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-17 13:03:39+00:00",
     "start_date_local": "2026-06-17 21:03:39",
     "distance": 2000.0,
@@ -18102,7 +18102,7 @@
   {
     "run_id": 1781739718000,
     "name": "Ninebot 2026-06-18 07:41:58 - 5.1km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-17 23:41:58+00:00",
     "start_date_local": "2026-06-18 07:41:58",
     "distance": 5100.0,
@@ -18122,7 +18122,7 @@
   {
     "run_id": 1781749565000,
     "name": "Ninebot 2026-06-18 10:26:05 - 10.3km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-18 02:26:05+00:00",
     "start_date_local": "2026-06-18 10:26:05",
     "distance": 10300.0,
@@ -18142,7 +18142,7 @@
   {
     "run_id": 1781778992000,
     "name": "Ninebot 2026-06-18 18:36:32 - 10.5km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-18 10:36:32+00:00",
     "start_date_local": "2026-06-18 18:36:32",
     "distance": 10500.0,
@@ -18162,7 +18162,7 @@
   {
     "run_id": 1781780541000,
     "name": "Ninebot 2026-06-18 19:02:21 - 1.1km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-18 11:02:21+00:00",
     "start_date_local": "2026-06-18 19:02:21",
     "distance": 1100.0,
@@ -18182,7 +18182,7 @@
   {
     "run_id": 1781916908000,
     "name": "Ninebot 2026-06-20 08:55:08 - 0.3km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-20 00:55:08+00:00",
     "start_date_local": "2026-06-20 08:55:08",
     "distance": 300.0,
@@ -18202,7 +18202,7 @@
   {
     "run_id": 1781922130000,
     "name": "Ninebot 2026-06-20 10:22:10 - 6.6km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-20 02:22:10+00:00",
     "start_date_local": "2026-06-20 10:22:10",
     "distance": 6600.0,
@@ -18222,7 +18222,7 @@
   {
     "run_id": 1781931977000,
     "name": "Ninebot 2026-06-20 13:06:17 - 7.2km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-20 05:06:17+00:00",
     "start_date_local": "2026-06-20 13:06:17",
     "distance": 7200.0,
@@ -18242,7 +18242,7 @@
   {
     "run_id": 1781944254000,
     "name": "Ninebot 2026-06-20 16:30:54 - 7.4km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-20 08:30:54+00:00",
     "start_date_local": "2026-06-20 16:30:54",
     "distance": 7400.0,
@@ -18262,7 +18262,7 @@
   {
     "run_id": 1781955772000,
     "name": "Ninebot 2026-06-20 19:42:52 - 8km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-20 11:42:52+00:00",
     "start_date_local": "2026-06-20 19:42:52",
     "distance": 8000.0,
@@ -18282,7 +18282,7 @@
   {
     "run_id": 1782002489000,
     "name": "Ninebot 2026-06-21 08:41:29 - 4.2km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-21 00:41:29+00:00",
     "start_date_local": "2026-06-21 08:41:29",
     "distance": 4200.0,
@@ -18302,7 +18302,7 @@
   {
     "run_id": 1782009650000,
     "name": "Ninebot 2026-06-21 10:40:50 - 2.7km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-21 02:40:50+00:00",
     "start_date_local": "2026-06-21 10:40:50",
     "distance": 2700.0,
@@ -18322,7 +18322,7 @@
   {
     "run_id": 1782011491000,
     "name": "Ninebot 2026-06-21 11:11:31 - 3.7km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-21 03:11:31+00:00",
     "start_date_local": "2026-06-21 11:11:31",
     "distance": 3700.0,
@@ -18342,7 +18342,7 @@
   {
     "run_id": 1782012568000,
     "name": "Ninebot 2026-06-21 11:29:28 - 4.4km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-21 03:29:28+00:00",
     "start_date_local": "2026-06-21 11:29:28",
     "distance": 4400.0,
@@ -18362,7 +18362,7 @@
   {
     "run_id": 1782027527000,
     "name": "Ninebot 2026-06-21 15:38:47 - 5.3km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-21 07:38:47+00:00",
     "start_date_local": "2026-06-21 15:38:47",
     "distance": 5300.0,
@@ -18382,7 +18382,7 @@
   {
     "run_id": 1782038703000,
     "name": "Ninebot 2026-06-21 18:45:03 - 7.5km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-21 10:45:03+00:00",
     "start_date_local": "2026-06-21 18:45:03",
     "distance": 7500.0,
@@ -18402,7 +18402,7 @@
   {
     "run_id": 1782045872000,
     "name": "Ninebot 2026-06-21 20:44:32 - 7.9km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-21 12:44:32+00:00",
     "start_date_local": "2026-06-21 20:44:32",
     "distance": 7900.0,
@@ -18422,7 +18422,7 @@
   {
     "run_id": 1782094956000,
     "name": "Ninebot 2026-06-22 10:22:36 - 0.3km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-22 02:22:36+00:00",
     "start_date_local": "2026-06-22 10:22:36",
     "distance": 300.0,
@@ -18442,7 +18442,7 @@
   {
     "run_id": 1782106959000,
     "name": "Ninebot 2026-06-22 13:42:39 - 10.2km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-22 05:42:39+00:00",
     "start_date_local": "2026-06-22 13:42:39",
     "distance": 10200.0,
@@ -18462,7 +18462,7 @@
   {
     "run_id": 1782125098000,
     "name": "Ninebot 2026-06-22 18:44:58 - 10.5km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-22 10:44:58+00:00",
     "start_date_local": "2026-06-22 18:44:58",
     "distance": 10500.0,
@@ -18482,7 +18482,7 @@
   {
     "run_id": 1782126580000,
     "name": "Ninebot 2026-06-22 19:09:40 - 1.2km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-22 11:09:40+00:00",
     "start_date_local": "2026-06-22 19:09:40",
     "distance": 1200.0,
@@ -18502,7 +18502,7 @@
   {
     "run_id": 1782128338000,
     "name": "Ninebot 2026-06-22 19:38:58 - 1.5km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-22 11:38:58+00:00",
     "start_date_local": "2026-06-22 19:38:58",
     "distance": 1500.0,
@@ -18522,7 +18522,7 @@
   {
     "run_id": 1782135727000,
     "name": "Ninebot 2026-06-22 21:42:07 - 1.5km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-22 13:42:07+00:00",
     "start_date_local": "2026-06-22 21:42:07",
     "distance": 1500.0,
@@ -18542,7 +18542,7 @@
   {
     "run_id": 1782136186000,
     "name": "Ninebot 2026-06-22 21:49:46 - 0.4km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-22 13:49:46+00:00",
     "start_date_local": "2026-06-22 21:49:46",
     "distance": 400.0,
@@ -18562,7 +18562,7 @@
   {
     "run_id": 1782171673000,
     "name": "Ninebot 2026-06-23 07:41:13 - 0.9km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-22 23:41:13+00:00",
     "start_date_local": "2026-06-23 07:41:13",
     "distance": 900.0,
@@ -18582,7 +18582,7 @@
   {
     "run_id": 1782172131000,
     "name": "Ninebot 2026-06-23 07:48:51 - 4.4km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-22 23:48:51+00:00",
     "start_date_local": "2026-06-23 07:48:51",
     "distance": 4400.0,
@@ -18602,7 +18602,7 @@
   {
     "run_id": 1782180523000,
     "name": "Ninebot 2026-06-23 10:08:43 - 10.3km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-23 02:08:43+00:00",
     "start_date_local": "2026-06-23 10:08:43",
     "distance": 10300.0,
@@ -18622,7 +18622,7 @@
   {
     "run_id": 1782211478000,
     "name": "Ninebot 2026-06-23 18:44:38 - 10.5km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-23 10:44:38+00:00",
     "start_date_local": "2026-06-23 18:44:38",
     "distance": 10500.0,
@@ -18642,7 +18642,7 @@
   {
     "run_id": 1782213723000,
     "name": "Ninebot 2026-06-23 19:22:03 - 1.7km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-23 11:22:03+00:00",
     "start_date_local": "2026-06-23 19:22:03",
     "distance": 1700.0,
@@ -18662,7 +18662,7 @@
   {
     "run_id": 1782219565000,
     "name": "Ninebot 2026-06-23 20:59:25 - 2.4km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-23 12:59:25+00:00",
     "start_date_local": "2026-06-23 20:59:25",
     "distance": 2400.0,
@@ -18682,7 +18682,7 @@
   {
     "run_id": 1782257995000,
     "name": "Ninebot 2026-06-24 07:39:55 - 5.2km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-23 23:39:55+00:00",
     "start_date_local": "2026-06-24 07:39:55",
     "distance": 5200.0,
@@ -18702,7 +18702,7 @@
   {
     "run_id": 1782262632000,
     "name": "Ninebot 2026-06-24 08:57:12 - 0.3km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-24 00:57:12+00:00",
     "start_date_local": "2026-06-24 08:57:12",
     "distance": 300.0,
@@ -18722,7 +18722,7 @@
   {
     "run_id": 1782266460000,
     "name": "Ninebot 2026-06-24 10:01:00 - 1.3km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-24 02:01:00+00:00",
     "start_date_local": "2026-06-24 10:01:00",
     "distance": 1300.0,
@@ -18742,7 +18742,7 @@
   {
     "run_id": 1782266705000,
     "name": "Ninebot 2026-06-24 10:05:05 - 9.2km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-24 02:05:05+00:00",
     "start_date_local": "2026-06-24 10:05:05",
     "distance": 9200.0,
@@ -18762,7 +18762,7 @@
   {
     "run_id": 1782300907000,
     "name": "Ninebot 2026-06-24 19:35:07 - 10.6km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-24 11:35:07+00:00",
     "start_date_local": "2026-06-24 19:35:07",
     "distance": 10600.0,
@@ -18782,7 +18782,7 @@
   {
     "run_id": 1782344514000,
     "name": "Ninebot 2026-06-25 07:41:54 - 0.9km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-24 23:41:54+00:00",
     "start_date_local": "2026-06-25 07:41:54",
     "distance": 900.0,
@@ -18802,7 +18802,7 @@
   {
     "run_id": 1782345054000,
     "name": "Ninebot 2026-06-25 07:50:54 - 1.6km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-24 23:50:54+00:00",
     "start_date_local": "2026-06-25 07:50:54",
     "distance": 1600.0,
@@ -18822,7 +18822,7 @@
   {
     "run_id": 1782354113000,
     "name": "Ninebot 2026-06-25 10:21:53 - 8.9km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-25 02:21:53+00:00",
     "start_date_local": "2026-06-25 10:21:53",
     "distance": 8900.0,
@@ -18842,7 +18842,7 @@
   {
     "run_id": 1782384000000,
     "name": "Ninebot 2026-06-25 18:40:00 - 10.6km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-25 10:40:00+00:00",
     "start_date_local": "2026-06-25 18:40:00",
     "distance": 10600.0,
@@ -18862,7 +18862,7 @@
   {
     "run_id": 1782388269000,
     "name": "Ninebot 2026-06-25 19:51:09 - 1.1km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-25 11:51:09+00:00",
     "start_date_local": "2026-06-25 19:51:09",
     "distance": 1100.0,
@@ -18882,7 +18882,7 @@
   {
     "run_id": 1782390353000,
     "name": "Ninebot 2026-06-25 20:25:53 - 1.9km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-25 12:25:53+00:00",
     "start_date_local": "2026-06-25 20:25:53",
     "distance": 1900.0,
@@ -18902,7 +18902,7 @@
   {
     "run_id": 1782395177000,
     "name": "Ninebot 2026-06-25 21:46:17 - 1.9km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-25 13:46:17+00:00",
     "start_date_local": "2026-06-25 21:46:17",
     "distance": 1900.0,
@@ -18922,7 +18922,7 @@
   {
     "run_id": 1782433101000,
     "name": "Ninebot 2026-06-26 08:18:21 - 5.4km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-26 00:18:21+00:00",
     "start_date_local": "2026-06-26 08:18:21",
     "distance": 5400.0,
@@ -18942,7 +18942,7 @@
   {
     "run_id": 1782440456000,
     "name": "Ninebot 2026-06-26 10:20:56 - 10.5km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-26 02:20:56+00:00",
     "start_date_local": "2026-06-26 10:20:56",
     "distance": 10500.0,
@@ -18962,7 +18962,7 @@
   {
     "run_id": 1782470856000,
     "name": "Ninebot 2026-06-26 18:47:36 - 10.5km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-26 10:47:36+00:00",
     "start_date_local": "2026-06-26 18:47:36",
     "distance": 10500.0,
@@ -18982,7 +18982,7 @@
   {
     "run_id": 1782474507000,
     "name": "Ninebot 2026-06-26 19:48:27 - 1.2km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-26 11:48:27+00:00",
     "start_date_local": "2026-06-26 19:48:27",
     "distance": 1200.0,
@@ -19002,7 +19002,7 @@
   {
     "run_id": 1782779989000,
     "name": "Ninebot 2026-06-30 08:39:49 - 0.6km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-30 00:39:49+00:00",
     "start_date_local": "2026-06-30 08:39:49",
     "distance": 600.0,
@@ -19022,7 +19022,7 @@
   {
     "run_id": 1782780260000,
     "name": "Ninebot 2026-06-30 08:44:20 - 0.5km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-30 00:44:20+00:00",
     "start_date_local": "2026-06-30 08:44:20",
     "distance": 500.0,
@@ -19042,7 +19042,7 @@
   {
     "run_id": 1782785828000,
     "name": "Ninebot 2026-06-30 10:17:08 - 10.3km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-30 02:17:08+00:00",
     "start_date_local": "2026-06-30 10:17:08",
     "distance": 10300.0,
@@ -19062,7 +19062,7 @@
   {
     "run_id": 1782816243000,
     "name": "Ninebot 2026-06-30 18:44:03 - 0.3km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-30 10:44:03+00:00",
     "start_date_local": "2026-06-30 18:44:03",
     "distance": 300.0,
@@ -19082,7 +19082,7 @@
   {
     "run_id": 1782816320000,
     "name": "Ninebot 2026-06-30 18:45:20 - 10.2km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-30 10:45:20+00:00",
     "start_date_local": "2026-06-30 18:45:20",
     "distance": 10200.0,
@@ -19102,7 +19102,7 @@
   {
     "run_id": 1782821280000,
     "name": "Ninebot 2026-06-30 20:08:00 - 1.2km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-30 12:08:00+00:00",
     "start_date_local": "2026-06-30 20:08:00",
     "distance": 1200.0,
@@ -19122,7 +19122,7 @@
   {
     "run_id": 1782821849000,
     "name": "Ninebot 2026-06-30 20:17:29 - 0.1km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-30 12:17:29+00:00",
     "start_date_local": "2026-06-30 20:17:29",
     "distance": 100.0,
@@ -19142,7 +19142,7 @@
   {
     "run_id": 1782863259000,
     "name": "Ninebot 2026-07-01 07:47:39 - 0.2km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-06-30 23:47:39+00:00",
     "start_date_local": "2026-07-01 07:47:39",
     "distance": 200.0,
@@ -19162,7 +19162,7 @@
   {
     "run_id": 1782869648000,
     "name": "Ninebot 2026-07-01 09:34:08 - 10.5km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-01 01:34:08+00:00",
     "start_date_local": "2026-07-01 09:34:08",
     "distance": 10500.0,
@@ -19182,7 +19182,7 @@
   {
     "run_id": 1782902521000,
     "name": "Ninebot 2026-07-01 18:42:01 - 10.5km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-01 10:42:01+00:00",
     "start_date_local": "2026-07-01 18:42:01",
     "distance": 10500.0,
@@ -19202,7 +19202,7 @@
   {
     "run_id": 1782904257000,
     "name": "Ninebot 2026-07-01 19:10:57 - 0.6km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-01 11:10:57+00:00",
     "start_date_local": "2026-07-01 19:10:57",
     "distance": 600.0,
@@ -19222,7 +19222,7 @@
   {
     "run_id": 1782910181000,
     "name": "Ninebot 2026-07-01 20:49:41 - 0.8km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-01 12:49:41+00:00",
     "start_date_local": "2026-07-01 20:49:41",
     "distance": 800.0,
@@ -19242,7 +19242,7 @@
   {
     "run_id": 1782949668000,
     "name": "Ninebot 2026-07-02 07:47:48 - 0.7km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-01 23:47:48+00:00",
     "start_date_local": "2026-07-02 07:47:48",
     "distance": 700.0,
@@ -19262,7 +19262,7 @@
   {
     "run_id": 1782950040000,
     "name": "Ninebot 2026-07-02 07:54:00 - 1.6km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-01 23:54:00+00:00",
     "start_date_local": "2026-07-02 07:54:00",
     "distance": 1600.0,
@@ -19282,7 +19282,7 @@
   {
     "run_id": 1782958403000,
     "name": "Ninebot 2026-07-02 10:13:23 - 8.9km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-02 02:13:23+00:00",
     "start_date_local": "2026-07-02 10:13:23",
     "distance": 8900.0,
@@ -19302,7 +19302,7 @@
   {
     "run_id": 1782960111000,
     "name": "Ninebot 2026-07-02 10:41:51 - 10.3km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-02 02:41:51+00:00",
     "start_date_local": "2026-07-02 10:41:51",
     "distance": 10300.0,
@@ -19322,7 +19322,7 @@
   {
     "run_id": 1782969537000,
     "name": "Ninebot 2026-07-02 13:18:57 - 2.1km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-02 05:18:57+00:00",
     "start_date_local": "2026-07-02 13:18:57",
     "distance": 2100.0,
@@ -19342,7 +19342,7 @@
   {
     "run_id": 1782970262000,
     "name": "Ninebot 2026-07-02 13:31:02 - 4.7km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-02 05:31:02+00:00",
     "start_date_local": "2026-07-02 13:31:02",
     "distance": 4700.0,
@@ -19362,7 +19362,7 @@
   {
     "run_id": 1782971567000,
     "name": "Ninebot 2026-07-02 13:52:47 - 5.6km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-02 05:52:47+00:00",
     "start_date_local": "2026-07-02 13:52:47",
     "distance": 5600.0,
@@ -19382,7 +19382,7 @@
   {
     "run_id": 1782988786000,
     "name": "Ninebot 2026-07-02 18:39:46 - 10km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-02 10:39:46+00:00",
     "start_date_local": "2026-07-02 18:39:46",
     "distance": 10000.0,
@@ -19402,7 +19402,7 @@
   {
     "run_id": 1782990279000,
     "name": "Ninebot 2026-07-02 19:04:39 - 0.5km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-02 11:04:39+00:00",
     "start_date_local": "2026-07-02 19:04:39",
     "distance": 500.0,
@@ -19422,7 +19422,7 @@
   {
     "run_id": 1782993721000,
     "name": "Ninebot 2026-07-02 20:02:01 - 1.2km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-02 12:02:01+00:00",
     "start_date_local": "2026-07-02 20:02:01",
     "distance": 1200.0,
@@ -19442,7 +19442,7 @@
   {
     "run_id": 1783038150000,
     "name": "Ninebot 2026-07-03 08:22:30 - 0.3km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-03 00:22:30+00:00",
     "start_date_local": "2026-07-03 08:22:30",
     "distance": 300.0,
@@ -19462,7 +19462,7 @@
   {
     "run_id": 1783044819000,
     "name": "Ninebot 2026-07-03 10:13:39 - 2.3km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-03 02:13:39+00:00",
     "start_date_local": "2026-07-03 10:13:39",
     "distance": 2300.0,
@@ -19482,7 +19482,7 @@
   {
     "run_id": 1783045184000,
     "name": "Ninebot 2026-07-03 10:19:44 - 8.9km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-03 02:19:44+00:00",
     "start_date_local": "2026-07-03 10:19:44",
     "distance": 8900.0,
@@ -19502,7 +19502,7 @@
   {
     "run_id": 1783075504000,
     "name": "Ninebot 2026-07-03 18:45:04 - 10.6km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-03 10:45:04+00:00",
     "start_date_local": "2026-07-03 18:45:04",
     "distance": 10600.0,
@@ -19522,7 +19522,7 @@
   {
     "run_id": 1783077092000,
     "name": "Ninebot 2026-07-03 19:11:32 - 1.2km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-03 11:11:32+00:00",
     "start_date_local": "2026-07-03 19:11:32",
     "distance": 1200.0,
@@ -19542,7 +19542,7 @@
   {
     "run_id": 1783150293000,
     "name": "Ninebot 2026-07-04 15:31:33 - 0.2km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-04 07:31:33+00:00",
     "start_date_local": "2026-07-04 15:31:33",
     "distance": 200.0,
@@ -19562,7 +19562,7 @@
   {
     "run_id": 1783212174000,
     "name": "Ninebot 2026-07-05 08:42:54 - 4.5km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-05 00:42:54+00:00",
     "start_date_local": "2026-07-05 08:42:54",
     "distance": 4500.0,
@@ -19582,7 +19582,7 @@
   {
     "run_id": 1783222852000,
     "name": "Ninebot 2026-07-05 11:40:52 - 0.7km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-05 03:40:52+00:00",
     "start_date_local": "2026-07-05 11:40:52",
     "distance": 700.0,
@@ -19602,7 +19602,7 @@
   {
     "run_id": 1783225949000,
     "name": "Ninebot 2026-07-05 12:32:29 - 4.2km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-05 04:32:29+00:00",
     "start_date_local": "2026-07-05 12:32:29",
     "distance": 4200.0,
@@ -19622,7 +19622,7 @@
   {
     "run_id": 1783294843000,
     "name": "Ninebot 2026-07-06 07:40:43 - 0.6km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-05 23:40:43+00:00",
     "start_date_local": "2026-07-06 07:40:43",
     "distance": 600.0,
@@ -19642,7 +19642,7 @@
   {
     "run_id": 1783295198000,
     "name": "Ninebot 2026-07-06 07:46:38 - 0.7km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-05 23:46:38+00:00",
     "start_date_local": "2026-07-06 07:46:38",
     "distance": 700.0,
@@ -19662,7 +19662,7 @@
   {
     "run_id": 1783299647000,
     "name": "Ninebot 2026-07-06 09:00:47 - 10.5km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-06 01:00:47+00:00",
     "start_date_local": "2026-07-06 09:00:47",
     "distance": 10500.0,
@@ -19682,7 +19682,7 @@
   {
     "run_id": 1783334852000,
     "name": "Ninebot 2026-07-06 18:47:32 - 10.6km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-06 10:47:32+00:00",
     "start_date_local": "2026-07-06 18:47:32",
     "distance": 10600.0,
@@ -19702,7 +19702,7 @@
   {
     "run_id": 1783336498000,
     "name": "Ninebot 2026-07-06 19:14:58 - 1.1km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-06 11:14:58+00:00",
     "start_date_local": "2026-07-06 19:14:58",
     "distance": 1100.0,
@@ -19722,7 +19722,7 @@
   {
     "run_id": 1783340398000,
     "name": "Ninebot 2026-07-06 20:19:58 - 1.5km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-06 12:19:58+00:00",
     "start_date_local": "2026-07-06 20:19:58",
     "distance": 1500.0,
@@ -19742,7 +19742,7 @@
   {
     "run_id": 1783343783000,
     "name": "Ninebot 2026-07-06 21:16:23 - 1.6km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-06 13:16:23+00:00",
     "start_date_local": "2026-07-06 21:16:23",
     "distance": 1600.0,
@@ -19762,7 +19762,7 @@
   {
     "run_id": 1783383115000,
     "name": "Ninebot 2026-07-07 08:11:55 - 0.7km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-07 00:11:55+00:00",
     "start_date_local": "2026-07-07 08:11:55",
     "distance": 700.0,
@@ -19782,7 +19782,7 @@
   {
     "run_id": 1783383407000,
     "name": "Ninebot 2026-07-07 08:16:47 - 1.2km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-07 00:16:47+00:00",
     "start_date_local": "2026-07-07 08:16:47",
     "distance": 1200.0,
@@ -19802,7 +19802,7 @@
   {
     "run_id": 1783389230000,
     "name": "Ninebot 2026-07-07 09:53:50 - 9.5km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-07 01:53:50+00:00",
     "start_date_local": "2026-07-07 09:53:50",
     "distance": 9500.0,
@@ -19821,28 +19821,28 @@
   },
   {
     "run_id": 1783421292000,
-    "name": "Ninebot 2026-07-07 18:48:12 - 1.8km",
-    "type": "Ride",
+    "name": "Ninebot 2026-07-07 18:48:12 - 10.5km",
+    "type": "Ninebot",
     "start_date": "2026-07-07 10:48:12+00:00",
     "start_date_local": "2026-07-07 18:48:12",
-    "distance": 1800.0,
-    "moving_time": "0:04:01",
+    "distance": 10500.0,
+    "moving_time": "0:20:19",
     "average_heartrate": null,
     "max_heartrate": null,
     "calories": null,
-    "average_speed": 7.468879668049793,
+    "average_speed": 8.613617719442166,
     "location_country": "",
-    "summary_polyline": "u_lsF_a{dUl@eAsATsAn@wAr@uAr@kAj@i@wA[uB]wB[yB[gBiAk@sAp@uAt@sAr@qAz@uAx@wAn@sAn@sAn@sAl@yAl@oAh@kAj@oAl@qAj@eAd@qAj@mAh@mAh@uAn@{Aj@mA^",
+    "summary_polyline": "ywksF}zydUn@eAsATuAn@uAr@uAr@mAj@i@wAYuB]wB[yB[eBiAk@sAn@uAv@sAr@qAz@uAv@wAn@uAn@qAn@sAl@{An@mAh@mAh@oAl@oAj@gAd@qAj@mAh@mAh@uAl@{Al@kA^_Ai@mAy@}APyAn@uAx@yAt@yAr@aA|@o@jBQbBu@nBwAx@uAj@yAl@{Al@yAl@{An@yAp@{Aj@yAj@wAp@wAp@yAr@mAj@{@aA}@i@yAp@wAr@yAp@uAr@wAp@wAp@wAr@yAr@wAv@yAt@}Al@yAj@mAd@yAl@wAr@wAr@wAr@wAn@yAr@wAr@yAr@yAp@yAr@wAr@uAp@uA|@qAfAoAfAqAfAmA`AoAbAqA`AqAz@sA|@sA~@qA`AkAnAcAvA_ArAy@bAeArAeAtAeAxA{@dBy@bB{@bB{@bB{@`B_A~A}@~A_A|A_AzAaAxA_AxA}@xA}@xA{@|AeAzAiApAq@U_@cBc@sBe@sBc@sBc@sBa@oBa@sBc@sB]cB]eB_@cB_@eB_@mA_@cBe@mB]mBg@kBc@kBc@cBo@wBg@aBg@wAi@aBk@cBo@{Be@oB[wBYuBYyBYuBUsBG}BUwBWuBc@}AQgBGmB[iCN_BH_BQuBSuBSwB]wBQcB_@yB_@uA}@DuAN}Ad@qClAk@ReAf@y@uAc@gBc@iB_@}ASiBQ_BKoB]kB[eBWqB?uB\\_@",
     "source": "notion-ninebot",
-    "notion_page_id": "39686019-c92c-8100-a518-e14f4c1f719f",
-    "notion_last_edited_time": "2026-07-07T10:55:00.000Z",
+    "notion_page_id": "39786019-c92c-8149-86ee-f4a84e6f9abd",
+    "notion_last_edited_time": "2026-07-08T08:39:00.000Z",
     "splits": [],
     "streak": 8
   },
   {
     "run_id": 1783425423000,
     "name": "Ninebot 2026-07-07 19:57:03 - 0.7km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-07 11:57:03+00:00",
     "start_date_local": "2026-07-07 19:57:03",
     "distance": 700.0,
@@ -19862,7 +19862,7 @@
   {
     "run_id": 1783425791000,
     "name": "Ninebot 2026-07-07 20:03:11 - 0.7km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-07 12:03:11+00:00",
     "start_date_local": "2026-07-07 20:03:11",
     "distance": 700.0,
@@ -19882,7 +19882,7 @@
   {
     "run_id": 1783468477000,
     "name": "Ninebot 2026-07-08 07:54:37 - 0.4km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-07 23:54:37+00:00",
     "start_date_local": "2026-07-08 07:54:37",
     "distance": 400.0,
@@ -19902,7 +19902,7 @@
   {
     "run_id": 1783468843000,
     "name": "Ninebot 2026-07-08 08:00:43 - 0.7km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-08 00:00:43+00:00",
     "start_date_local": "2026-07-08 08:00:43",
     "distance": 700.0,
@@ -19922,7 +19922,7 @@
   {
     "run_id": 1783475860000,
     "name": "Ninebot 2026-07-08 09:57:40 - 10.6km",
-    "type": "Ride",
+    "type": "Ninebot",
     "start_date": "2026-07-08 01:57:40+00:00",
     "start_date_local": "2026-07-08 09:57:40",
     "distance": 10600.0,
@@ -19938,5 +19938,85 @@
     "notion_last_edited_time": "2026-07-08T08:39:00.000Z",
     "splits": [],
     "streak": 9
+  },
+  {
+    "run_id": 1783507163000,
+    "name": "Ninebot 2026-07-08 18:39:23 - 10.5km",
+    "type": "Ninebot",
+    "start_date": "2026-07-08 10:39:23+00:00",
+    "start_date_local": "2026-07-08 18:39:23",
+    "distance": 10500.0,
+    "moving_time": "0:24:15",
+    "average_heartrate": null,
+    "max_heartrate": null,
+    "calories": null,
+    "average_speed": 7.216494845360825,
+    "location_country": "",
+    "summary_polyline": "ouksF{{ydUy@m@qAp@mAn@uAh@uAr@iAFW_BYeBYkBUuA[oBiAiAwAn@kAr@mAn@qAx@mAx@_Ab@mAj@wAp@wAl@mAh@qAj@uAj@aAd@wAl@kAh@oAj@qAh@sAj@qAl@kAf@mAl@}AP{@aA{A[aAXsAh@mAr@mAn@qAl@}@h@w@tAWdBa@lB_AnA}@d@oAh@oAh@qAh@sAj@wAj@wAj@uAn@yAl@oAf@_Ab@oAl@oAj@yAj@u@cA}@k@kAj@oAl@_Ad@mAn@oAn@mAl@oAl@_Ab@mAn@qAn@mAl@oAl@aA`@qAf@qAf@qAj@mAl@_A`@oAj@mAl@oAl@oAn@_A`@oAn@oAl@qAn@_Ab@mAh@mAn@kAx@kA~@y@p@gA~@gA~@gA|@gAz@iAz@{@j@kAx@kAv@kAx@eA`Au@z@}@nA_AlA_AlA}@lAq@~@{@nA{@pAq@zAu@xAg@fAu@vAw@vAy@tAw@tAm@dAw@rAy@tAy@pA{@pAo@~@y@nAs@vAy@rAcAlAeAdA_@wAa@aBYoAa@iB_@gB_@gBa@gBYqAa@gB_@eB_@kBa@kB[wAe@kBg@gBm@sBWqA_@yBc@yBc@oBm@yBi@aBo@kBk@}Ak@gBe@cB_@gBa@uBYeBSuA[uBYsBMkBKeBM}AKaBg@qBi@gCSwBU}AXaCBaBMqBQeBYyBW{BUiBSqA]kBa@cB[cBYkBUsAc@wBYoBY_B[YyA`@eBXaBPcBT{AJq@gBWmBUiBt@}@??",
+    "source": "notion-ninebot",
+    "notion_page_id": "39786019-c92c-81cd-b2b4-e9a3780368a6",
+    "notion_last_edited_time": "2026-07-08T16:05:00.000Z",
+    "splits": [],
+    "streak": 9
+  },
+  {
+    "run_id": 1783508766000,
+    "name": "Ninebot 2026-07-08 19:06:06 - 0.6km",
+    "type": "Ninebot",
+    "start_date": "2026-07-08 11:06:06+00:00",
+    "start_date_local": "2026-07-08 19:06:06",
+    "distance": 600.0,
+    "moving_time": "0:03:24",
+    "average_heartrate": null,
+    "max_heartrate": null,
+    "calories": null,
+    "average_speed": 2.9411764705882355,
+    "location_country": "",
+    "summary_polyline": "mtvsFokzdUo@bCXjBTnB`@|AJlBJ`BVlBJbBeAb@j@~APjA??",
+    "source": "notion-ninebot",
+    "notion_page_id": "39786019-c92c-8170-b8c1-d12f0e4b4a6b",
+    "notion_last_edited_time": "2026-07-08T16:05:00.000Z",
+    "splits": [],
+    "streak": 9
+  },
+  {
+    "run_id": 1783514421000,
+    "name": "Ninebot 2026-07-08 20:40:21 - 0.9km",
+    "type": "Ninebot",
+    "start_date": "2026-07-08 12:40:21+00:00",
+    "start_date_local": "2026-07-08 20:40:21",
+    "distance": 900.0,
+    "moving_time": "0:06:08",
+    "average_heartrate": null,
+    "max_heartrate": null,
+    "calories": null,
+    "average_speed": 2.4456521739130435,
+    "location_country": "",
+    "summary_polyline": "yqvsF{iydUe@oBCwAbAE`@zA\\`B`@~Ao@fAmAn@kAl@}@t@gAz@~@MnA`@d@rAdAp@b@xAFT",
+    "source": "notion-ninebot",
+    "notion_page_id": "39786019-c92c-810b-ad3f-ca5f3556c11c",
+    "notion_last_edited_time": "2026-07-08T16:05:00.000Z",
+    "splits": [],
+    "streak": 9
+  },
+  {
+    "run_id": 1783562264000,
+    "name": "Ninebot 2026-07-09 09:57:44 - 10.6km",
+    "type": "Ninebot",
+    "start_date": "2026-07-09 01:57:44+00:00",
+    "start_date_local": "2026-07-09 09:57:44",
+    "distance": 10600.0,
+    "moving_time": "0:23:11",
+    "average_heartrate": null,
+    "max_heartrate": null,
+    "calories": null,
+    "average_speed": 7.620416966211359,
+    "location_country": "",
+    "summary_polyline": "snvsFkvxdUHrA{A~@wA`@uARk@Rz@VpAUzAi@vAq@rAi@jAi@~@eAn@wAj@aA~@iA`AgA~@CXrBZzBPrAFhBTvBXzBNbBVpBJnBDzBPzBLlBNjBNjBTxBXtB\\lBj@nBd@~Af@dBf@`Bn@jBh@|Ah@|A`@nAl@xBZpA`@fB`@jB`@jB\\dBh@pBb@vBd@tB`@rBd@pB`@rB\\pB\\bBd@xAd@pBZzAZ`B\\`Bb@rBZnATjBRdBh@rBhACl@}Ad@iAt@iB|@aBv@cBv@gBj@}Al@_Bn@}Ap@yAj@gAr@yAr@wAr@wAr@uAh@eAr@wAr@wAz@eBt@uAv@sAn@_Az@mA|@iA~@gA`AeAt@s@~@eAbAaAbAaAbAaAt@u@dA{@dA{@hAu@hAs@z@i@jAs@jAq@hAs@jAo@hAs@z@i@jAm@lAm@jAm@lAm@z@c@lAm@lAi@lAi@lAm@~@a@lAm@lAm@jAk@jAq@z@e@jAq@jAo@jAm@lAi@|@e@lAg@jAk@lAi@lAk@|@a@lAm@nAi@pAg@pAo@xAq@lAm@|@a@nAi@lAg@lAi@nAg@lAg@pAk@rAg@|Ao@|@a@nAe@jAm@r@qA\\wB\\kBhAkAvAu@xAw@hAq@rAo@tA]nAr@lA|@vAg@zAq@lAg@pAo@nB_AvAm@lAi@zAm@vAo@vAo@vAm@lAk@pAk@`Ac@pAk@tAm@`BcAvAy@tAy@tAm@x@z@XbBZtB\\vBZrBPlBbCo@vAu@xAs@|@[lAg@AB??",
+    "source": "notion-ninebot",
+    "notion_page_id": "39886019-c92c-8137-84ed-ee9cbc696947",
+    "notion_last_edited_time": "2026-07-09T02:33:00.000Z",
+    "splits": [],
+    "streak": 10
   }
 ]
