@@ -200,6 +200,36 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
 
   useEffect(() => {
     const map = mapRef.current?.getMap();
+    if (!map || !mapLoaded || typeof document === 'undefined') return;
+
+    const mapContainer = map.getContainer();
+    const resizeMap = () => {
+      window.requestAnimationFrame(() => {
+        map.resize();
+        window.setTimeout(() => map.resize(), 120);
+      });
+    };
+
+    const syncFullscreenState = () => {
+      const fullscreenElement =
+        document.fullscreenElement ||
+        (document as Document & { webkitFullscreenElement?: Element }).webkitFullscreenElement;
+      mapContainer.classList.toggle('mapboxgl-fullscreen', fullscreenElement === mapContainer);
+      resizeMap();
+    };
+
+    document.addEventListener('fullscreenchange', syncFullscreenState);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenState);
+    syncFullscreenState();
+
+    return () => {
+      document.removeEventListener('fullscreenchange', syncFullscreenState);
+      document.removeEventListener('webkitfullscreenchange', syncFullscreenState);
+    };
+  }, [mapLoaded]);
+
+  useEffect(() => {
+    const map = mapRef.current?.getMap();
     if (!map || !mapLoaded) return;
 
     map.stop();

@@ -13,8 +13,28 @@
   top: 0;
 }
 .mapboxgl-map:-webkit-full-screen {
-  width: 100%;
-  height: 100%;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  border-radius: 0 !important;
+}
+.mapboxgl-map:fullscreen,
+.mapboxgl-map.mapboxgl-fullscreen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  border-radius: 0 !important;
+}
+.mapboxgl-map:-webkit-full-screen .mapboxgl-canvas-container,
+.mapboxgl-map:fullscreen .mapboxgl-canvas-container,
+.mapboxgl-map.mapboxgl-fullscreen .mapboxgl-canvas-container,
+.mapboxgl-map:-webkit-full-screen .mapboxgl-canvas,
+.mapboxgl-map:fullscreen .mapboxgl-canvas,
+.mapboxgl-map.mapboxgl-fullscreen .mapboxgl-canvas {
+  width: 100% !important;
+  height: 100% !important;
 }
 .mapboxgl-canary {
   background-color: salmon;

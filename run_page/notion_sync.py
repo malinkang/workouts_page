@@ -442,7 +442,7 @@ def load_route_map(pages: List[dict], workers: int = 16) -> Dict[str, str]:
         for page in pages
     ]
     candidates = [(page_id, urls) for page_id, urls in candidates if page_id and urls]
-    limit = int(os.getenv("NOTION_ROUTE_FETCH_LIMIT", "400") or "400")
+    limit = int(os.getenv("NOTION_ROUTE_FETCH_LIMIT", "3000") or "3000")
     candidates = candidates[: max(limit, 0)]
     if not candidates:
         return {}
@@ -626,7 +626,7 @@ def page_to_activity(
     else:
         distance = float(extract_number(pick_property(properties, "distance")) or 0)
         duration_seconds = int(extract_number(pick_property(properties, "duration")) or 0)
-    if distance <= 0 and duration_seconds <= 0:
+    if distance <= 0 and duration_seconds <= 0 and not is_keep:
         return None
 
     end_value = extract_date(pick_property(properties, "end", "date"), local_tz)
@@ -761,7 +761,7 @@ def write_activities_json(activities: List[dict]) -> int:
     activities = [
         activity
         for activity in activities
-        if activity["type"] in MAPPING_TYPE and activity["distance"] > 0
+        if activity["type"] in MAPPING_TYPE
     ]
     activities.sort(key=lambda item: item["start_date_local"])
     apply_streaks(activities)
@@ -915,6 +915,11 @@ def sync_from_notion(full_sync: bool = False) -> int:
             sleep_pages = fetch_pages_edited_after(client, sleep_database_id, sleep_sync_anchor)
 
         route_map = load_route_map(workout_pages + keep_pages)
+        workout_source = (
+            "notion-keep"
+            if workout_database_id and workout_database_id == keep_database_id
+            else "notion"
+        )
 
         for page in workout_pages:
             run_id = extract_run_id_from_page(page)
@@ -926,6 +931,7 @@ def sync_from_notion(full_sync: bool = False) -> int:
                 type_name_by_id,
                 local_tz,
                 splits=split_map.get(page.get("id"), []),
+                source=workout_source,
                 route_map=route_map,
             )
             if activity is None:
