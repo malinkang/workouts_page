@@ -412,7 +412,6 @@ const RunHeatmap = ({ runs, year, locateActivity, setRunIndex }: RunHeatmapProps
     <div className={styles.card}>
       <div className={styles.header}>
         <div>
-          <div className={styles.title}>年度热力图</div>
           <div className={styles.subtitle}>{year} 年每日运动分布</div>
         </div>
         <div className={styles.summary}>

@@ -42,6 +42,11 @@ const Index = () => {
   const [runs, setActivity] = useState(
     filterAndSortRuns(activities, year, filterYearRuns, sortDateFunc)
   );
+  // Keep the annual heatmap dataset separate from the currently selected period.
+  const [heatmapYear, setHeatmapYear] = useState(thisYear);
+  const [heatmapRuns, setHeatmapRuns] = useState(() =>
+    filterAndSortRuns(activities, thisYear, filterYearRuns, sortDateFunc)
+  );
   
   const [title, setTitle] = useState('');
   const [geoData, setGeoData] = useState(geoJsonForRuns(runs));
@@ -88,6 +93,10 @@ const Index = () => {
 
   const changeYear = (y: string) => {
     setYear(y);
+    if (y !== heatmapYear) {
+      setHeatmapYear(y);
+      setHeatmapRuns(filterAndSortRuns(activities, y, filterYearRuns, sortDateFunc));
+    }
     changeByItem(y, 'Year', filterYearRuns);
   };
 
@@ -126,9 +135,20 @@ const Index = () => {
     setStatsRuns(selectedActivities);
     setStatsTitle(selection.title || '');
     setRunIndex(-1);
-    const selectedYear = selectedActivities[0]?.start_date_local?.slice(0, 4);
-    if (selectedYear) setYear(selectedYear);
-  }, []);
+
+    // A period selection carries its owning year. Keep the annual heatmap
+    // stable for periods within that year and replace it only across years.
+    const selectedYear = selectedActivities.length > 0 && selection.bucket !== 'total'
+      ? selection.bucket.slice(0, 4)
+      : undefined;
+    if (selectedYear) {
+      setYear(selectedYear);
+      if (selectedYear !== heatmapYear) {
+        setHeatmapYear(selectedYear);
+        setHeatmapRuns(filterAndSortRuns(activities, selectedYear, filterYearRuns, sortDateFunc));
+      }
+    }
+  }, [activities, heatmapYear]);
 
   useEffect(() => {
     if (statsRuns === null) return;
@@ -185,10 +205,10 @@ const Index = () => {
         </div>
         <div className="annual-heatmap-board">
           <RunHeatmap
-            runs={runs}
+            runs={heatmapRuns}
             locateActivity={locateActivity}
             setRunIndex={setRunIndex}
-            year={year}
+            year={heatmapYear}
           />
         </div>
         </>
