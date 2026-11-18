@@ -32,13 +32,14 @@
 
 .periodTabs {
   margin: 0 0 8px;
-  width: max-content;
-  max-width: 100%;
-  padding: 0;
-  border-radius: 0;
-  background: transparent;
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  background: var(--surface-strong);
   justify-content: flex-start;
   gap: 4px;
+  box-sizing: border-box;
 }
 
 .periodTab {
