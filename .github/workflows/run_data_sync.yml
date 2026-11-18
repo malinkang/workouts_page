@@ -1,6 +1,9 @@
 name: Run Data Sync
 
 on:
+  schedule:
+    # GitHub cron uses UTC; 16:00 UTC is 00:00 the next day in Asia/Shanghai.
+    - cron: '0 16 * * *'
   workflow_dispatch:
     inputs:
       full_sync:
@@ -18,6 +21,10 @@ on:
 
 permissions:
   contents: write
+
+concurrency:
+  group: notion-workouts-sync
+  cancel-in-progress: false
 
 env:
   GITHUB_NAME: malinkang

@@ -9,6 +9,7 @@ import {
   MAP_HEIGHT,
 } from '@/utils/const';
 import { Activity, Coordinate, geoJsonForMap, colorFromType, formatRunTime, formatSpeedOrPace } from '@/utils/utils';
+import { RouteAnimator } from '@/utils/routeAnimation';
 import RunMarker from './RunMarker';
 import styles from './style.module.scss';
 import { FeatureCollection } from 'geojson';
@@ -70,6 +71,9 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
   const [currentZoom, setCurrentZoom] = useState(3);
   const [themeMode, setThemeMode] = useState<'light' | 'dark'>(getThemeMode);
   const [labelLayerId, setLabelLayerId] = useState<string | undefined>(undefined);
+  const [animatedPoints, setAnimatedPoints] = useState<Coordinate[]>([]);
+  const routeAnimatorRef = useRef<RouteAnimator | null>(null);
+  const lastRouteKeyRef = useRef<string | null>(null);
 
   const isSingleRun = geoData.features.length === 1 && geoData.features[0].geometry.coordinates.length;
   const isBigMap = currentZoom <= 3;
@@ -142,6 +146,42 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
       runColor: colorFromType(type) || runProps?.color || '#32D74B',
     };
   }, [geoData, isSingleRun, selectedRun]);
+
+  const startRouteAnimation = useCallback(() => {
+    if (!isSingleRun) return;
+
+    const points = geoData.features[0].geometry.coordinates as Coordinate[];
+    if (points.length < 2) return;
+
+    routeAnimatorRef.current?.stop();
+    routeAnimatorRef.current = new RouteAnimator(
+      points,
+      setAnimatedPoints,
+      () => {
+        routeAnimatorRef.current = null;
+      }
+    );
+    routeAnimatorRef.current.start();
+  }, [geoData, isSingleRun]);
+
+  useEffect(() => {
+    if (!isSingleRun) {
+      routeAnimatorRef.current?.stop();
+      routeAnimatorRef.current = null;
+      lastRouteKeyRef.current = null;
+      setAnimatedPoints([]);
+      return;
+    }
+
+    const points = geoData.features[0].geometry.coordinates as Coordinate[];
+    const key = `${points.length}-${points[0]?.join(',')}-${points[points.length - 1]?.join(',')}`;
+    if (key && key !== lastRouteKeyRef.current) {
+      lastRouteKeyRef.current = key;
+      startRouteAnimation();
+    }
+
+    return () => routeAnimatorRef.current?.stop();
+  }, [geoData, isSingleRun, startRouteAnimation]);
 
   useEffect(() => {
     const map = mapRef.current?.getMap();
@@ -273,6 +313,36 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
           layout={{ 'line-join': 'round', 'line-cap': 'round' }}
         />
       </Source>
+      {isSingleRun && animatedPoints.length > 0 && (
+        <Source
+          id="animated-run"
+          type="geojson"
+          data={{
+            type: 'FeatureCollection',
+            features: [
+              {
+                type: 'Feature',
+                properties: { color: runStats?.runColor || '#32D74B' },
+                geometry: {
+                  type: 'LineString',
+                  coordinates: animatedPoints,
+                },
+              },
+            ],
+          }}
+        >
+          <Layer
+            id="animated-run"
+            type="line"
+            paint={{
+              'line-color': ['get', 'color'],
+              'line-width': 3,
+              'line-opacity': 1,
+            }}
+            layout={{ 'line-join': 'round', 'line-cap': 'round' }}
+          />
+        </Source>
+      )}
       {hasMapboxToken && (
         <Layer
           id="city-label-overlay"

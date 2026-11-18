@@ -463,8 +463,8 @@ const filterAndSortRuns = (
   item: string,
   filterFunc: (_run: Activity, _bvalue: string) => boolean,
   sortFunc: (_a: Activity, _b: Activity) => number,
-  item2: string | null,
-  filterFunc2: ((_run: Activity, _bvalue: string) => boolean) | null,
+  item2: string | null = null,
+  filterFunc2: ((_run: Activity, _bvalue: string) => boolean) | null = null,
 ) => {
   let s = activities;
   if (item !== 'Total') {
@@ -473,7 +473,8 @@ const filterAndSortRuns = (
   if(filterFunc2 != null && item2 != null){
     s = s.filter((run) => filterFunc2(run, item2));
   }
-  return s.sort(sortFunc);
+  // Keep the imported activity list immutable; multiple views share this array.
+  return [...s].sort(sortFunc);
 };
 
 const sortDateFunc = (a: Activity, b: Activity) => {
