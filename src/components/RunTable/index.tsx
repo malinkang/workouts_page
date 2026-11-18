@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { Activity, RunIds } from '@/utils/utils';
 import RunRow from './RunRow';
 import WorkoutDetailPanel from '@/components/WorkoutDetailPanel';
@@ -23,23 +23,6 @@ const RunTable = ({
   runIndex,
   setRunIndex,
 }: IRunTableProperties) => {
-  const [filterMonth, setFilterMonth] = useState('All');
-
-  const availableMonths = useMemo(() => {
-    if (!runs || runs.length === 0) return [];
-    const months = new Set<string>();
-    runs.forEach(r => {
-      if (r.start_date_local) months.add(r.start_date_local.slice(5, 7));
-    });
-    return Array.from(months).sort().reverse();
-  }, [runs]);
-
-  useEffect(() => {
-    if (filterMonth !== 'All' && !availableMonths.includes(filterMonth)) {
-      setFilterMonth('All');
-    }
-  }, [availableMonths, filterMonth]);
-
   const { rideYearlyMaxId, rideMonthlyMaxIds, rwYearlyMaxId, rwMonthlyMaxIds } = useMemo(() => {
     if (!runs || runs.length === 0) {
       return { 
@@ -82,13 +65,9 @@ const RunTable = ({
 
   const filteredRuns = useMemo(() => {
     if (!runs) return [];
-    let result = runs;
-    if (filterMonth !== 'All') {
-      result = runs.filter(r => r.start_date_local && r.start_date_local.slice(5, 7) === filterMonth);
-    }
     // 🌟 终极性能优化：利用字符串 localeCompare 替代 new Date() 解析，性能提升数倍
-    return [...result].sort((a, b) => b.start_date_local.localeCompare(a.start_date_local));
-  }, [runs, filterMonth]);
+    return [...runs].sort((a, b) => b.start_date_local.localeCompare(a.start_date_local));
+  }, [runs]);
 
   const groupedRuns = useMemo(() => {
     const groups: Array<Array<{ run: Activity; elementIndex: number }>> = [];
@@ -107,30 +86,6 @@ const RunTable = ({
 
   return (
     <div className={styles.tableContainer}>
-      <div className={styles.controlsArea}>
-        {availableMonths.length > 0 && (
-          <div className={styles.filterBar}>
-            <div 
-              className={`${styles.filterPill} ${filterMonth === 'All' ? styles.activePill : ''}`}
-              onClick={() => { setFilterMonth('All'); setRunIndex(-1); }}
-            >
-              全部
-            </div>
-            {availableMonths.map(m => (
-              <div 
-                key={m} 
-                className={`${styles.filterPill} ${filterMonth === m ? styles.activePill : ''}`}
-                onClick={() => { setFilterMonth(m); setRunIndex(-1); }}
-              >
-                {m}
-              </div>
-            ))}
-            
-            <div className={styles.monthLabel}>月</div>
-          </div>
-        )}
-      </div>
-
       <div className={styles.cardList}>
         {groupedRuns.map((group, groupIndex) => {
           const expandedRun = group.find(item => item.elementIndex === runIndex)?.run;
