@@ -18,6 +18,7 @@ FOLDER_DICT = {
 }
 SQL_FILE = os.path.join(parent, "run_page", "data.db")
 JSON_FILE = os.path.join(parent, "src", "static", "activities.json")
+SLEEP_JSON_FILE = os.path.join(parent, "src", "static", "sleep_records.json")
 SYNCED_FILE = os.path.join(parent, "imported.json")
 SYNCED_ACTIVITY_FILE = os.path.join(parent, "synced_activity.json")
 
@@ -98,6 +99,10 @@ MAPPING_TYPE = [
     "Walk",
     "Treadmill",
     "VirtualRun",
+    "Other",
+    "Elliptical",
+    "Stairs",
+    "Workout",
 ]
 
 STRAVA_GARMIN_TYPE_DICT = {

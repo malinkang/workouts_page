@@ -315,46 +315,6 @@ h5 .header-link {
 }
 
 // ------------------------------------
-// 🌟 2. 全局年份切换器 🌟
-// ------------------------------------
-.year-switcher {
-  display: inline-flex;
-  align-items: center;
-  gap: 0;
-  margin: 0;
-  padding: 0;
-}
-
-.year-select {
-  appearance: none;
-  -webkit-appearance: none;
-  border: 0;
-  border-radius: 999px;
-  padding: 9px 38px 9px 14px;
-  min-width: 116px;
-  background:
-    linear-gradient(45deg, transparent 50%, var(--text-secondary) 50%) calc(100% - 18px) calc(50% - 2px) / 6px 6px no-repeat,
-    linear-gradient(135deg, var(--text-secondary) 50%, transparent 50%) calc(100% - 12px) calc(50% - 2px) / 6px 6px no-repeat,
-    var(--surface);
-  color: var(--text-primary);
-  font-size: 0.92rem;
-  cursor: pointer;
-  outline: none;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.year-select:hover {
-  background:
-    linear-gradient(45deg, transparent 50%, var(--text-primary) 50%) calc(100% - 18px) calc(50% - 2px) / 6px 6px no-repeat,
-    linear-gradient(135deg, var(--text-primary) 50%, transparent 50%) calc(100% - 12px) calc(50% - 2px) / 6px 6px no-repeat,
-    var(--surface-hover);
-}
-
-.year-select:focus-visible {
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 40%, transparent);
-}
-
-// ------------------------------------
 // 🌟 左(地图) + 右(统计) 🌟
 // ------------------------------------
 .bento-hero {
@@ -603,16 +563,6 @@ h5 .header-link {
   .pagetitle { 
     margin-top: 10px; 
     margin-bottom: 10px;
-  }
-  
-  .year-switcher {
-    padding: 0;
-  }
-
-  .year-select {
-    min-width: 108px;
-    padding: 8px 34px 8px 12px;
-    font-size: 0.88rem;
   }
   
   .bento-hero {

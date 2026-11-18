@@ -58,6 +58,7 @@ export interface Activity {
   calories?: number;
   average_speed: number;
   streak: number;
+  source?: string;
   notion_page_id?: string;
   notion_last_edited_time?: string;
   splits?: ActivitySplit[];

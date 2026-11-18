@@ -17,6 +17,7 @@ on:
     paths:
       - .github/workflows/run_data_sync.yml
       - run_page/notion_sync.py
+      - run_page/config.py
       - requirements.txt
 
 permissions:
@@ -68,13 +69,13 @@ jobs:
 
       - name: Commit synced activities
         run: |
-          if git diff --quiet -- src/static/activities.json; then
-            echo "activities.json unchanged"
+          if git diff --quiet -- src/static/activities.json src/static/sleep_records.json; then
+            echo "workout and sleep data unchanged"
             exit 0
           fi
 
           git config --local user.email "${{ env.GITHUB_EMAIL }}"
           git config --local user.name "${{ env.GITHUB_NAME }}"
-          git add src/static/activities.json
-          git commit -m "Sync workouts data from Notion"
+          git add src/static/activities.json src/static/sleep_records.json
+          git commit -m "Sync workouts and sleep data from Notion"
           git push origin HEAD:master

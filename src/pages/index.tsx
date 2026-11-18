@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState, useRef, useMemo } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import Layout from '@/components/Layout';
+import KeepStats, { SleepRecord } from '@/components/KeepStats';
 import RunMap from '@/components/RunMap';
 import RunTable from '@/components/RunTable';
 import useActivities from '@/hooks/useActivities';
@@ -17,13 +18,17 @@ import {
   titleForShow,
   RunIds,
 } from '@/utils/utils';
+import sleepRecords from '@/static/sleep_records.json';
+
+type DashboardMode = 'workout' | 'sleep';
 
 const Index = () => {
-  const { siteTitle } = useSiteMetadata();
+  useSiteMetadata();
   const { activities, thisYear } = useActivities();
   const [year, setYear] = useState(thisYear);
   const [runIndex, setRunIndex] = useState(-1);
-  
+  const [dashboardMode, setDashboardMode] = useState<DashboardMode>('workout');
+  const [statsRuns, setStatsRuns] = useState<Activity[] | null>(null);
   const [runs, setActivity] = useState(
     filterAndSortRuns(activities, year, filterYearRuns, sortDateFunc)
   );
@@ -61,6 +66,7 @@ const Index = () => {
     func: (_run: Activity, _value: string) => boolean
   ) => {
     if (!isSticky) scrollToMap();
+    setStatsRuns(null);
     if (name != 'Year') {
       setYear(thisYear);
     }
@@ -104,32 +110,33 @@ const Index = () => {
   useEffect(() => {
     setGeoData(geoJsonForRuns(runs));
   }, [runs]);
-  
-  const yearArray = useMemo(() => {
-    const years = Array.from(new Set(activities.map((a: Activity) => a.start_date_local.slice(0, 4))));
-    years.sort((a, b) => b.localeCompare(a));
-    return years;
-  }, [activities]);
-  
+
+  const handleStatsSelection = useCallback((selectedActivities: Activity[]) => {
+    setStatsRuns(selectedActivities);
+    setRunIndex(-1);
+    const selectedYear = selectedActivities[0]?.start_date_local?.slice(0, 4);
+    if (selectedYear) setYear(selectedYear);
+  }, []);
+
+  useEffect(() => {
+    if (statsRuns === null) return;
+    const nextRuns = [...statsRuns].sort(sortDateFunc);
+    setActivity(nextRuns);
+    setGeoData(geoJsonForRuns(nextRuns));
+    setTitle(nextRuns.length ? titleForShow(nextRuns[nextRuns.length - 1]) : '');
+  }, [statsRuns]);
+
   return (
-    <Layout
-      toolbarContent={
-        <div className="year-switcher">
-          <select
-            id="year-select"
-            className="year-select"
-            value={year}
-            onChange={(e) => changeYear(e.target.value)}
-          >
-            {yearArray.map((y) => (
-              <option key={y} value={y}>
-                {y} 年
-              </option>
-            ))}
-          </select>
-        </div>
-      }
-    >
+    <Layout>
+      <KeepStats
+        activities={activities}
+        sleepRecords={sleepRecords as SleepRecord[]}
+        mode={dashboardMode}
+        onModeChange={setDashboardMode}
+        onActivitySelectionChange={handleStatsSelection}
+      />
+      {dashboardMode === 'workout' && (
+        <>
         <div className="bento-hero" ref={bentoRef}>
           <div className="bento-map-placeholder">
             <div className={`page-map bento-card-map ${isSticky ? 'sticky-map' : ''}`}>
@@ -171,6 +178,8 @@ const Index = () => {
             setRunIndex={setRunIndex}
           />
           </div>
+        </>
+      )}
       <Analytics />
     </Layout>
   );

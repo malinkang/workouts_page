@@ -1,6 +1,8 @@
 import argparse
+import hashlib
 import json
 import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Iterable, List, Optional, Tuple
 from zoneinfo import ZoneInfo
@@ -8,10 +10,13 @@ from zoneinfo import ZoneInfo
 import gpxpy
 import httpx
 import polyline
-from config import BASE_TIMEZONE, JSON_FILE, MAPPING_TYPE
+from config import BASE_TIMEZONE, JSON_FILE, MAPPING_TYPE, SLEEP_JSON_FILE
 
 NOTION_API_BASE = "https://api.notion.com/v1"
 NOTION_API_VERSION = os.getenv("NOTION_API_VERSION", "2022-06-28")
+KEEP_DATABASE_ID = "99186019-c92c-8254-8ca5-01ea9089d2a6"
+KEEP_TYPE_DATABASE_ID = "c2086019-c92c-8310-8c70-0191c6e25894"
+KEEP_SLEEP_DATABASE_ID = "4eb86019-c92c-82bc-92ff-81ae69131441"
 SYNC_OVERLAP_SECONDS = int(os.getenv("NOTION_SYNC_OVERLAP_SECONDS", "300") or "300")
 
 PROPERTY_CANDIDATES = {
@@ -26,6 +31,7 @@ PROPERTY_CANDIDATES = {
     "avg_pace": ["平均配速", "Average Pace", "average_pace"],
     "start": ["开始时间", "Start", "start_date_local", "Start Time"],
     "end": ["结束时间", "End", "end", "End Time"],
+    "sleep_date": ["日期", "Date", "date"],
     "type_relation": ["运动类型", "类型", "Type", "type"],
     "gpx": ["gpx", "GPX", "轨迹", "路线"],
     "location": ["位置", "地点", "Location", "location_country", "region"],
@@ -71,6 +77,13 @@ TYPE_ALIASES = {
     "皮划艇": "Kayaking",
     "roadtrip": "RoadTrip",
     "自驾": "RoadTrip",
+    "其他": "Other",
+    "椭圆机": "Elliptical",
+    "爬楼梯": "Stairs",
+    "自由训练": "Workout",
+    "hiit": "Workout",
+    "热身": "Workout",
+    "拉伸": "Workout",
 }
 
 
@@ -196,6 +209,12 @@ def extract_file_urls(prop: Optional[dict]) -> List[str]:
     return urls
 
 
+def extract_relation_names(prop: Optional[dict]) -> List[str]:
+    if not prop or prop.get("type") != "relation":
+        return []
+    return [item.get("id", "") for item in prop.get("relation", []) if item.get("id")]
+
+
 
 def pick_property(
     properties: Dict[str, dict], key: str, prop_type: Optional[str] = None
@@ -264,6 +283,13 @@ def map_type_name(name: str) -> Optional[str]:
         ("walk", "Walk"),
         ("跑", "Run"),
         ("run", "Run"),
+        ("椭圆", "Elliptical"),
+        ("楼梯", "Stairs"),
+        ("自由训练", "Workout"),
+        ("hiit", "Workout"),
+        ("热身", "Workout"),
+        ("拉伸", "Workout"),
+        ("其他", "Other"),
     ]
     for needle, mapped in fuzzy_rules:
         if needle in lowered or needle in compact:
@@ -381,7 +407,9 @@ def load_route_from_gpx(
 ) -> Tuple[str, Optional[Tuple[float, float]]]:
     for url in urls:
         try:
-            response = client.get(url)
+            # Notion file URLs are optional enrichments; do not let one expired
+            # signed URL block the whole daily sync.
+            response = client.get(url, timeout=4.0)
             response.raise_for_status()
             gpx = gpxpy.parse(unwrap_gpx_text(response.text))
         except Exception:
@@ -404,6 +432,37 @@ def load_route_from_gpx(
         return polyline.encode(coords), coords[0]
 
     return "", None
+
+
+def load_route_map(pages: List[dict], workers: int = 16) -> Dict[str, str]:
+    if os.getenv("NOTION_FETCH_ROUTES", "true").lower() in {"0", "false", "no"}:
+        return {}
+    candidates = [
+        (page.get("id"), extract_file_urls(pick_property(page.get("properties", {}), "gpx", "files")))
+        for page in pages
+    ]
+    candidates = [(page_id, urls) for page_id, urls in candidates if page_id and urls]
+    limit = int(os.getenv("NOTION_ROUTE_FETCH_LIMIT", "400") or "400")
+    candidates = candidates[: max(limit, 0)]
+    if not candidates:
+        return {}
+
+    def load_one(page_id: str, urls: List[str]) -> Tuple[str, str]:
+        try:
+            with httpx.Client(timeout=6.0) as route_client:
+                summary_polyline, _ = load_route_from_gpx(route_client, urls)
+            return page_id, summary_polyline
+        except Exception:
+            return page_id, ""
+
+    route_map: Dict[str, str] = {}
+    with ThreadPoolExecutor(max_workers=min(workers, len(candidates))) as executor:
+        futures = [executor.submit(load_one, page_id, urls) for page_id, urls in candidates]
+        for future in as_completed(futures):
+            page_id, summary_polyline = future.result()
+            if summary_polyline:
+                route_map[page_id] = summary_polyline
+    return route_map
 
 
 
@@ -477,6 +536,13 @@ def extract_run_id_from_page(page: dict) -> Optional[int]:
     return parse_run_id(extract_plain_text(fallback_url_prop))
 
 
+def keep_run_id(page: dict, start_value: Optional[datetime]) -> int:
+    """Create a JS-safe, stable id for Keep rows whose native ids exceed 2^53."""
+    timestamp = int((start_value or datetime.now(timezone.utc)).timestamp() * 1000)
+    suffix = int(hashlib.sha1(page.get("id", "").encode()).hexdigest()[:3], 16) % 1000
+    return timestamp * 1000 + suffix
+
+
 
 def split_page_to_record(page: dict) -> Optional[Tuple[List[str], dict]]:
     if page.get("archived") or page.get("in_trash"):
@@ -532,14 +598,18 @@ def page_to_activity(
     type_name_by_id: Dict[str, str],
     local_tz: ZoneInfo,
     splits: Optional[List[dict]] = None,
+    source: str = "notion",
+    route_map: Optional[Dict[str, str]] = None,
 ) -> Optional[dict]:
-    run_id = extract_run_id_from_page(page)
-    if run_id is None:
-        return None
     if page.get("archived") or page.get("in_trash"):
         return None
 
     properties = page.get("properties", {})
+    start_value = extract_date(pick_property(properties, "start", "date"), local_tz)
+    is_keep = source == "notion-keep"
+    run_id = keep_run_id(page, start_value) if is_keep else extract_run_id_from_page(page)
+    if run_id is None:
+        return None
 
     title_prop = pick_property(properties, "title", "title")
     title = extract_plain_text(title_prop)
@@ -559,7 +629,6 @@ def page_to_activity(
     if distance <= 0 and duration_seconds <= 0:
         return None
 
-    start_value = extract_date(pick_property(properties, "start", "date"), local_tz)
     end_value = extract_date(pick_property(properties, "end", "date"), local_tz)
     if is_ninebot:
         stable_start, stable_end = parse_stable_key_range(properties, local_tz)
@@ -580,18 +649,20 @@ def page_to_activity(
     type_relation_ids = extract_relation_ids(
         pick_property(properties, "type_relation", "relation")
     )
-    workout_type = (
-        "Ninebot" if is_ninebot else resolve_type(type_relation_ids, type_name_by_id, title)
-    )
+    workout_type = "Ninebot" if is_ninebot else resolve_type(type_relation_ids, type_name_by_id, title)
+    if is_keep:
+        workout_type = map_type_name(title) or workout_type
 
     location_country = extract_plain_text(pick_property(properties, "location"))
     average_heartrate = extract_number(pick_property(properties, "avg_hr"))
     max_heartrate = extract_number(pick_property(properties, "max_hr"))
     calories = extract_number(pick_property(properties, "calories"))
 
-    summary_polyline, _ = load_route_from_gpx(
-        client, extract_file_urls(pick_property(properties, "gpx", "files"))
-    )
+    summary_polyline = (route_map or {}).get(page.get("id"), "")
+    if not summary_polyline and route_map is None:
+        summary_polyline, _ = load_route_from_gpx(
+            client, extract_file_urls(pick_property(properties, "gpx", "files"))
+        )
 
     return {
         "run_id": run_id,
@@ -607,7 +678,7 @@ def page_to_activity(
         "average_speed": (distance / duration_seconds) if duration_seconds > 0 else 0,
         "location_country": location_country,
         "summary_polyline": summary_polyline,
-        "source": "notion-ninebot" if is_ninebot else "notion",
+        "source": "notion-ninebot" if is_ninebot else source,
         "notion_page_id": page.get("id"),
         "notion_last_edited_time": page.get("last_edited_time"),
         "splits": splits or [],
@@ -701,6 +772,82 @@ def write_activities_json(activities: List[dict]) -> int:
     return len(activities)
 
 
+def extract_date_range(prop: Optional[dict], local_tz: ZoneInfo) -> Tuple[Optional[datetime], Optional[datetime]]:
+    if not prop or prop.get("type") != "date":
+        return None, None
+    date_value = prop.get("date") or {}
+    start = extract_date({"type": "date", "date": {"start": date_value.get("start")}}, local_tz)
+    end = extract_date({"type": "date", "date": {"start": date_value.get("end")}}, local_tz)
+    return start, end
+
+
+def page_to_sleep_record(page: dict, local_tz: ZoneInfo) -> Optional[dict]:
+    if page.get("archived") or page.get("in_trash"):
+        return None
+    properties = page.get("properties", {})
+    date_value = extract_date(pick_property(properties, "sleep_date", "date"), local_tz)
+    if date_value is None:
+        date_value = extract_date(pick_property(properties, "start", "date"), local_tz)
+    if date_value is None:
+        return None
+
+    sleep_start, sleep_end = extract_date_range(properties.get("睡眠时间"), local_tz)
+    bed_start, bed_end = extract_date_range(properties.get("卧床时间"), local_tz)
+    sleep_minutes = extract_number(properties.get("睡眠时长（分钟）"))
+    bed_minutes = extract_number(properties.get("卧床时长（分钟）"))
+    if sleep_minutes is None and sleep_start and sleep_end:
+        sleep_minutes = (sleep_end - sleep_start).total_seconds() / 60
+    if bed_minutes is None and bed_start and bed_end:
+        bed_minutes = (bed_end - bed_start).total_seconds() / 60
+
+    title = extract_plain_text(pick_property(properties, "title", "title"))
+    return {
+        "sleep_id": page.get("id"),
+        "name": title or date_value.strftime("%Y-%m-%d"),
+        "date": date_value.strftime("%Y-%m-%d"),
+        "sleep_start": sleep_start.strftime("%Y-%m-%d %H:%M:%S") if sleep_start else "",
+        "sleep_end": sleep_end.strftime("%Y-%m-%d %H:%M:%S") if sleep_end else "",
+        "sleep_minutes": round(sleep_minutes or 0),
+        "bed_minutes": round(bed_minutes or 0),
+        "deep_sleep_ratio": extract_number(properties.get("深睡比例")),
+        "light_sleep_ratio": extract_number(properties.get("浅睡比例")),
+        "rem_sleep_ratio": extract_number(properties.get("快速眼动睡眠比例")),
+        "awake_count": extract_number(properties.get("清醒次数")),
+        "respiration_range": extract_plain_text(properties.get("呼吸频率范围")),
+        "source": "notion-keep-sleep",
+        "notion_last_edited_time": page.get("last_edited_time"),
+    }
+
+
+def load_existing_sleep() -> List[dict]:
+    if not os.path.exists(SLEEP_JSON_FILE):
+        return []
+    try:
+        with open(SLEEP_JSON_FILE, "r", encoding="utf-8") as handle:
+            data = json.load(handle)
+    except Exception:
+        return []
+    return [item for item in data if isinstance(item, dict) and item.get("sleep_id")]
+
+
+def compute_sleep_sync_anchor(records: List[dict]) -> Optional[datetime]:
+    latest = [
+        parse_notion_datetime(item.get("notion_last_edited_time"))
+        for item in records
+    ]
+    latest = [value for value in latest if value is not None]
+    if not latest:
+        return None
+    return max(latest) - timedelta(seconds=max(SYNC_OVERLAP_SECONDS, 0))
+
+
+def write_sleep_json(records: List[dict]) -> int:
+    records.sort(key=lambda item: item.get("date", ""))
+    with open(SLEEP_JSON_FILE, "w", encoding="utf-8") as handle:
+        json.dump(records, handle, ensure_ascii=False, indent=2)
+    return len(records)
+
+
 
 def sync_from_notion(full_sync: bool = False) -> int:
     workout_database_id = os.getenv("WORKOUT_DATABASE_ID") or get_env(
@@ -708,11 +855,17 @@ def sync_from_notion(full_sync: bool = False) -> int:
     )
     type_database_id = os.getenv("TYPE_DATABASE_ID")
     split_database_id = os.getenv("SPLIT_DATABASE_ID")
+    keep_database_id = os.getenv("KEEP_DATABASE_ID", KEEP_DATABASE_ID)
+    keep_type_database_id = os.getenv("KEEP_TYPE_DATABASE_ID", KEEP_TYPE_DATABASE_ID)
+    sleep_database_id = os.getenv("KEEP_SLEEP_DATABASE_ID", KEEP_SLEEP_DATABASE_ID)
     local_tz = ZoneInfo(os.getenv("WORKOUTS_PAGE_TIMEZONE", BASE_TIMEZONE))
 
     existing_activities = [] if full_sync else load_existing_activities(local_tz)
+    existing_sleep = [] if full_sync else load_existing_sleep()
     existing_by_run_id = {activity["run_id"]: activity for activity in existing_activities}
+    sleep_by_id = {record["sleep_id"]: record for record in existing_sleep}
     sync_anchor = None if full_sync else compute_sync_anchor(existing_activities)
+    sleep_sync_anchor = None if full_sync else compute_sleep_sync_anchor(existing_sleep)
 
     def load_split_map(client: httpx.Client) -> Dict[str, List[dict]]:
         if not split_database_id:
@@ -729,13 +882,16 @@ def sync_from_notion(full_sync: bool = False) -> int:
 
     with httpx.Client(timeout=30.0) as client:
         type_name_by_id = build_type_map(client, type_database_id)
+        type_name_by_id.update(build_type_map(client, keep_type_database_id))
         split_map: Dict[str, List[dict]] = {}
 
         if full_sync or sync_anchor is None:
             workout_pages = fetch_database_pages(client, workout_database_id)
+            keep_pages = fetch_database_pages(client, keep_database_id) if keep_database_id and keep_database_id != workout_database_id else []
             split_map = load_split_map(client)
         else:
             workout_pages = fetch_pages_edited_after(client, workout_database_id, sync_anchor)
+            keep_pages = fetch_pages_edited_after(client, keep_database_id, sync_anchor) if keep_database_id and keep_database_id != workout_database_id else []
             if split_database_id:
                 try:
                     changed_split_pages = fetch_pages_edited_after(client, split_database_id, sync_anchor)
@@ -753,6 +909,13 @@ def sync_from_notion(full_sync: bool = False) -> int:
                         page_id = activity.get("notion_page_id")
                         activity["splits"] = split_map.get(page_id, []) if page_id else []
 
+        if full_sync or sleep_sync_anchor is None:
+            sleep_pages = fetch_database_pages(client, sleep_database_id)
+        else:
+            sleep_pages = fetch_pages_edited_after(client, sleep_database_id, sleep_sync_anchor)
+
+        route_map = load_route_map(workout_pages + keep_pages)
+
         for page in workout_pages:
             run_id = extract_run_id_from_page(page)
             if run_id is None:
@@ -763,12 +926,31 @@ def sync_from_notion(full_sync: bool = False) -> int:
                 type_name_by_id,
                 local_tz,
                 splits=split_map.get(page.get("id"), []),
+                route_map=route_map,
             )
             if activity is None:
                 existing_by_run_id.pop(run_id, None)
                 continue
             existing_by_run_id[run_id] = activity
 
+        for page in keep_pages:
+            activity = page_to_activity(
+                client,
+                page,
+                type_name_by_id,
+                local_tz,
+                source="notion-keep",
+                route_map=route_map,
+            )
+            if activity is not None:
+                existing_by_run_id[activity["run_id"]] = activity
+
+        for page in sleep_pages:
+            record = page_to_sleep_record(page, local_tz)
+            if record is not None:
+                sleep_by_id[record["sleep_id"]] = record
+
+    write_sleep_json(list(sleep_by_id.values()))
     return write_activities_json(list(existing_by_run_id.values()))
 
 
