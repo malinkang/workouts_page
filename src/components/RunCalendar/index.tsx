@@ -9,13 +9,14 @@ interface IRunCalendarProps {
   runIndex: number;
   setRunIndex: (_index: number) => void;
   year: string;
+  summaryTitle?: string;
 }
 
 const RIDE_TYPES = new Set(['Ride', 'Ninebot', 'VirtualRide', 'EBikeRide']);
 const WALK_TYPES = new Set(['Walk', 'Hike']); 
-const RUN_TYPES = new Set(['Run', 'TrailRun', 'Treadmill', 'VirtualRun']);
+const RUN_TYPES = new Set(['Run', 'Trail Run', 'Treadmill', 'VirtualRun']);
 const SWIM_TYPES = new Set(['Swim', 'WaterSport']); 
-const RUN_WALK_TYPES = new Set(['Run', 'Hike', 'TrailRun', 'Walk', 'Treadmill', 'VirtualRun']);
+const RUN_WALK_TYPES = new Set(['Run', 'Hike', 'Trail Run', 'Walk', 'Treadmill', 'VirtualRun']);
 
 const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -234,7 +235,14 @@ const getActivityIcon = (type: string) => {
   return <span style={{ fontSize: '14px' }}>🏅</span>;
 };
 
-const RunCalendar = ({ runs, locateActivity, runIndex, setRunIndex, year }: IRunCalendarProps) => {
+const RunCalendar = ({
+  runs,
+  locateActivity,
+  runIndex,
+  setRunIndex,
+  year,
+  summaryTitle,
+}: IRunCalendarProps) => {
   const [monthIndex, setMonthIndex] = useState<number>(new Date().getMonth());
   const [direction, setDirection] = useState<number>(0);
 
@@ -298,7 +306,7 @@ const RunCalendar = ({ runs, locateActivity, runIndex, setRunIndex, year }: IRun
           </svg>
         )}
         
-        <div className={styles.globalTitle}>年度总里程</div>
+        <div className={styles.globalTitle}>{summaryTitle ? `${summaryTitle}总里程` : '总里程'}</div>
 
         <div className={styles.globalMainStat}>
           <span className={styles.val}>{engine.globalData.stats.totalDist.toFixed(1)}</span>

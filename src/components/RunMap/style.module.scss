@@ -31,6 +31,40 @@
   pointer-events: none;
 }
 
+.routeLegend {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  max-width: min(72%, 250px);
+  padding: 8px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  background: var(--surface-strong);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-size: 0.68rem;
+  pointer-events: none;
+}
+
+.routeLegendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.routeLegendItem i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
 /* =========================================
    🌟 单次运动详情悬浮面板
 ========================================= */
@@ -160,6 +194,14 @@
     max-width: calc(100% - 84px);
     padding: 7px 12px;
     font-size: 0.68rem;
+  }
+
+  .routeLegend {
+    top: 10px;
+    right: 10px;
+    max-width: calc(100% - 84px);
+    padding: 6px 8px;
+    font-size: 0.62rem;
   }
 
   .runDetailCard {

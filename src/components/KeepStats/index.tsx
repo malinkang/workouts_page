@@ -2,9 +2,15 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Activity } from '@/utils/utils';
 import styles from './style.module.scss';
 
-type DashboardMode = 'workout' | 'sleep';
-type ActivityFilter = 'run' | 'walk' | 'ride' | 'other' | 'all';
-type Period = 'day' | 'week' | 'month' | 'year' | 'total';
+export type DashboardFilter = 'run' | 'walk' | 'ride' | 'sleep';
+type ActivityFilter = Exclude<DashboardFilter, 'sleep'>;
+type Period = 'week' | 'month' | 'year' | 'total';
+
+export interface StatsSelection {
+  period: Period;
+  bucket: string;
+  title: string;
+}
 
 export interface SleepRecord {
   sleep_id: string;
@@ -25,9 +31,8 @@ export interface SleepRecord {
 interface KeepStatsProps {
   activities: Activity[];
   sleepRecords: SleepRecord[];
-  mode: DashboardMode;
-  onModeChange: (mode: DashboardMode) => void;
-  onActivitySelectionChange: (activities: Activity[]) => void;
+  filter: DashboardFilter;
+  onActivitySelectionChange: (activities: Activity[], selection: StatsSelection) => void;
 }
 
 interface ActivityBucket {
@@ -53,7 +58,6 @@ const RUN_TYPES = new Set(['Run', 'Trail Run', 'Treadmill', 'VirtualRun']);
 const WALK_TYPES = new Set(['Walk', 'Hike']);
 const RIDE_TYPES = new Set(['Ride', 'Ninebot', 'VirtualRide', 'EBikeRide', 'Indoor Ride']);
 const PERIOD_LABELS: Array<{ key: Period; label: string }> = [
-  { key: 'day', label: '日' },
   { key: 'week', label: '周' },
   { key: 'month', label: '月' },
   { key: 'year', label: '年' },
@@ -75,7 +79,6 @@ const getIsoWeek = (value: string): string => {
 
 const bucketForDate = (value: string, period: Period): { key: string; label: string } => {
   const date = getDatePart(value);
-  if (period === 'day') return { key: date, label: date.slice(5) };
   if (period === 'month') return { key: date.slice(0, 7), label: date.slice(0, 7) };
   if (period === 'year') return { key: date.slice(0, 4), label: `${date.slice(0, 4)}年` };
   if (period === 'week') {
@@ -85,12 +88,15 @@ const bucketForDate = (value: string, period: Period): { key: string; label: str
   return { key: 'total', label: '全部' };
 };
 
-const formatDuration = (seconds: number): string => {
-  const total = Math.round(seconds);
-  const hours = Math.floor(total / 3600);
-  const minutes = Math.floor((total % 3600) / 60);
-  const secondsPart = total % 60;
-  return `${hours}:${String(minutes).padStart(2, '0')}:${String(secondsPart).padStart(2, '0')}`;
+const titleForSelection = (period: Period, bucket: string): string => {
+  if (period === 'total' || bucket === 'total') return '';
+  if (period === 'year') return `${bucket}年`;
+  if (period === 'month') {
+    const [year, month] = bucket.split('-');
+    return `${year}年${Number(month)}月`;
+  }
+  const [year, week] = bucket.split('-W');
+  return `${year}年第${Number(week)}周`;
 };
 
 const formatHours = (minutes: number): string => {
@@ -100,27 +106,27 @@ const formatHours = (minutes: number): string => {
 };
 
 const activityMatches = (activity: Activity, filter: ActivityFilter): boolean => {
-  if (filter === 'all') return true;
   if (filter === 'run') return RUN_TYPES.has(activity.type);
   if (filter === 'walk') return WALK_TYPES.has(activity.type);
-  if (filter === 'ride') return RIDE_TYPES.has(activity.type);
-  return !RUN_TYPES.has(activity.type) && !WALK_TYPES.has(activity.type) && !RIDE_TYPES.has(activity.type);
+  return RIDE_TYPES.has(activity.type);
 };
 
 const KeepStats = ({
   activities,
   sleepRecords,
-  mode,
-  onModeChange,
+  filter,
   onActivitySelectionChange,
 }: KeepStatsProps) => {
-  const [activityFilter, setActivityFilter] = useState<ActivityFilter>('run');
   const [period, setPeriod] = useState<Period>('year');
   const [selectedBucket, setSelectedBucket] = useState('total');
+  const mode = filter === 'sleep' ? 'sleep' : 'workout';
 
   const filteredActivities = useMemo(
-    () => activities.filter((activity) => activityMatches(activity, activityFilter)),
-    [activities, activityFilter],
+    () =>
+      filter === 'sleep'
+        ? []
+        : activities.filter((activity) => activityMatches(activity, filter)),
+    [activities, filter],
   );
 
   const activityBuckets = useMemo<ActivityBucket[]>(() => {
@@ -169,6 +175,10 @@ const KeepStats = ({
 
   const activeBuckets = mode === 'workout' ? activityBuckets : sleepBuckets;
   const activeBucketKeys = useMemo(() => new Set(activeBuckets.map((bucket) => bucket.key)), [activeBuckets]);
+  const effectiveBucket =
+    selectedBucket === 'total' || activeBucketKeys.has(selectedBucket)
+      ? selectedBucket
+      : activeBuckets[activeBuckets.length - 1]?.key || 'total';
 
   useEffect(() => {
     if (!activeBucketKeys.has(selectedBucket)) {
@@ -178,95 +188,29 @@ const KeepStats = ({
 
   const selectedActivities = useMemo(() => {
     if (mode !== 'workout') return [];
-    if (selectedBucket === 'total') return filteredActivities;
+    if (effectiveBucket === 'total') return filteredActivities;
     return filteredActivities.filter(
-      (activity) => bucketForDate(activity.start_date_local, period).key === selectedBucket,
+      (activity) => bucketForDate(activity.start_date_local, period).key === effectiveBucket,
     );
-  }, [filteredActivities, mode, period, selectedBucket]);
+  }, [effectiveBucket, filteredActivities, mode, period]);
 
   const selectedSleep = useMemo(() => {
-    if (selectedBucket === 'total') return sleepRecords;
-    return sleepRecords.filter((record) => bucketForDate(record.date, period).key === selectedBucket);
-  }, [period, selectedBucket, sleepRecords]);
+    if (effectiveBucket === 'total') return sleepRecords;
+    return sleepRecords.filter((record) => bucketForDate(record.date, period).key === effectiveBucket);
+  }, [effectiveBucket, period, sleepRecords]);
 
   useEffect(() => {
-    onActivitySelectionChange(selectedActivities);
-  }, [onActivitySelectionChange, selectedActivities]);
-
-  const selectedActivitySummary = useMemo(() => {
-    return selectedActivities.reduce(
-      (summary, activity) => ({
-        distance: summary.distance + activity.distance,
-        duration: summary.duration + parseDuration(activity.moving_time),
-        calories: summary.calories + (activity.calories || 0),
-      }),
-      { distance: 0, duration: 0, calories: 0 },
-    );
-  }, [selectedActivities]);
-
-  const selectedSleepSummary = useMemo(
-    () =>
-      selectedSleep.reduce(
-        (summary, record) => ({
-          sleep: summary.sleep + record.sleep_minutes,
-          bed: summary.bed + record.bed_minutes,
-        }),
-        { sleep: 0, bed: 0 },
-      ),
-    [selectedSleep],
-  );
+    onActivitySelectionChange(selectedActivities, {
+      period,
+      bucket: effectiveBucket,
+      title: titleForSelection(period, effectiveBucket),
+    });
+  }, [effectiveBucket, onActivitySelectionChange, period, selectedActivities]);
 
   const maxValue = Math.max(...activeBuckets.map((bucket) => bucket.value), 1);
 
   return (
     <section className={styles.panel} aria-label="运动和睡眠统计">
-      <div className={styles.modeTabs} role="tablist" aria-label="记录类型">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={mode === 'workout'}
-          className={styles.modeTab}
-          onClick={() => onModeChange('workout')}
-        >
-          运动记录
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={mode === 'sleep'}
-          className={styles.modeTab}
-          onClick={() => onModeChange('sleep')}
-        >
-          睡眠
-        </button>
-      </div>
-
-      {mode === 'workout' && (
-        <div className={styles.activityTabs} role="tablist" aria-label="运动类型">
-          {([
-            ['run', '跑步'],
-            ['walk', '步行'],
-            ['ride', '骑行'],
-            ['other', '其他'],
-            ['all', '全部'],
-          ] as Array<[ActivityFilter, string]>).map(([key, label]) => (
-            <button
-              type="button"
-              role="tab"
-              key={key}
-              aria-selected={activityFilter === key}
-              className={styles.activityTab}
-              onClick={() => {
-                setActivityFilter(key);
-                setSelectedBucket('total');
-              }}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      )}
-
       <div className={styles.periodTabs} role="tablist" aria-label="统计周期">
         {PERIOD_LABELS.map(({ key, label }) => (
           <button
@@ -285,32 +229,6 @@ const KeepStats = ({
         ))}
       </div>
 
-      <div className={styles.summaryHeader}>
-        <div>
-          <span className={styles.eyebrow}>{mode === 'workout' ? '当前选择' : '睡眠统计'}</span>
-          <strong>{mode === 'workout' ? `${(selectedActivitySummary.distance / 1000).toFixed(2)} km` : formatHours(selectedSleepSummary.sleep)}</strong>
-        </div>
-        <span className={styles.selectionLabel}>
-          {activeBuckets.find((bucket) => bucket.key === selectedBucket)?.label || '选择一个周期'}
-        </span>
-      </div>
-
-      <div className={styles.metricGrid}>
-        {mode === 'workout' ? (
-          <>
-            <div><span>完成</span><strong>{selectedActivities.length}</strong><small>次</small></div>
-            <div><span>时长</span><strong>{formatDuration(selectedActivitySummary.duration)}</strong></div>
-            <div><span>消耗</span><strong>{Math.round(selectedActivitySummary.calories).toLocaleString()}</strong><small>kcal</small></div>
-          </>
-        ) : (
-          <>
-            <div><span>睡眠</span><strong>{formatHours(selectedSleepSummary.sleep)}</strong></div>
-            <div><span>卧床</span><strong>{formatHours(selectedSleepSummary.bed)}</strong></div>
-            <div><span>记录</span><strong>{selectedSleep.length}</strong><small>晚</small></div>
-          </>
-        )}
-      </div>
-
       <div className={styles.chartShell}>
         <div className={styles.chartHeader}>
           <span>{mode === 'workout' ? '里程（公里）' : '睡眠时长（小时）'}</span>
@@ -321,8 +239,8 @@ const KeepStats = ({
             <button
               type="button"
               role="tab"
-              aria-selected={selectedBucket === bucket.key}
-              className={`${styles.barButton} ${selectedBucket === bucket.key ? styles.selectedBar : ''}`}
+              aria-selected={effectiveBucket === bucket.key}
+              className={`${styles.barButton} ${effectiveBucket === bucket.key ? styles.selectedBar : ''}`}
               key={bucket.key}
               onClick={() => setSelectedBucket(bucket.key)}
               title={`${bucket.label} ${bucket.value.toFixed(2)}`}

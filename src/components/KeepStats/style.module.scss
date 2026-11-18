@@ -7,8 +7,6 @@
   color: var(--text-primary);
 }
 
-.modeTabs,
-.activityTabs,
 .periodTabs {
   display: flex;
   overflow-x: auto;
@@ -17,19 +15,10 @@
   scroll-snap-type: inline proximity;
 }
 
-.modeTabs::-webkit-scrollbar,
-.activityTabs::-webkit-scrollbar,
 .periodTabs::-webkit-scrollbar {
   display: none;
 }
 
-.modeTabs {
-  border-bottom: 1px solid var(--border-subtle);
-  margin-bottom: 18px;
-}
-
-.modeTab,
-.activityTab,
 .periodTab {
   flex: 0 0 auto;
   border: 0;
@@ -41,20 +30,8 @@
   scroll-snap-align: start;
 }
 
-.modeTab {
-  padding: 8px 14px 14px;
-  font-size: 1.05rem;
-  font-weight: 650;
-}
-
-.activityTab {
-  padding: 10px 14px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 999px;
-}
-
 .periodTabs {
-  margin: 22px 0 24px;
+  margin: 0 0 8px;
   padding: 5px;
   border-radius: 999px;
   background: var(--surface-hover);
@@ -67,85 +44,26 @@
   border-radius: 999px;
 }
 
-.modeTab[aria-selected='true'],
-.activityTab[aria-selected='true'],
 .periodTab[aria-selected='true'] {
   color: var(--text-primary);
   font-weight: 700;
 }
 
-.modeTab[aria-selected='true'] {
-  border-bottom: 3px solid var(--accent);
-}
-
-.activityTab[aria-selected='true'],
 .periodTab[aria-selected='true'] {
   color: var(--accent-contrast);
   background: var(--accent);
 }
 
-.modeTab:focus-visible,
-.activityTab:focus-visible,
 .periodTab:focus-visible,
 .barButton:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--accent) 60%, transparent);
   outline-offset: 2px;
 }
 
-.summaryHeader {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  align-items: end;
-}
-
-.summaryHeader > div {
-  display: grid;
-  gap: 6px;
-}
-
-.eyebrow,
 .chartHeader,
-.metricGrid span,
 .sleepRow span {
   color: var(--text-secondary);
   font-size: 0.82rem;
-}
-
-.summaryHeader strong {
-  font-size: clamp(2rem, 8vw, 3.25rem);
-  letter-spacing: -0.05em;
-}
-
-.selectionLabel {
-  color: var(--text-secondary);
-  white-space: nowrap;
-}
-
-.metricGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin: 22px 0;
-}
-
-.metricGrid > div {
-  display: grid;
-  gap: 4px;
-  min-width: 0;
-}
-
-.metricGrid strong {
-  overflow: hidden;
-  font-size: clamp(1.1rem, 4vw, 1.65rem);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.metricGrid small {
-  margin-left: 4px;
-  color: var(--text-secondary);
-  font-size: 0.72rem;
 }
 
 .chartShell {
@@ -255,10 +173,6 @@
   .panel {
     padding: 18px;
     border-radius: 22px;
-  }
-
-  .metricGrid {
-    gap: 8px;
   }
 
   .barButton {

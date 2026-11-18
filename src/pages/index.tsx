@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import Layout from '@/components/Layout';
-import KeepStats, { SleepRecord } from '@/components/KeepStats';
+import KeepStats, {
+  type DashboardFilter,
+  type SleepRecord,
+  type StatsSelection,
+} from '@/components/KeepStats';
 import RunMap from '@/components/RunMap';
 import RunTable from '@/components/RunTable';
 import useActivities from '@/hooks/useActivities';
@@ -20,21 +24,28 @@ import {
 } from '@/utils/utils';
 import sleepRecords from '@/static/sleep_records.json';
 
-type DashboardMode = 'workout' | 'sleep';
+const DASHBOARD_FILTERS: Array<{ key: DashboardFilter; label: string }> = [
+  { key: 'run', label: '跑步' },
+  { key: 'walk', label: '步行' },
+  { key: 'ride', label: '电动车骑行' },
+  { key: 'sleep', label: '睡眠' },
+];
 
 const Index = () => {
   useSiteMetadata();
   const { activities, thisYear } = useActivities();
   const [year, setYear] = useState(thisYear);
   const [runIndex, setRunIndex] = useState(-1);
-  const [dashboardMode, setDashboardMode] = useState<DashboardMode>('workout');
+  const [dashboardFilter, setDashboardFilter] = useState<DashboardFilter>('run');
   const [statsRuns, setStatsRuns] = useState<Activity[] | null>(null);
+  const [statsTitle, setStatsTitle] = useState(`${thisYear}年`);
   const [runs, setActivity] = useState(
     filterAndSortRuns(activities, year, filterYearRuns, sortDateFunc)
   );
   
   const [title, setTitle] = useState('');
   const [geoData, setGeoData] = useState(geoJsonForRuns(runs));
+  const dashboardMode = dashboardFilter === 'sleep' ? 'sleep' : 'workout';
 
   const bentoRef = useRef<HTMLDivElement>(null);
   const [isSticky, setIsSticky] = useState(false);
@@ -111,8 +122,9 @@ const Index = () => {
     setGeoData(geoJsonForRuns(runs));
   }, [runs]);
 
-  const handleStatsSelection = useCallback((selectedActivities: Activity[]) => {
+  const handleStatsSelection = useCallback((selectedActivities: Activity[], selection: StatsSelection) => {
     setStatsRuns(selectedActivities);
+    setStatsTitle(selection.title || '');
     setRunIndex(-1);
     const selectedYear = selectedActivities[0]?.start_date_local?.slice(0, 4);
     if (selectedYear) setYear(selectedYear);
@@ -127,14 +139,23 @@ const Index = () => {
   }, [statsRuns]);
 
   return (
-    <Layout>
-      <KeepStats
-        activities={activities}
-        sleepRecords={sleepRecords as SleepRecord[]}
-        mode={dashboardMode}
-        onModeChange={setDashboardMode}
-        onActivitySelectionChange={handleStatsSelection}
-      />
+    <Layout
+      toolbarContent={
+        <nav className="category-tabs" aria-label="内容筛选">
+          {DASHBOARD_FILTERS.map(({ key, label }) => (
+            <button
+              type="button"
+              className="category-tab"
+              key={key}
+              aria-pressed={dashboardFilter === key}
+              onClick={() => setDashboardFilter(key)}
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
+      }
+    >
       {dashboardMode === 'workout' && (
         <>
         <div className="bento-hero" ref={bentoRef}>
@@ -158,6 +179,7 @@ const Index = () => {
               runIndex={runIndex}
               setRunIndex={setRunIndex}
               year={year} 
+                summaryTitle={statsTitle}
             />
           </div>
         </div>
@@ -169,6 +191,15 @@ const Index = () => {
             year={year}
           />
         </div>
+        </>
+      )}
+      <KeepStats
+        activities={activities}
+        sleepRecords={sleepRecords as SleepRecord[]}
+        filter={dashboardFilter}
+        onActivitySelectionChange={handleStatsSelection}
+      />
+      {dashboardMode === 'workout' && (
         <div className="shuju-list">
           <RunTable
             runs={runs}
@@ -177,8 +208,7 @@ const Index = () => {
             runIndex={runIndex}
             setRunIndex={setRunIndex}
           />
-          </div>
-        </>
+        </div>
       )}
       <Analytics />
     </Layout>

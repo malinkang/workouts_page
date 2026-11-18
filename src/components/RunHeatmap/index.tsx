@@ -239,7 +239,11 @@ const RunHeatmap = ({ runs, year, locateActivity, setRunIndex }: RunHeatmapProps
   const layout = useMemo(() => {
     const gutter = 3;
     const weekdayLabelWidth = 28;
-    const usableWidth = Math.max(containerWidth - weekdayLabelWidth, 0);
+    const fallbackWidth = typeof window === 'undefined'
+      ? 760
+      : Math.min(Math.max(window.innerWidth - 40, 280), 828);
+    const measuredWidth = containerWidth || wrapRef.current?.clientWidth || fallbackWidth;
+    const usableWidth = Math.max(measuredWidth - weekdayLabelWidth, 0);
     const totalGaps = Math.max(totalColumns - 1, 0);
     const computedCell = totalColumns > 0
       ? Number(((usableWidth - gutter * totalGaps) / totalColumns).toFixed(2))

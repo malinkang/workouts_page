@@ -25,6 +25,12 @@ interface IRunMapProps {
 }
 
 const RIDE_TYPES = new Set(['Ride', 'Ninebot', 'VirtualRide', 'EBikeRide']);
+const ROUTE_LEGEND = [
+  { label: '跑步', type: 'Run' },
+  { label: '步行', type: 'Walk' },
+  { label: '骑行', type: 'Ride' },
+  { label: '电动车', type: 'Ninebot' },
+] as const;
 
 const formatCoordinate = (lat: number, lon: number) => `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
 const LABEL_TEXT_FIELD = ['coalesce', ['get', 'name_zh-Hans'], ['get', 'name_zh-Hant'], ['get', 'name']] as const;
@@ -56,10 +62,20 @@ const getCoreBounds = (features: any[]) => {
   );
 
   const finalCoords = coreCoords.length > 0 ? coreCoords : allCoords;
-  return [
-    [Math.min(...finalCoords.map(p => p[0])), Math.min(...finalCoords.map(p => p[1]))],
-    [Math.max(...finalCoords.map(p => p[0])), Math.max(...finalCoords.map(p => p[1]))]
-  ] as [[number, number], [number, number]];
+  let minLon = finalCoords[0][0];
+  let minLat = finalCoords[0][1];
+  let maxLon = finalCoords[0][0];
+  let maxLat = finalCoords[0][1];
+
+  for (let index = 1; index < finalCoords.length; index += 1) {
+    const [lon, lat] = finalCoords[index];
+    minLon = Math.min(minLon, lon);
+    minLat = Math.min(minLat, lat);
+    maxLon = Math.max(maxLon, lon);
+    maxLat = Math.max(maxLat, lat);
+  }
+
+  return [[minLon, minLat], [maxLon, maxLat]];
 };
 
 const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps) => {
@@ -304,8 +320,8 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
       mapStyle={mapStyleUrl}
       mapboxAccessToken={MAPBOX_TOKEN || undefined}
       logoPosition="bottom-right"
-      attributionControl={false} 
-      fog={{ range: [0.8, 3.5], color: "#151516", "horizon-blend": 0.15, "star-intensity": 0.2 }}
+      attributionControl={!hasMapboxToken}
+      fog={hasMapboxToken ? { range: [0.8, 3.5], color: '#151516', 'horizon-blend': 0.15, 'star-intensity': 0.2 } : undefined}
       terrain={hasMapboxToken && isSingleRun ? { source: 'mapbox-dem', exaggeration: 2.5 } : undefined}
     >
       {hasMapboxToken && (
@@ -445,6 +461,15 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
       {!isSingleRun && title && (
         <div className={styles.runTitle}>{title}</div>
       )}
+
+      <div className={styles.routeLegend} aria-label="轨迹颜色说明">
+        {ROUTE_LEGEND.map(({ label, type }) => (
+          <span className={styles.routeLegendItem} key={type}>
+            <i style={{ backgroundColor: colorFromType(type) }} />
+            {label}
+          </span>
+        ))}
+      </div>
       
       <FullscreenControl position="top-left" />
       <NavigationControl showCompass={false} position="bottom-left" />
