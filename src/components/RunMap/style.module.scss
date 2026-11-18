@@ -1,11 +1,25 @@
 @import '../../styles/variables.scss';
 
 .locationSVG {
-  height: 100%;
-  width: 100%;
-  margin: 1rem 0 0;
+  display: block;
+  width: 22px;
+  height: 22px;
   border: 0;
   padding: 0;
+}
+
+.endpointMarker {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 28px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+  pointer-events: none;
+}
+
+.endpointStart,
+.endpointEnd {
+  transform-origin: center bottom;
 }
 
 .mapFrame {
@@ -36,6 +50,81 @@
   z-index: 1;
   width: 100% !important;
   height: 100% !important;
+}
+
+.leafletFallback {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  background: var(--page-bg);
+}
+
+.leafletMap {
+  width: 100%;
+  height: 100%;
+  min-height: 240px;
+  background: var(--page-bg);
+}
+
+.leafletMap :global(.leaflet-control-zoom) {
+  margin-top: 10px;
+  margin-left: 10px;
+  border: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+.leafletMap :global(.leaflet-control-zoom a) {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  color: #202124;
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.leafletMap :global(.leaflet-control-attribution) {
+  font-size: 10px;
+}
+
+.leafletFullscreenButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  color: #202124;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 32px;
+}
+
+.leafletTitle {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  z-index: 1000;
+  max-width: calc(100% - 120px);
+  padding: 8px 14px;
+  transform: translateX(-50%);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  color: var(--text-primary);
+  background: var(--surface-strong);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  overflow: hidden;
+  pointer-events: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .runTitle {

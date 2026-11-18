@@ -1,5 +1,6 @@
-import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react';
+import { useRef, useCallback, useState, useEffect, useMemo } from 'react';
 import Map, { Layer, Source, FullscreenControl, NavigationControl, MapRef } from 'react-map-gl';
+import mapboxgl from 'mapbox-gl';
 import useActivities from '@/hooks/useActivities';
 import {
   IS_CHINESE,
@@ -11,6 +12,7 @@ import {
 import { Activity, Coordinate, geoJsonForMap, colorFromType, formatRunTime, formatSpeedOrPace } from '@/utils/utils';
 import { RouteAnimator } from '@/utils/routeAnimation';
 import RunMarker from './RunMarker';
+import LeafletMapFallback from './LeafletMapFallback';
 import styles from './style.module.scss';
 import { FeatureCollection } from 'geojson';
 import { RPGeometry } from '@/static/run_countries';
@@ -72,8 +74,8 @@ const getCoreBounds = (features: any[]) => {
   return [[minLon, minLat], [maxLon, maxLat]];
 };
 
-const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps) => {
-  const { runs, activities, countries, provinces } = useActivities() as any;
+const RunMap = ({ title, changeYear: _changeYear, geoData, thisYear, isSticky }: IRunMapProps) => {
+  const { runs, activities } = useActivities() as any;
   const allRuns = runs || activities || []; 
   
   const mapRef = useRef<MapRef>(null);
@@ -82,8 +84,17 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
   const [themeMode, setThemeMode] = useState<'light' | 'dark'>(getThemeMode);
   const [labelLayerId, setLabelLayerId] = useState<string | undefined>(undefined);
   const [animatedPoints, setAnimatedPoints] = useState<Coordinate[]>([]);
+  const [mapboxFailed, setMapboxFailed] = useState(false);
   const routeAnimatorRef = useRef<RouteAnimator | null>(null);
   const lastRouteKeyRef = useRef<string | null>(null);
+  const mapSupportsWebGL = useMemo(() => {
+    if (typeof window === 'undefined') return true;
+    try {
+      return mapboxgl.supported({ failIfMajorPerformanceCaveat: false });
+    } catch {
+      return false;
+    }
+  }, []);
 
   const isSingleRun = geoData.features.length === 1 && geoData.features[0].geometry.coordinates.length;
   const isBigMap = currentZoom <= 3;
@@ -323,6 +334,18 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
 
   const dash = USE_DASH_LINE && !isSingleRun && !isBigMap ? [2, 2] : [2, 0];
 
+  if (!mapSupportsWebGL || mapboxFailed) {
+    return (
+      <div className={styles.mapFrame}>
+        <LeafletMapFallback
+          geoData={geoData}
+          title={title}
+          isSingleRun={Boolean(isSingleRun)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={styles.mapFrame}>
       <div className={styles.mapFallback} aria-hidden="true">
@@ -351,6 +374,7 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
       <Map
       ref={mapRef}
       onLoad={onMapLoad}
+      onError={() => setMapboxFailed(true)}
       initialViewState={{ bounds: initialBounds, fitBoundsOptions: { padding: 40 } }}
       onZoom={(e) => setCurrentZoom(e.viewState.zoom)}
       style={{ width: '100%', height: MAP_HEIGHT }}

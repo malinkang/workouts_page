@@ -16,31 +16,21 @@ const RunMarker = ({
   endLon,
   endLat,
 }: IRunMarkerProperties) => {
-  const size = 5;
   return (
     <>
       <Marker
-        key="maker_start"
+        key="marker_start"
         longitude={startLon}
         latitude={startLat}
+        anchor="bottom"
         pitchAlignment="viewport"
       >
-        <div
-          style={{
-            transform: `translate(${-size / 2}px,${-size}px)`,
-            maxWidth: '25px',
-          }}
-        >
+        <div className={`${styles.endpointMarker} ${styles.endpointStart}`} aria-label="起点">
           <StartSvg className={styles.locationSVG} />
         </div>
       </Marker>
-      <Marker key="maker_end" longitude={endLon} latitude={endLat}>
-        <div
-          style={{
-            transform: `translate(${-size / 2}px,${-size}px)`,
-            maxWidth: '25px',
-          }}
-        >
+      <Marker key="marker_end" longitude={endLon} latitude={endLat} anchor="bottom">
+        <div className={`${styles.endpointMarker} ${styles.endpointEnd}`} aria-label="终点">
           <EndSvg className={styles.locationSVG} />
         </div>
       </Marker>
