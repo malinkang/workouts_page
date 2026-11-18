@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Activity } from '@/utils/utils';
 import styles from './style.module.scss';
 
@@ -174,6 +174,7 @@ const KeepStats = ({
   }, [period, sleepRecords]);
 
   const activeBuckets = mode === 'workout' ? activityBuckets : sleepBuckets;
+  const chartRef = useRef<HTMLDivElement>(null);
   const activeBucketKeys = useMemo(() => new Set(activeBuckets.map((bucket) => bucket.key)), [activeBuckets]);
   const effectiveBucket =
     selectedBucket === 'total' || activeBucketKeys.has(selectedBucket)
@@ -207,6 +208,19 @@ const KeepStats = ({
     });
   }, [effectiveBucket, onActivitySelectionChange, period, selectedActivities]);
 
+  // Keep the newest week/month/year visible after changing the filter or period.
+  useLayoutEffect(() => {
+    if (period === 'total' || activeBuckets.length === 0) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      const chart = chartRef.current;
+      if (!chart) return;
+      chart.scrollTo({ left: chart.scrollWidth, behavior: 'auto' });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeBuckets, filter, period]);
+
   const maxValue = Math.max(...activeBuckets.map((bucket) => bucket.value), 1);
 
   return (
@@ -234,7 +248,7 @@ const KeepStats = ({
           <span>{mode === 'workout' ? '里程（公里）' : '睡眠时长（小时）'}</span>
           <span>{activeBuckets.length} 个周期</span>
         </div>
-        <div className={styles.chart} role="tablist" aria-label="周期数据">
+        <div ref={chartRef} className={styles.chart} role="tablist" aria-label="周期数据">
           {activeBuckets.map((bucket) => (
             <button
               type="button"

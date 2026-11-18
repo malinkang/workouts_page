@@ -25,12 +25,6 @@ interface IRunMapProps {
 }
 
 const RIDE_TYPES = new Set(['Ride', 'Ninebot', 'VirtualRide', 'EBikeRide']);
-const ROUTE_LEGEND = [
-  { label: '跑步', type: 'Run' },
-  { label: '步行', type: 'Walk' },
-  { label: '骑行', type: 'Ride' },
-  { label: '电动车', type: 'Ninebot' },
-] as const;
 
 const formatCoordinate = (lat: number, lon: number) => `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
 const LABEL_TEXT_FIELD = ['coalesce', ['get', 'name_zh-Hans'], ['get', 'name_zh-Hant'], ['get', 'name']] as const;
@@ -277,6 +271,25 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
     return dataToRender; 
   }, [geoData, isBigMap]);
 
+  // Keep the route visible while a remote basemap is still loading or unavailable.
+  const fallbackRoutePaths = useMemo(() => {
+    const bounds = getCoreBounds(geoData?.features || []);
+    if (!bounds) return [];
+    const [[minLon, minLat], [maxLon, maxLat]] = bounds;
+    const lonSpan = Math.max(maxLon - minLon, 0.001);
+    const latSpan = Math.max(maxLat - minLat, 0.001);
+    return geoData.features.map((feature) => {
+      const points = feature.geometry.coordinates as Coordinate[];
+      return points
+        .map(([lon, lat], index) => {
+          const x = 8 + ((lon - minLon) / lonSpan) * 84;
+          const y = 92 - ((lat - minLat) / latSpan) * 84;
+          return `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`;
+        })
+        .join(' ');
+    }).filter(Boolean);
+  }, [geoData]);
+
   useEffect(() => {
     if (typeof document === 'undefined') return;
 
@@ -311,7 +324,31 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
   const dash = USE_DASH_LINE && !isSingleRun && !isBigMap ? [2, 2] : [2, 0];
 
   return (
-    <Map
+    <div className={styles.mapFrame}>
+      <div className={styles.mapFallback} aria-hidden="true">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+          <defs>
+            <pattern id="map-grid" width="10" height="10" patternUnits="userSpaceOnUse">
+              <path d="M 10 0 L 0 0 0 10" fill="none" stroke="currentColor" strokeOpacity="0.12" strokeWidth="0.35" />
+            </pattern>
+          </defs>
+          <rect width="100" height="100" fill="currentColor" opacity="0.06" />
+          <rect width="100" height="100" fill="url(#map-grid)" />
+          {fallbackRoutePaths.map((path, index) => (
+            <path
+              key={`${path.slice(0, 24)}-${index}`}
+              d={path}
+              fill="none"
+              stroke={index % 2 === 0 ? '#32D74B' : '#00C7FF'}
+              strokeWidth="0.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              vectorEffect="non-scaling-stroke"
+            />
+          ))}
+        </svg>
+      </div>
+      <Map
       ref={mapRef}
       onLoad={onMapLoad}
       initialViewState={{ bounds: initialBounds, fitBoundsOptions: { padding: 40 } }}
@@ -462,19 +499,11 @@ const RunMap = ({ title, changeYear, geoData, thisYear, isSticky }: IRunMapProps
         <div className={styles.runTitle}>{title}</div>
       )}
 
-      <div className={styles.routeLegend} aria-label="轨迹颜色说明">
-        {ROUTE_LEGEND.map(({ label, type }) => (
-          <span className={styles.routeLegendItem} key={type}>
-            <i style={{ backgroundColor: colorFromType(type) }} />
-            {label}
-          </span>
-        ))}
-      </div>
-      
       <FullscreenControl position="top-left" />
       <NavigationControl showCompass={false} position="bottom-left" />
 
-    </Map>
+      </Map>
+    </div>
   );
 };
 
