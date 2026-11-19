@@ -14,6 +14,7 @@ import RunCalendar from '@/components/RunCalendar';
 import RunHeatmap from '@/components/RunHeatmap';
 import {
   Activity,
+  activityMatchesDashboardFilter,
   filterAndSortRuns,
   filterYearRuns,
   geoJsonForRuns,
@@ -46,11 +47,19 @@ const Index = () => {
   const [heatmapYear, setHeatmapYear] = useState(thisYear);
   const [heatmapRuns, setHeatmapRuns] = useState(() =>
     filterAndSortRuns(activities, thisYear, filterYearRuns, sortDateFunc)
+      .filter((activity) => activityMatchesDashboardFilter(activity, dashboardFilter))
   );
   
   const [title, setTitle] = useState('');
   const [geoData, setGeoData] = useState(geoJsonForRuns(runs));
   const dashboardMode = dashboardFilter === 'sleep' ? 'sleep' : 'workout';
+
+  useEffect(() => {
+    setHeatmapRuns(
+      filterAndSortRuns(activities, heatmapYear, filterYearRuns, sortDateFunc)
+        .filter((activity) => activityMatchesDashboardFilter(activity, dashboardFilter)),
+    );
+  }, [activities, dashboardFilter, heatmapYear]);
 
   const bentoRef = useRef<HTMLDivElement>(null);
   const [isSticky, setIsSticky] = useState(false);
@@ -95,7 +104,10 @@ const Index = () => {
     setYear(y);
     if (y !== heatmapYear) {
       setHeatmapYear(y);
-      setHeatmapRuns(filterAndSortRuns(activities, y, filterYearRuns, sortDateFunc));
+      setHeatmapRuns(
+        filterAndSortRuns(activities, y, filterYearRuns, sortDateFunc)
+          .filter((activity) => activityMatchesDashboardFilter(activity, dashboardFilter)),
+      );
     }
     changeByItem(y, 'Year', filterYearRuns);
   };
@@ -145,7 +157,10 @@ const Index = () => {
       setYear(selectedYear);
       if (selectedYear !== heatmapYear) {
         setHeatmapYear(selectedYear);
-        setHeatmapRuns(filterAndSortRuns(activities, selectedYear, filterYearRuns, sortDateFunc));
+        setHeatmapRuns(
+          filterAndSortRuns(activities, selectedYear, filterYearRuns, sortDateFunc)
+            .filter((activity) => activityMatchesDashboardFilter(activity, dashboardFilter)),
+        );
       }
     }
   }, [activities, heatmapYear]);

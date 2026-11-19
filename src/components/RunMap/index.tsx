@@ -84,9 +84,9 @@ const RunMap = ({ title, changeYear: _changeYear, geoData, thisYear, isSticky }:
   const [themeMode, setThemeMode] = useState<'light' | 'dark'>(getThemeMode);
   const [labelLayerId, setLabelLayerId] = useState<string | undefined>(undefined);
   const [animatedPoints, setAnimatedPoints] = useState<Coordinate[]>([]);
+  const [isRouteAnimating, setIsRouteAnimating] = useState(false);
   const [mapboxFailed, setMapboxFailed] = useState(false);
   const routeAnimatorRef = useRef<RouteAnimator | null>(null);
-  const lastRouteKeyRef = useRef<string | null>(null);
   const mapSupportsWebGL = useMemo(() => {
     if (typeof window === 'undefined') return true;
     try {
@@ -169,40 +169,44 @@ const RunMap = ({ title, changeYear: _changeYear, geoData, thisYear, isSticky }:
   }, [geoData, isSingleRun, selectedRun]);
 
   const startRouteAnimation = useCallback(() => {
-    if (!isSingleRun) return;
+    routeAnimatorRef.current?.stop();
+    routeAnimatorRef.current = null;
+
+    if (!isSingleRun) {
+      setAnimatedPoints([]);
+      setIsRouteAnimating(false);
+      return null;
+    }
 
     const points = geoData.features[0].geometry.coordinates as Coordinate[];
-    if (points.length < 2) return;
+    if (points.length < 2) {
+      setAnimatedPoints([]);
+      setIsRouteAnimating(false);
+      return null;
+    }
 
-    routeAnimatorRef.current?.stop();
-    routeAnimatorRef.current = new RouteAnimator(
+    setAnimatedPoints([]);
+    setIsRouteAnimating(true);
+    const animator = new RouteAnimator(
       points,
       setAnimatedPoints,
       () => {
-        routeAnimatorRef.current = null;
-      }
+        if (routeAnimatorRef.current === animator) {
+          routeAnimatorRef.current = null;
+          setIsRouteAnimating(false);
+        }
+      },
+      { minDistance: 2 },
     );
-    routeAnimatorRef.current.start();
+    routeAnimatorRef.current = animator;
+    animator.start();
+    return animator;
   }, [geoData, isSingleRun]);
 
   useEffect(() => {
-    if (!isSingleRun) {
-      routeAnimatorRef.current?.stop();
-      routeAnimatorRef.current = null;
-      lastRouteKeyRef.current = null;
-      setAnimatedPoints([]);
-      return;
-    }
-
-    const points = geoData.features[0].geometry.coordinates as Coordinate[];
-    const key = `${points.length}-${points[0]?.join(',')}-${points[points.length - 1]?.join(',')}`;
-    if (key && key !== lastRouteKeyRef.current) {
-      lastRouteKeyRef.current = key;
-      startRouteAnimation();
-    }
-
-    return () => routeAnimatorRef.current?.stop();
-  }, [geoData, isSingleRun, startRouteAnimation]);
+    const animator = startRouteAnimation();
+    return () => animator?.stop();
+  }, [startRouteAnimation]);
 
   useEffect(() => {
     const map = mapRef.current?.getMap();
@@ -374,6 +378,9 @@ const RunMap = ({ title, changeYear: _changeYear, geoData, thisYear, isSticky }:
       <Map
       ref={mapRef}
       onLoad={onMapLoad}
+      onClick={() => {
+        if (isSingleRun) startRouteAnimation();
+      }}
       onError={() => setMapboxFailed(true)}
       initialViewState={{ bounds: initialBounds, fitBoundsOptions: { padding: 40 } }}
       onZoom={(e) => setCurrentZoom(e.viewState.zoom)}
@@ -414,8 +421,9 @@ const RunMap = ({ title, changeYear: _changeYear, geoData, thisYear, isSticky }:
             'line-color': ['get', 'color'],
             'line-width': isSingleRun ? 5 : (isBigMap ? 1 : 2),
             'line-dasharray': dash,
-            'line-opacity': isSingleRun || isBigMap ? 1 : LINE_OPACITY,
-            'line-blur': 1,
+            'line-opacity': isSingleRun && isRouteAnimating
+              ? 0.16
+              : (isSingleRun || isBigMap ? 1 : LINE_OPACITY),
           }}
           layout={{ 'line-join': 'round', 'line-cap': 'round' }}
         />
@@ -443,7 +451,7 @@ const RunMap = ({ title, changeYear: _changeYear, geoData, thisYear, isSticky }:
             type="line"
             paint={{
               'line-color': ['get', 'color'],
-              'line-width': 3,
+              'line-width': 6,
               'line-opacity': 1,
             }}
             layout={{ 'line-join': 'round', 'line-cap': 'round' }}

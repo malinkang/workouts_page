@@ -1,8 +1,8 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Activity } from '@/utils/utils';
+import { Activity, activityMatchesDashboardFilter, type DashboardActivityFilter } from '@/utils/utils';
 import styles from './style.module.scss';
 
-export type DashboardFilter = 'run' | 'walk' | 'ride' | 'sleep';
+export type DashboardFilter = DashboardActivityFilter;
 type ActivityFilter = Exclude<DashboardFilter, 'sleep'>;
 type Period = 'week' | 'month' | 'year' | 'total';
 
@@ -54,9 +54,6 @@ interface SleepBucket {
   bedMinutes: number;
 }
 
-const RUN_TYPES = new Set(['Run', 'Trail Run', 'Treadmill', 'VirtualRun']);
-const WALK_TYPES = new Set(['Walk', 'Hike']);
-const RIDE_TYPES = new Set(['Ride', 'Ninebot', 'VirtualRide', 'EBikeRide', 'Indoor Ride']);
 const PERIOD_LABELS: Array<{ key: Period; label: string }> = [
   { key: 'week', label: '周' },
   { key: 'month', label: '月' },
@@ -105,10 +102,44 @@ const formatHours = (minutes: number): string => {
   return `${hours}小时 ${String(remainder).padStart(2, '0')}分`;
 };
 
+const ActivityBar = ({
+  bucket,
+  maxValue,
+  selected,
+  onSelect,
+}: {
+  bucket: Pick<ActivityBucket | SleepBucket, 'key' | 'label' | 'value'>;
+  maxValue: number;
+  selected: boolean;
+  onSelect: () => void;
+}) => {
+  const barHeight = Math.max((bucket.value / maxValue) * 170, 5);
+
+  return (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={selected}
+      className={`${styles.barButton} ${selected ? styles.selectedBar : ''}`}
+      onClick={onSelect}
+      title={`${bucket.label} ${bucket.value.toFixed(2)}`}
+    >
+      <span
+        className={styles.barValue}
+        style={{ '--value-bottom': `${34 + barHeight}px` } as React.CSSProperties}
+      >
+        {bucket.value.toFixed(1)}
+      </span>
+      <span className={styles.barTrack}>
+        <span className={styles.bar} style={{ height: `${barHeight}px` }} />
+      </span>
+      <span className={styles.barLabel}>{bucket.label}</span>
+    </button>
+  );
+};
+
 const activityMatches = (activity: Activity, filter: ActivityFilter): boolean => {
-  if (filter === 'run') return RUN_TYPES.has(activity.type);
-  if (filter === 'walk') return WALK_TYPES.has(activity.type);
-  return RIDE_TYPES.has(activity.type);
+  return activityMatchesDashboardFilter(activity, filter);
 };
 
 const KeepStats = ({
@@ -250,21 +281,13 @@ const KeepStats = ({
         </div>
         <div ref={chartRef} className={styles.chart} role="tablist" aria-label="周期数据">
           {activeBuckets.map((bucket) => (
-            <button
-              type="button"
-              role="tab"
-              aria-selected={effectiveBucket === bucket.key}
-              className={`${styles.barButton} ${effectiveBucket === bucket.key ? styles.selectedBar : ''}`}
+            <ActivityBar
               key={bucket.key}
-              onClick={() => setSelectedBucket(bucket.key)}
-              title={`${bucket.label} ${bucket.value.toFixed(2)}`}
-            >
-              <span className={styles.barValue}>{bucket.value.toFixed(1)}</span>
-              <span className={styles.barTrack}>
-                <span className={styles.bar} style={{ height: `${Math.max((bucket.value / maxValue) * 100, 4)}%` }} />
-              </span>
-              <span className={styles.barLabel}>{bucket.label}</span>
-            </button>
+              bucket={bucket}
+              maxValue={maxValue}
+              selected={effectiveBucket === bucket.key}
+              onSelect={() => setSelectedBucket(bucket.key)}
+            />
           ))}
         </div>
       </div>
