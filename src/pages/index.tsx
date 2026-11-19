@@ -153,7 +153,7 @@ const Index = () => {
 
     // A period selection carries its owning year. Keep the annual heatmap
     // stable for periods within that year and replace it only across years.
-    const selectedYear = selectedActivities.length > 0 && selection.bucket !== 'total'
+    const selectedYear = selection.bucket !== 'total'
       ? selection.bucket.slice(0, 4)
       : undefined;
     if (selectedYear) {
