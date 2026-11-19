@@ -12,7 +12,7 @@ import useActivities from '@/hooks/useActivities';
 import useSiteMetadata from '@/hooks/useSiteMetadata';
 import RunCalendar from '@/components/RunCalendar';
 import RunHeatmap from '@/components/RunHeatmap';
-import MetricHeatmap from '@/components/MetricHeatmap';
+import MetricHeatmap, { type MetricRecord } from '@/components/MetricHeatmap';
 import {
   Activity,
   activityMatchesDashboardFilter,
@@ -33,6 +33,8 @@ const DASHBOARD_FILTERS: Array<{ key: DashboardFilter; label: string }> = [
   { key: 'walk', label: '步行' },
   { key: 'ride', label: '电动车骑行' },
   { key: 'sleep', label: '睡眠' },
+  { key: 'steps', label: '步数' },
+  { key: 'water', label: '饮水' },
 ];
 
 const Index = () => {
@@ -55,7 +57,27 @@ const Index = () => {
   
   const [title, setTitle] = useState('');
   const [geoData, setGeoData] = useState(geoJsonForRuns(runs));
-  const dashboardMode = dashboardFilter === 'sleep' ? 'sleep' : 'workout';
+  const dashboardMode = dashboardFilter === 'sleep'
+    ? 'sleep'
+    : dashboardFilter === 'steps' || dashboardFilter === 'water'
+      ? 'metric'
+      : 'workout';
+  const metricHeatmap: { title: string; unit: string; records: MetricRecord[]; accent: string } | null =
+    dashboardFilter === 'steps'
+      ? {
+          title: '步数热力图',
+          unit: '步',
+          records: stepsRecords.map((record) => ({ date: record.date, value: record.steps })),
+          accent: '#22a861',
+        }
+      : dashboardFilter === 'water'
+        ? {
+            title: '饮水热力图',
+            unit: 'ml',
+            records: waterRecords.map((record) => ({ date: record.date, value: record.water_ml })),
+            accent: '#2196d3',
+          }
+        : null;
 
   useEffect(() => {
     setHeatmapRuns(
@@ -229,23 +251,18 @@ const Index = () => {
             year={heatmapYear}
           />
         </div>
-        <div className="annual-heatmap-board metric-heatmap-grid">
+        </>
+      )}
+      {dashboardMode === 'metric' && metricHeatmap && (
+        <div className="annual-heatmap-board">
           <MetricHeatmap
-            title="步数热力图"
-            unit="步"
+            title={metricHeatmap.title}
+            unit={metricHeatmap.unit}
             year={heatmapYear}
-            records={stepsRecords.map((record) => ({ date: record.date, value: record.steps }))}
-            accent="#22a861"
-          />
-          <MetricHeatmap
-            title="饮水热力图"
-            unit="ml"
-            year={heatmapYear}
-            records={waterRecords.map((record) => ({ date: record.date, value: record.water_ml }))}
-            accent="#2196d3"
+            records={metricHeatmap.records}
+            accent={metricHeatmap.accent}
           />
         </div>
-        </>
       )}
       {dashboardMode === 'sleep' && (
         <div className="annual-heatmap-board">
@@ -261,12 +278,14 @@ const Index = () => {
           />
         </div>
       )}
-      <KeepStats
-        activities={activities}
-        sleepRecords={sleepRecords as SleepRecord[]}
-        filter={dashboardFilter}
-        onActivitySelectionChange={handleStatsSelection}
-      />
+      {dashboardMode !== 'metric' && (
+        <KeepStats
+          activities={activities}
+          sleepRecords={sleepRecords as SleepRecord[]}
+          filter={dashboardFilter}
+          onActivitySelectionChange={handleStatsSelection}
+        />
+      )}
       {dashboardMode === 'workout' && (
         <div className="shuju-list">
           <RunTable
