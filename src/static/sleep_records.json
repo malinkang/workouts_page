@@ -12382,5 +12382,21 @@
     "respiration_range": "",
     "source": "notion-keep-sleep",
     "notion_last_edited_time": "2026-11-18T08:19:00.000Z"
+  },
+  {
+    "sleep_id": "41d86019-c92c-813e-a1b7-f85bdc9a633e",
+    "name": "2026-11-19",
+    "date": "2026-11-19",
+    "sleep_start": "2026-11-18 22:36:00",
+    "sleep_end": "2026-11-19 06:25:00",
+    "sleep_minutes": 446,
+    "bed_minutes": 468,
+    "deep_sleep_ratio": 0.099352051836,
+    "light_sleep_ratio": 0.66090712743,
+    "rem_sleep_ratio": 0.190064794816,
+    "awake_count": 10,
+    "respiration_range": "",
+    "source": "notion-keep-sleep",
+    "notion_last_edited_time": "2026-11-19T09:42:00.000Z"
   }
 ]
