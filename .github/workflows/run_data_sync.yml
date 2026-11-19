@@ -41,6 +41,8 @@ jobs:
       NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
       NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
       WORKOUT_DATABASE_ID: ${{ secrets.WORKOUT_DATABASE_ID || secrets.NOTION_DATABASE_ID }}
+      KEEP_STEPS_DATABASE_ID: ${{ secrets.KEEP_STEPS_DATABASE_ID || '66e1a13b704a4c819d817b80d5b81a38' }}
+      KEEP_WATER_DATABASE_ID: ${{ secrets.KEEP_WATER_DATABASE_ID || 'd277ac88dc9a4615a9e17d607397f351' }}
       TYPE_DATABASE_ID: ''
       SPLIT_DATABASE_ID: ''
     steps:
@@ -69,13 +71,13 @@ jobs:
 
       - name: Commit synced activities
         run: |
-          if git diff --quiet -- src/static/activities.json src/static/sleep_records.json; then
-            echo "workout and sleep data unchanged"
+          if git diff --quiet -- src/static/activities.json src/static/sleep_records.json src/static/steps_records.json src/static/water_records.json; then
+            echo "workout, sleep, steps, and water data unchanged"
             exit 0
           fi
 
           git config --local user.email "${{ env.GITHUB_EMAIL }}"
           git config --local user.name "${{ env.GITHUB_NAME }}"
-          git add src/static/activities.json src/static/sleep_records.json
-          git commit -m "Sync workouts and sleep data from Notion"
+          git add src/static/activities.json src/static/sleep_records.json src/static/steps_records.json src/static/water_records.json
+          git commit -m "Sync workouts, sleep, steps, and water data from Notion"
           git push origin HEAD:master

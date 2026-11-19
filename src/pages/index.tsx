@@ -12,6 +12,7 @@ import useActivities from '@/hooks/useActivities';
 import useSiteMetadata from '@/hooks/useSiteMetadata';
 import RunCalendar from '@/components/RunCalendar';
 import RunHeatmap from '@/components/RunHeatmap';
+import MetricHeatmap from '@/components/MetricHeatmap';
 import {
   Activity,
   activityMatchesDashboardFilter,
@@ -24,6 +25,8 @@ import {
   RunIds,
 } from '@/utils/utils';
 import sleepRecords from '@/static/sleep_records.json';
+import stepsRecords from '@/static/steps_records.json';
+import waterRecords from '@/static/water_records.json';
 
 const DASHBOARD_FILTERS: Array<{ key: DashboardFilter; label: string }> = [
   { key: 'run', label: '跑步' },
@@ -224,6 +227,22 @@ const Index = () => {
             locateActivity={locateActivity}
             setRunIndex={setRunIndex}
             year={heatmapYear}
+          />
+        </div>
+        <div className="annual-heatmap-board metric-heatmap-grid">
+          <MetricHeatmap
+            title="步数热力图"
+            unit="步"
+            year={heatmapYear}
+            records={stepsRecords.map((record) => ({ date: record.date, value: record.steps }))}
+            accent="#22a861"
+          />
+          <MetricHeatmap
+            title="饮水热力图"
+            unit="ml"
+            year={heatmapYear}
+            records={waterRecords.map((record) => ({ date: record.date, value: record.water_ml }))}
+            accent="#2196d3"
           />
         </div>
         </>

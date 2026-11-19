@@ -1,0 +1,71 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  overflow: hidden;
+  border: 1px solid var(--border-card);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+.header,
+.legend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+}
+
+.header strong {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.heatmapWrap {
+  position: relative;
+  width: 100%;
+  padding-top: 20px;
+}
+
+.monthLabels {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 16px;
+  pointer-events: none;
+}
+
+.monthLabel {
+  position: absolute;
+  top: 0;
+  color: var(--text-secondary);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.heatmapRoot :global(.ch-subdomain-bg) {
+  fill: color-mix(in srgb, var(--surface) 82%, var(--text-muted) 18%);
+  shape-rendering: geometricPrecision;
+}
+
+html[data-theme='dark'] .heatmapRoot :global(.ch-subdomain-bg) {
+  fill: #21262d;
+}
+
+.legend {
+  justify-content: flex-end;
+}
+
+.legendScale {
+  width: 42px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.maxValue {
+  margin-left: 6px;
+}

@@ -10,13 +10,22 @@ from zoneinfo import ZoneInfo
 import gpxpy
 import httpx
 import polyline
-from config import BASE_TIMEZONE, JSON_FILE, MAPPING_TYPE, SLEEP_JSON_FILE
+from config import (
+    BASE_TIMEZONE,
+    JSON_FILE,
+    MAPPING_TYPE,
+    SLEEP_JSON_FILE,
+    STEPS_JSON_FILE,
+    WATER_JSON_FILE,
+)
 
 NOTION_API_BASE = "https://api.notion.com/v1"
 NOTION_API_VERSION = os.getenv("NOTION_API_VERSION", "2022-06-28")
 KEEP_DATABASE_ID = "99186019-c92c-8254-8ca5-01ea9089d2a6"
 KEEP_TYPE_DATABASE_ID = "c2086019-c92c-8310-8c70-0191c6e25894"
 KEEP_SLEEP_DATABASE_ID = "4eb86019-c92c-82bc-92ff-81ae69131441"
+KEEP_STEPS_DATABASE_ID = "66e1a13b704a4c819d817b80d5b81a38"
+KEEP_WATER_DATABASE_ID = "d277ac88dc9a4615a9e17d607397f351"
 SYNC_OVERLAP_SECONDS = int(os.getenv("NOTION_SYNC_OVERLAP_SECONDS", "300") or "300")
 
 PROPERTY_CANDIDATES = {
@@ -848,6 +857,69 @@ def write_sleep_json(records: List[dict]) -> int:
     return len(records)
 
 
+def page_to_steps_record(page: dict, local_tz: ZoneInfo) -> Optional[dict]:
+    if page.get("archived") or page.get("in_trash"):
+        return None
+    properties = page.get("properties", {})
+    date_value = extract_date(properties.get("日期"), local_tz)
+    steps = extract_number(properties.get("步数"))
+    if date_value is None or steps is None:
+        return None
+    return {
+        "steps_id": page.get("id"),
+        "date": date_value.strftime("%Y-%m-%d"),
+        "steps": round(steps),
+        "notion_last_edited_time": page.get("last_edited_time"),
+    }
+
+
+def page_to_water_record(page: dict, local_tz: ZoneInfo) -> Optional[dict]:
+    if page.get("archived") or page.get("in_trash"):
+        return None
+    properties = page.get("properties", {})
+    date_value = extract_date(properties.get("日期"), local_tz)
+    water = extract_number(properties.get("饮水量（毫升）"))
+    goal = extract_number(properties.get("目标饮水量"))
+    if date_value is None or water is None:
+        return None
+    return {
+        "water_id": page.get("id"),
+        "date": date_value.strftime("%Y-%m-%d"),
+        "water_ml": round(water),
+        "goal_ml": round(goal) if goal is not None else None,
+        "notion_last_edited_time": page.get("last_edited_time"),
+    }
+
+
+def load_metric_json(path: str, id_key: str) -> List[dict]:
+    if not os.path.exists(path):
+        return []
+    try:
+        with open(path, "r", encoding="utf-8") as handle:
+            data = json.load(handle)
+    except Exception:
+        return []
+    return [item for item in data if isinstance(item, dict) and item.get(id_key)]
+
+
+def compute_metric_sync_anchor(records: List[dict]) -> Optional[datetime]:
+    latest = [
+        parse_notion_datetime(item.get("notion_last_edited_time"))
+        for item in records
+    ]
+    latest = [value for value in latest if value is not None]
+    if not latest:
+        return None
+    return max(latest) - timedelta(seconds=max(SYNC_OVERLAP_SECONDS, 0))
+
+
+def write_metric_json(path: str, records: List[dict]) -> int:
+    records.sort(key=lambda item: item.get("date", ""))
+    with open(path, "w", encoding="utf-8") as handle:
+        json.dump(records, handle, ensure_ascii=False, indent=2)
+    return len(records)
+
+
 
 def sync_from_notion(full_sync: bool = False) -> int:
     workout_database_id = os.getenv("WORKOUT_DATABASE_ID") or get_env(
@@ -858,14 +930,22 @@ def sync_from_notion(full_sync: bool = False) -> int:
     keep_database_id = os.getenv("KEEP_DATABASE_ID", KEEP_DATABASE_ID)
     keep_type_database_id = os.getenv("KEEP_TYPE_DATABASE_ID", KEEP_TYPE_DATABASE_ID)
     sleep_database_id = os.getenv("KEEP_SLEEP_DATABASE_ID", KEEP_SLEEP_DATABASE_ID)
+    steps_database_id = os.getenv("KEEP_STEPS_DATABASE_ID", KEEP_STEPS_DATABASE_ID)
+    water_database_id = os.getenv("KEEP_WATER_DATABASE_ID", KEEP_WATER_DATABASE_ID)
     local_tz = ZoneInfo(os.getenv("WORKOUTS_PAGE_TIMEZONE", BASE_TIMEZONE))
 
     existing_activities = [] if full_sync else load_existing_activities(local_tz)
     existing_sleep = [] if full_sync else load_existing_sleep()
+    existing_steps = [] if full_sync else load_metric_json(STEPS_JSON_FILE, "steps_id")
+    existing_water = [] if full_sync else load_metric_json(WATER_JSON_FILE, "water_id")
     existing_by_run_id = {activity["run_id"]: activity for activity in existing_activities}
     sleep_by_id = {record["sleep_id"]: record for record in existing_sleep}
+    steps_by_id = {record["steps_id"]: record for record in existing_steps}
+    water_by_id = {record["water_id"]: record for record in existing_water}
     sync_anchor = None if full_sync else compute_sync_anchor(existing_activities)
     sleep_sync_anchor = None if full_sync else compute_sleep_sync_anchor(existing_sleep)
+    steps_sync_anchor = None if full_sync else compute_metric_sync_anchor(existing_steps)
+    water_sync_anchor = None if full_sync else compute_metric_sync_anchor(existing_water)
 
     def load_split_map(client: httpx.Client) -> Dict[str, List[dict]]:
         if not split_database_id:
@@ -914,6 +994,16 @@ def sync_from_notion(full_sync: bool = False) -> int:
         else:
             sleep_pages = fetch_pages_edited_after(client, sleep_database_id, sleep_sync_anchor)
 
+        if full_sync or steps_sync_anchor is None:
+            steps_pages = fetch_database_pages(client, steps_database_id)
+        else:
+            steps_pages = fetch_pages_edited_after(client, steps_database_id, steps_sync_anchor)
+
+        if full_sync or water_sync_anchor is None:
+            water_pages = fetch_database_pages(client, water_database_id)
+        else:
+            water_pages = fetch_pages_edited_after(client, water_database_id, water_sync_anchor)
+
         route_map = load_route_map(workout_pages + keep_pages)
         workout_source = (
             "notion-keep"
@@ -956,7 +1046,19 @@ def sync_from_notion(full_sync: bool = False) -> int:
             if record is not None:
                 sleep_by_id[record["sleep_id"]] = record
 
+        for page in steps_pages:
+            record = page_to_steps_record(page, local_tz)
+            if record is not None:
+                steps_by_id[record["steps_id"]] = record
+
+        for page in water_pages:
+            record = page_to_water_record(page, local_tz)
+            if record is not None:
+                water_by_id[record["water_id"]] = record
+
     write_sleep_json(list(sleep_by_id.values()))
+    write_metric_json(STEPS_JSON_FILE, list(steps_by_id.values()))
+    write_metric_json(WATER_JSON_FILE, list(water_by_id.values()))
     return write_activities_json(list(existing_by_run_id.values()))
 
 
