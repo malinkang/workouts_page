@@ -22,6 +22,19 @@ interface MetricHeatmapProps {
 const WEEKDAY_LABELS = ['', '一', '', '三', '', '五', ''];
 const MONTH_LABELS = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
 
+const getThemeMode = (): 'light' | 'dark' => {
+  if (typeof document !== 'undefined') {
+    const documentTheme = document.documentElement.dataset.theme;
+    if (documentTheme === 'light' || documentTheme === 'dark') return documentTheme;
+  }
+
+  if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  return 'light';
+};
+
 const dateKeyToUtcNoon = (dateKey: string) => {
   const [year, month, day] = dateKey.split('-').map(Number);
   return Date.UTC(year, month - 1, day, 12, 0, 0, 0);
@@ -33,6 +46,7 @@ const MetricHeatmap = ({ title, unit, year, records, accent, decimals = 0 }: Met
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+  const [themeMode, setThemeMode] = useState<'light' | 'dark'>(getThemeMode);
   const displayYear = Number(year);
   const yearRecords = useMemo(
     () => records.filter((record) => record.date.slice(0, 4) === year && Number.isFinite(record.value)),
@@ -82,6 +96,14 @@ const MetricHeatmap = ({ title, unit, year, records, accent, decimals = 0 }: Met
   }, [containerWidth]);
 
   useEffect(() => {
+    if (typeof document === 'undefined') return undefined;
+
+    const observer = new MutationObserver(() => setThemeMode(getThemeMode()));
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
     const wrap = wrapRef.current;
     if (!wrap || typeof ResizeObserver === 'undefined') return undefined;
     const update = () => setContainerWidth(wrap.clientWidth);
@@ -94,7 +116,6 @@ const MetricHeatmap = ({ title, unit, year, records, accent, decimals = 0 }: Met
   useEffect(() => {
     const host = containerRef.current;
     if (!host) return undefined;
-    let disposed = false;
     host.innerHTML = '';
     const heatmap = new CalHeatmap();
     const colors = ['#d9f7e1', '#a6e3b5', '#5bc77a', accent];
@@ -104,7 +125,17 @@ const MetricHeatmap = ({ title, unit, year, records, accent, decimals = 0 }: Met
         itemSelector: host as unknown as string,
         range: 1,
         date: { start: new Date(Date.UTC(displayYear, 0, 1, 12)), timezone: 'UTC' },
-        domain: { type: 'year', gutter: 0, label: { text: null, height: 0 } },
+        domain: {
+          type: 'year',
+          gutter: 0,
+          label: {
+            text: null,
+            position: 'top',
+            textAlign: 'start',
+            offset: { x: 0, y: 0 },
+            height: 0,
+          },
+        },
         subDomain: {
           type: 'day',
           width: layout.cellSize,
@@ -117,10 +148,17 @@ const MetricHeatmap = ({ title, unit, year, records, accent, decimals = 0 }: Met
           x: 'date',
           y: 'fillColor',
           groupY: (values: Array<string | number | null>) => values[values.length - 1] ?? null,
-          defaultValue: '#ebedf0',
+          defaultValue: themeMode === 'light' ? '#ebedf0' : '#21262d',
         },
-        scale: { color: { type: 'ordinal', domain: ['#ebedf0', ...colors], range: ['#ebedf0', ...colors] } },
+        scale: {
+          color: {
+            type: 'ordinal',
+            domain: [themeMode === 'light' ? '#ebedf0' : '#21262d', ...colors],
+            range: [themeMode === 'light' ? '#ebedf0' : '#21262d', ...colors],
+          },
+        },
         animationDuration: 180,
+        theme: themeMode,
       },
       [
         [Tooltip, {
@@ -144,18 +182,17 @@ const MetricHeatmap = ({ title, unit, year, records, accent, decimals = 0 }: Met
       ],
     );
 
-    void paint.then(() => {
-      if (disposed) {
-        void heatmap.destroy();
-        host.innerHTML = '';
-      }
+    void paint.catch((error: unknown) => {
+      // Keep paint failures visible during development instead of silently leaving an empty chart.
+      console.error('[MetricHeatmap] Failed to paint heatmap', error);
     });
     return () => {
-      disposed = true;
       void heatmap.destroy();
       host.innerHTML = '';
     };
-  }, [accent, chartData, decimals, displayYear, layout, unit, yearRecords]);
+  }, [accent, chartData, decimals, displayYear, layout, themeMode, unit, yearRecords]);
+
+  const renderKey = `${year}-${themeMode}-${layout.cellSize}-${layout.contentWidth}`;
 
   return (
     <section className={styles.card} aria-label={`${title}热力图`}>
@@ -171,7 +208,12 @@ const MetricHeatmap = ({ title, unit, year, records, accent, decimals = 0 }: Met
             </span>
           ))}
         </div>
-        <div ref={containerRef} className={styles.heatmapRoot} style={{ width: layout.contentWidth }} />
+        <div
+          key={renderKey}
+          ref={containerRef}
+          className={styles.heatmapRoot}
+          style={{ width: layout.contentWidth }}
+        />
       </div>
       <div className={styles.legend}><span>少</span><span className={styles.legendScale} style={{ background: accent }} /><span>多</span><span className={styles.maxValue}>最高 {maxValue.toLocaleString()} {unit}</span></div>
     </section>

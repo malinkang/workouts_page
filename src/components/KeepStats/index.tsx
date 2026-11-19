@@ -1,10 +1,14 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Activity, activityMatchesDashboardFilter, type DashboardActivityFilter } from '@/utils/utils';
+import SleepOverview, {
+  type SleepOverviewBucket,
+  type SleepOverviewRecord,
+} from '@/components/SleepOverview';
 import styles from './style.module.scss';
 
 export type DashboardFilter = DashboardActivityFilter;
 type ActivityFilter = Exclude<DashboardFilter, 'sleep'>;
-type Period = 'week' | 'month' | 'year' | 'total';
+export type Period = 'week' | 'month' | 'year' | 'total';
 
 export interface StatsSelection {
   period: Period;
@@ -32,7 +36,7 @@ interface KeepStatsProps {
   activities: Activity[];
   sleepRecords: SleepRecord[];
   filter: DashboardFilter;
-  onActivitySelectionChange: (activities: Activity[], selection: StatsSelection) => void;
+  onActivitySelectionChange: (_activities: Activity[], _selection: StatsSelection) => void;
 }
 
 interface ActivityBucket {
@@ -45,7 +49,7 @@ interface ActivityBucket {
   calories: number;
 }
 
-interface SleepBucket {
+interface SleepBucket extends SleepOverviewBucket {
   key: string;
   label: string;
   value: number;
@@ -94,12 +98,6 @@ const titleForSelection = (period: Period, bucket: string): string => {
   }
   const [year, week] = bucket.split('-W');
   return `${year}年第${Number(week)}周`;
-};
-
-const formatHours = (minutes: number): string => {
-  const hours = Math.floor(minutes / 60);
-  const remainder = Math.round(minutes % 60);
-  return `${hours}小时 ${String(remainder).padStart(2, '0')}分`;
 };
 
 const ActivityBar = ({
@@ -274,36 +272,34 @@ const KeepStats = ({
         ))}
       </div>
 
-      <div className={styles.chartShell}>
-        <div className={styles.chartHeader}>
-          <span>{mode === 'workout' ? '里程（公里）' : '睡眠时长（小时）'}</span>
-          <span>{activeBuckets.length} 个周期</span>
+      {mode === 'workout' && (
+        <div className={styles.chartShell}>
+          <div className={styles.chartHeader}>
+            <span>里程（公里）</span>
+            <span>{activeBuckets.length} 个周期</span>
+          </div>
+          <div ref={chartRef} className={styles.chart} role="tablist" aria-label="周期数据">
+            {activeBuckets.map((bucket) => (
+              <ActivityBar
+                key={bucket.key}
+                bucket={bucket}
+                maxValue={maxValue}
+                selected={effectiveBucket === bucket.key}
+                onSelect={() => setSelectedBucket(bucket.key)}
+              />
+            ))}
+          </div>
         </div>
-        <div ref={chartRef} className={styles.chart} role="tablist" aria-label="周期数据">
-          {activeBuckets.map((bucket) => (
-            <ActivityBar
-              key={bucket.key}
-              bucket={bucket}
-              maxValue={maxValue}
-              selected={effectiveBucket === bucket.key}
-              onSelect={() => setSelectedBucket(bucket.key)}
-            />
-          ))}
-        </div>
-      </div>
+      )}
 
-      {mode === 'sleep' && selectedSleep.length > 0 && (
-        <div className={styles.sleepList}>
-          {selectedSleep.slice().reverse().map((record) => (
-            <div className={styles.sleepRow} key={record.sleep_id}>
-              <div>
-                <strong>{record.date}</strong>
-                <span>{record.sleep_start ? `${record.sleep_start.slice(11, 16)} - ${record.sleep_end.slice(11, 16)}` : '时间未记录'}</span>
-              </div>
-              <strong>{formatHours(record.sleep_minutes)}</strong>
-            </div>
-          ))}
-        </div>
+      {mode === 'sleep' && (
+        <SleepOverview
+          period={period}
+          buckets={sleepBuckets}
+          selectedBucket={effectiveBucket}
+          selectedRecords={selectedSleep as SleepOverviewRecord[]}
+          onSelectBucket={setSelectedBucket}
+        />
       )}
     </section>
   );

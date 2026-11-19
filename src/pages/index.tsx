@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import Layout from '@/components/Layout';
 import KeepStats, {
@@ -62,19 +62,34 @@ const Index = () => {
     : dashboardFilter === 'steps' || dashboardFilter === 'water'
       ? 'metric'
       : 'workout';
+  const sleepMetricRecords = useMemo(
+    () => (sleepRecords as SleepRecord[]).map((record) => ({
+      date: record.date,
+      value: record.sleep_minutes,
+    })),
+    [],
+  );
+  const stepsMetricRecords = useMemo(
+    () => stepsRecords.map((record) => ({ date: record.date, value: record.steps })),
+    [],
+  );
+  const waterMetricRecords = useMemo(
+    () => waterRecords.map((record) => ({ date: record.date, value: record.water_ml })),
+    [],
+  );
   const metricHeatmap: { title: string; unit: string; records: MetricRecord[]; accent: string } | null =
     dashboardFilter === 'steps'
       ? {
           title: '步数热力图',
           unit: '步',
-          records: stepsRecords.map((record) => ({ date: record.date, value: record.steps })),
+          records: stepsMetricRecords,
           accent: '#22a861',
         }
       : dashboardFilter === 'water'
         ? {
             title: '饮水热力图',
             unit: 'ml',
-            records: waterRecords.map((record) => ({ date: record.date, value: record.water_ml })),
+            records: waterMetricRecords,
             accent: '#2196d3',
           }
         : null;
@@ -270,10 +285,7 @@ const Index = () => {
             title="睡眠热力图"
             unit="分钟"
             year={heatmapYear}
-            records={(sleepRecords as SleepRecord[]).map((record) => ({
-              date: record.date,
-              value: record.sleep_minutes,
-            }))}
+            records={sleepMetricRecords}
             accent="#8667d7"
           />
         </div>

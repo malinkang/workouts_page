@@ -47,13 +47,36 @@
   white-space: nowrap;
 }
 
+.heatmapRoot {
+  color: var(--text-secondary);
+}
+
+.heatmapRoot :global(.ch-container) {
+  display: block;
+}
+
+.heatmapRoot :global(.ch-domain-text) {
+  fill: var(--text-secondary);
+  font-size: 11px;
+}
+
 .heatmapRoot :global(.ch-subdomain-bg) {
   fill: color-mix(in srgb, var(--surface) 82%, var(--text-muted) 18%);
+  transition: stroke 0.16s ease, opacity 0.16s ease;
   shape-rendering: geometricPrecision;
 }
 
 html[data-theme='dark'] .heatmapRoot :global(.ch-subdomain-bg) {
   fill: #21262d;
+}
+
+html[data-theme='light'] .heatmapRoot :global(.ch-subdomain-bg) {
+  fill: #ebedf0;
+}
+
+.heatmapRoot :global(.ch-subdomain-bg:hover) {
+  stroke: color-mix(in srgb, var(--text-primary) 45%, transparent);
+  stroke-width: 1px;
 }
 
 .legend {
