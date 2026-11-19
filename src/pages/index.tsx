@@ -247,6 +247,20 @@ const Index = () => {
         </div>
         </>
       )}
+      {dashboardMode === 'sleep' && (
+        <div className="annual-heatmap-board">
+          <MetricHeatmap
+            title="睡眠热力图"
+            unit="分钟"
+            year={heatmapYear}
+            records={(sleepRecords as SleepRecord[]).map((record) => ({
+              date: record.date,
+              value: record.sleep_minutes,
+            }))}
+            accent="#8667d7"
+          />
+        </div>
+      )}
       <KeepStats
         activities={activities}
         sleepRecords={sleepRecords as SleepRecord[]}
