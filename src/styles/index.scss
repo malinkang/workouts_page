@@ -6,6 +6,7 @@
 :root,
 html[data-theme='dark'],
 body[data-theme='dark'] {
+  color-scheme: dark;
   --page-bg: #151516;
   --surface: #1c1c1e;
   --surface-strong: rgba(28, 28, 30, 0.85);
@@ -21,6 +22,7 @@ body[data-theme='dark'] {
 
 html[data-theme='light'],
 body[data-theme='light'] {
+  color-scheme: light;
   --page-bg: #f4f5ef;
   --surface: #ffffff;
   --surface-strong: rgba(255, 255, 255, 0.92);

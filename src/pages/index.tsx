@@ -13,6 +13,9 @@ import useSiteMetadata from '@/hooks/useSiteMetadata';
 import RunCalendar from '@/components/RunCalendar';
 import RunHeatmap from '@/components/RunHeatmap';
 import MetricHeatmap, { type MetricRecord } from '@/components/MetricHeatmap';
+import RingCalendarHeatmap, {
+  type ActivityRingRecord,
+} from '@/components/RingCalendarHeatmap';
 import {
   Activity,
   activityMatchesDashboardFilter,
@@ -27,6 +30,7 @@ import {
 import sleepRecords from '@/static/sleep_records.json';
 import stepsRecords from '@/static/steps_records.json';
 import waterRecords from '@/static/water_records.json';
+import activityRings from '@/static/activity_rings.json';
 
 const DASHBOARD_FILTERS: Array<{ key: DashboardFilter; label: string }> = [
   { key: 'run', label: '跑步' },
@@ -35,6 +39,7 @@ const DASHBOARD_FILTERS: Array<{ key: DashboardFilter; label: string }> = [
   { key: 'sleep', label: '睡眠' },
   { key: 'steps', label: '步数' },
   { key: 'water', label: '饮水' },
+  { key: 'rings', label: '圆环' },
 ];
 
 const Index = () => {
@@ -57,11 +62,14 @@ const Index = () => {
   
   const [title, setTitle] = useState('');
   const [geoData, setGeoData] = useState(geoJsonForRuns(runs));
-  const dashboardMode = dashboardFilter === 'sleep'
-    ? 'sleep'
-    : dashboardFilter === 'steps' || dashboardFilter === 'water'
-      ? 'metric'
-      : 'workout';
+  const dashboardMode: 'workout' | 'sleep' | 'metric' | 'rings' =
+    dashboardFilter === 'sleep'
+      ? 'sleep'
+      : dashboardFilter === 'steps' || dashboardFilter === 'water'
+        ? 'metric'
+        : dashboardFilter === 'rings'
+          ? 'rings'
+          : 'workout';
   const sleepMetricRecords = useMemo(
     () => (sleepRecords as SleepRecord[]).map((record) => ({
       date: record.date,
@@ -290,7 +298,12 @@ const Index = () => {
           />
         </div>
       )}
-      {dashboardMode !== 'metric' && (
+      {dashboardMode === 'rings' && (
+        <div className="annual-heatmap-board">
+          <RingCalendarHeatmap records={activityRings as ActivityRingRecord[]} />
+        </div>
+      )}
+      {(dashboardMode === 'workout' || dashboardMode === 'sleep') && (
         <KeepStats
           activities={activities}
           sleepRecords={sleepRecords as SleepRecord[]}

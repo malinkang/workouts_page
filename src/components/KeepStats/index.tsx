@@ -7,7 +7,7 @@ import SleepOverview, {
 import styles from './style.module.scss';
 
 export type DashboardFilter = DashboardActivityFilter;
-type ActivityFilter = Exclude<DashboardFilter, 'sleep'>;
+type ActivityFilter = 'run' | 'walk' | 'ride';
 export type Period = 'week' | 'month' | 'year' | 'total';
 
 export interface StatsSelection {
@@ -149,13 +149,16 @@ const KeepStats = ({
   const [period, setPeriod] = useState<Period>('year');
   const [selectedBucket, setSelectedBucket] = useState('total');
   const mode = filter === 'sleep' ? 'sleep' : 'workout';
+  const workoutFilter = filter === 'run' || filter === 'walk' || filter === 'ride'
+    ? filter
+    : null;
 
   const filteredActivities = useMemo(
     () =>
-      filter === 'sleep'
+      workoutFilter === null
         ? []
-        : activities.filter((activity) => activityMatches(activity, filter)),
-    [activities, filter],
+        : activities.filter((activity) => activityMatches(activity, workoutFilter)),
+    [activities, workoutFilter],
   );
 
   const activityBuckets = useMemo<ActivityBucket[]>(() => {

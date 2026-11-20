@@ -41,6 +41,7 @@ const Layout = ({ children, toolbarContent }: LayoutProps) => {
         <meta name="description" content={description} />
         <meta name="keywords" content={keywords} />
         <meta name="theme-color" content={theme === 'dark' ? '#151516' : '#f4f5ef'} />
+        <meta name="color-scheme" content="light dark" />
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no"

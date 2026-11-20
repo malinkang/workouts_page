@@ -1,0 +1,467 @@
+.card {
+  container: ring-calendar / inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-inline-size: 0;
+  padding: 18px;
+  overflow: clip;
+  border: 1px solid var(--border-card);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.header > div:first-child {
+  min-inline-size: 0;
+}
+
+.eyebrow {
+  display: block;
+  margin-block-end: 3px;
+  color: var(--text-secondary);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.header h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: clamp(1.2rem, 1rem + 1.1cqi, 1.65rem);
+  line-height: 1.12;
+}
+
+.header p {
+  margin: 6px 0 0;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.yearTabs {
+  display: flex;
+  flex: 0 1 auto;
+  gap: 4px;
+  max-inline-size: 50%;
+  padding: 3px;
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: var(--surface-hover);
+  scrollbar-width: none;
+  scroll-snap-type: inline proximity;
+}
+
+.yearTabs::-webkit-scrollbar {
+  display: none;
+}
+
+.yearTab {
+  flex: none;
+  min-inline-size: 48px;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  scroll-snap-align: start;
+}
+
+.yearTab:hover {
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+.yearTab[aria-pressed='true'] {
+  background: var(--surface);
+  color: var(--text-primary);
+  font-weight: 700;
+  box-shadow: 0 1px 6px rgb(0 0 0 / 12%);
+}
+
+.yearTab:focus-visible,
+.day:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  outline-offset: 2px;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.summaryCard {
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  min-block-size: 92px;
+  padding: 13px 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--surface-hover) 74%, transparent),
+      transparent
+    ),
+    var(--surface);
+}
+
+.summaryCard span,
+.summaryCard small {
+  color: var(--text-secondary);
+  font-size: 0.65rem;
+}
+
+.summaryCard strong {
+  color: var(--text-primary);
+  font-size: 1.28rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.detailCard {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.34fr) minmax(0, 1fr);
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 15px;
+  background: var(--surface-hover);
+}
+
+.detailHeading {
+  display: grid;
+  align-content: center;
+  gap: 5px;
+}
+
+.detailHeading span {
+  color: var(--text-secondary);
+  font-size: 0.65rem;
+}
+
+.detailHeading time {
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.detailHeading > strong {
+  width: fit-content;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, #32d74b 14%, transparent);
+  color: #32b957;
+  font-size: 0.62rem;
+}
+
+.emptyDetail {
+  padding: 14px;
+  border: 1px dashed var(--border-subtle);
+  border-radius: 15px;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.metricGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.metric {
+  min-inline-size: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 11px;
+  background: var(--surface);
+}
+
+.metricTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.65rem;
+}
+
+.metricTitle strong {
+  margin-inline-start: auto;
+  color: var(--ring-color);
+  font-size: 0.65rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.metricDot {
+  inline-size: 7px;
+  block-size: 7px;
+  border-radius: 50%;
+  background: var(--ring-color);
+}
+
+.metric progress {
+  display: block;
+  inline-size: 100%;
+  block-size: 5px;
+  margin-block: 8px 6px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: var(--surface-hover);
+  appearance: none;
+}
+
+.metric progress::-webkit-progress-bar {
+  border-radius: 999px;
+  background: var(--surface-hover);
+}
+
+.metric progress::-webkit-progress-value {
+  border-radius: 999px;
+  background: var(--ring-color);
+}
+
+.metric progress::-moz-progress-bar {
+  border-radius: 999px;
+  background: var(--ring-color);
+}
+
+.metric small {
+  display: block;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 0.61rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-secondary);
+  font-size: 0.65rem;
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend i {
+  inline-size: 7px;
+  block-size: 7px;
+  border-radius: 50%;
+}
+
+.legendNote {
+  margin-inline-start: auto;
+}
+
+.monthGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.monthCard {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 202px;
+  min-inline-size: 0;
+  padding: 11px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--surface-hover) 48%, var(--surface));
+}
+
+@supports not (content-visibility: auto) {
+  .monthCard {
+    contain: layout style paint;
+  }
+}
+
+.monthHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  margin-block-end: 8px;
+}
+
+.monthHeader strong {
+  color: var(--text-primary);
+  font-size: 0.75rem;
+}
+
+.monthHeader span {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.57rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.weekdays,
+.daysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.weekdays {
+  margin-block-end: 3px;
+  color: var(--text-muted);
+  font-size: 0.5rem;
+  text-align: center;
+}
+
+.day,
+.daySpacer {
+  min-inline-size: 0;
+  aspect-ratio: 1;
+  border-radius: 6px;
+}
+
+.day {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+}
+
+.day:not(:disabled) {
+  cursor: pointer;
+}
+
+.closedDay {
+  border-color: color-mix(in srgb, var(--border-subtle) 74%, transparent);
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+}
+
+.day:hover:not(:disabled),
+.day[aria-pressed='true'] {
+  border-color: color-mix(in srgb, var(--text-primary) 26%, transparent);
+  background: var(--surface);
+  transform: translateY(-1px);
+}
+
+.day[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+.day[aria-current='date'] {
+  border-color: var(--accent);
+}
+
+.day:disabled {
+  cursor: default;
+  opacity: 0.58;
+}
+
+.ringGlyph {
+  display: block;
+  inline-size: 100%;
+  max-inline-size: 22px;
+  block-size: auto;
+}
+
+.ringTrack,
+.ringProgress {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.ringTrack {
+  stroke: color-mix(in srgb, var(--text-muted) 24%, transparent);
+  stroke-width: 1.65;
+}
+
+.ringProgress {
+  stroke-width: 1.75;
+  stroke-linecap: round;
+}
+
+@container ring-calendar (inline-size < 700px) {
+  .monthGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .detailCard {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .card {
+    padding: 14px;
+  }
+
+  .header {
+    flex-direction: column;
+  }
+
+  .yearTabs {
+    max-inline-size: 100%;
+    inline-size: 100%;
+  }
+
+  .monthGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .metricGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .legendNote {
+    flex-basis: 100%;
+    margin-inline-start: 0;
+  }
+}
+
+@media (max-width: 460px) {
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .summaryCard {
+    min-block-size: 72px;
+  }
+
+  .monthCard {
+    padding: 9px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .day,
+  .yearTab {
+    transition: transform 140ms ease, border-color 140ms ease,
+      background-color 140ms ease, color 140ms ease;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .day:hover:not(:disabled),
+  .day[aria-pressed='true'] {
+    transform: none;
+  }
+}

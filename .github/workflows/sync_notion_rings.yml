@@ -1,0 +1,83 @@
+name: Sync Apple Fitness rings
+
+on:
+  schedule:
+    # Run after the Health repository's 03:00 UTC ring-to-Notion sync.
+    - cron: '30 3 * * *'
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - run_page/notion_rings_sync.py
+      - tests/test_notion_rings_sync.py
+      - .github/workflows/sync_notion_rings.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: notion-fitness-ring-static-sync
+  cancel-in-progress: false
+
+env:
+  GITHUB_NAME: malinkang
+  GITHUB_EMAIL: linkang.ma@gmail.com
+
+jobs:
+  sync:
+    name: Sync ring calendar
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Build static ring data from Notion
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_ROOT_PAGE_ID: ${{ secrets.NOTION_ROOT_PAGE_ID }}
+          ACTIVITY_RING_DATABASE_ID: ${{ secrets.ACTIVITY_RING_DATABASE_ID }}
+        run: |
+          test -n "$NOTION_TOKEN"
+          python run_page/notion_rings_sync.py
+
+      - name: Commit ring data
+        id: commit
+        run: |
+          if git diff --quiet -- src/static/activity_rings.json; then
+            echo "Ring data unchanged"
+            exit 0
+          fi
+
+          git config --local user.email "${{ env.GITHUB_EMAIL }}"
+          git config --local user.name "${{ env.GITHUB_NAME }}"
+          git add src/static/activity_rings.json
+          git commit -m "Sync Apple Fitness rings from Notion"
+          for attempt in 1 2 3; do
+            if git pull --rebase origin master && git push origin HEAD:master; then
+              echo "changed=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep $((attempt * 2))
+          done
+          exit 1
+
+      - name: Trigger Vercel deploy hook
+        if: ${{ steps.commit.outputs.changed == 'true' }}
+        env:
+          VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          if [[ -z "$VERCEL_DEPLOY_HOOK_URL" ]]; then
+            echo "VERCEL_DEPLOY_HOOK_URL is not configured; Vercel will use the pushed commit."
+            exit 0
+          fi
+          curl --fail --silent --show-error --request POST "$VERCEL_DEPLOY_HOOK_URL"

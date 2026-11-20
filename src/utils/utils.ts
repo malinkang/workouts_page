@@ -64,7 +64,14 @@ export interface Activity {
   splits?: ActivitySplit[];
 }
 
-export type DashboardActivityFilter = 'run' | 'walk' | 'ride' | 'sleep' | 'steps' | 'water';
+export type DashboardActivityFilter =
+  | 'run'
+  | 'walk'
+  | 'ride'
+  | 'sleep'
+  | 'steps'
+  | 'water'
+  | 'rings';
 
 const RUN_ACTIVITY_TYPES = new Set(['Run', 'Trail Run', 'TrailRun', 'Treadmill', 'VirtualRun']);
 const WALK_ACTIVITY_TYPES = new Set(['Walk', 'Hike']);
@@ -77,6 +84,7 @@ export const activityMatchesDashboardFilter = (
 ): boolean => {
   if (filter === 'sleep') return false;
   if (filter === 'steps' || filter === 'water') return false;
+  if (filter === 'rings') return false;
   if (filter === 'run') return RUN_ACTIVITY_TYPES.has(activity.type);
   if (filter === 'walk') return WALK_ACTIVITY_TYPES.has(activity.type);
 
