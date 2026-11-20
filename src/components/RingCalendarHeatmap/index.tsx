@@ -5,6 +5,7 @@ import {
   useState,
   type CSSProperties,
 } from 'react';
+import { formatMinutesAsDuration } from '@/utils/utils';
 import styles from './style.module.scss';
 
 export interface ActivityRingRecord {
@@ -58,11 +59,21 @@ const numberFormatter = new Intl.NumberFormat('zh-CN', {
   maximumFractionDigits: 0,
 });
 
+const formatRingMetricValue = (metric: RingMetric, value: number) =>
+  metric.key === 'exercise'
+    ? formatMinutesAsDuration(value)
+    : `${numberFormatter.format(value)} ${metric.unit}`;
+
 const dateKey = (year: number, month: number, day: number) =>
   `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(
     2,
     '0'
   )}`;
+
+const localTodayKey = () => {
+  const today = new Date();
+  return dateKey(today.getFullYear(), today.getMonth(), today.getDate());
+};
 
 const dateKeyToUtc = (value: string) => {
   const [year, month, day] = value.split('-').map(Number);
@@ -102,6 +113,30 @@ const bestClosedMonth = (records: ActivityRingRecord[]) => {
     }
   });
   return bestMonth >= 0 ? MONTH_NAMES[bestMonth] : '暂无';
+};
+
+const countUnclosedDays = (
+  recordsByDate: Map<string, ActivityRingRecord>,
+  year: number,
+  coverageStart: string,
+  today: string
+) => {
+  const start =
+    coverageStart > `${year}-01-01` ? coverageStart : `${year}-01-01`;
+  const end = today < `${year}-12-31` ? today : `${year}-12-31`;
+
+  if (start > end) return 0;
+
+  let count = 0;
+  for (
+    let value = dateKeyToUtc(start);
+    value <= dateKeyToUtc(end);
+    value += 86_400_000
+  ) {
+    const key = new Date(value).toISOString().slice(0, 10);
+    if (!recordsByDate.has(key)) count += 1;
+  }
+  return count;
 };
 
 const RingGlyph = ({ record }: { record: ActivityRingRecord | null }) => {
@@ -158,22 +193,31 @@ const MonthCalendar = ({
   month,
   recordsByDate,
   selectedDate,
+  coverageStart,
+  today,
   onSelect,
 }: {
   year: number;
   month: number;
   recordsByDate: Map<string, ActivityRingRecord>;
   selectedDate?: string;
-  onSelect: (_record: ActivityRingRecord) => void;
+  coverageStart: string;
+  today: string;
+  onSelect: (_date: string) => void;
 }) => {
   const firstWeekday = (new Date(Date.UTC(year, month, 1)).getUTCDay() + 6) % 7;
   const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
-  const today = new Date().toISOString().slice(0, 10);
   const closedCount = [...recordsByDate.keys()].filter(
     (date) =>
       Number(date.slice(0, 4)) === year &&
       Number(date.slice(5, 7)) - 1 === month
   ).length;
+  const unclosedCount = Array.from({ length: daysInMonth }, (_, index) => {
+    const value = dateKey(year, month, index + 1);
+    return (
+      value >= coverageStart && value <= today && !recordsByDate.has(value)
+    );
+  }).filter(Boolean).length;
 
   return (
     <article
@@ -182,7 +226,11 @@ const MonthCalendar = ({
     >
       <header className={styles.monthHeader}>
         <strong>{MONTH_NAMES[month]}</strong>
-        <span>{closedCount ? `${closedCount} 天闭合` : '暂无闭合'}</span>
+        <span>
+          {closedCount || unclosedCount
+            ? `${closedCount} 闭合 · ${unclosedCount} 未合`
+            : '尚无数据'}
+        </span>
       </header>
       <div className={styles.weekdays} aria-hidden="true">
         {WEEKDAYS.map((weekday) => (
@@ -202,26 +250,78 @@ const MonthCalendar = ({
           const value = dateKey(year, month, day);
           const record = recordsByDate.get(value) || null;
           const isSelected = selectedDate === value;
-          const label = record
-            ? `${readableDate(value)}，三环闭合。活动 ${numberFormatter.format(
-                record.move_actual
-              )} 千卡，锻炼 ${numberFormatter.format(
-                record.exercise_actual
-              )} 分钟，站立 ${numberFormatter.format(record.stand_actual)} 小时`
-            : `${readableDate(value)}，暂无闭合圆环`;
+          const isInCoverage = value >= coverageStart && value <= today;
+          const isUnclosed = !record && isInCoverage;
+          const isSelectable = Boolean(record) || isUnclosed;
+          let label = `${readableDate(value)}，无圆环状态数据`;
+
+          if (record) {
+            label = `${readableDate(value)}，三环闭合。${RING_METRICS.map(
+              (metric) =>
+                `${metric.label} ${formatRingMetricValue(
+                  metric,
+                  record[`${metric.key}_actual` as const]
+                )}`
+            ).join('，')}`;
+          } else if (isUnclosed) {
+            label =
+              value === today
+                ? `${readableDate(value)}，今天的圆环尚未合上`
+                : `${readableDate(value)}，三环未合上`;
+          } else if (value > today) {
+            label = `${readableDate(value)}，尚未到达`;
+          } else if (value < coverageStart) {
+            label = `${readableDate(value)}，早于圆环数据起始日期`;
+          }
 
           return (
             <button
               type="button"
               key={value}
-              className={`${styles.day} ${record ? styles.closedDay : ''}`}
-              disabled={!record}
+              className={`${styles.day} ${
+                record
+                  ? styles.closedDay
+                  : isUnclosed
+                  ? styles.unclosedDay
+                  : styles.unavailableDay
+              }`}
+              disabled={!isSelectable}
+              title={isSelectable ? label : undefined}
               aria-label={label}
-              aria-pressed={record ? isSelected : undefined}
+              aria-pressed={isSelectable ? isSelected : undefined}
               aria-current={value === today ? 'date' : undefined}
-              onClick={() => record && onSelect(record)}
+              onClick={() => isSelectable && onSelect(value)}
             >
               <RingGlyph record={record} />
+              {record && (
+                <span className={styles.dayTooltip} aria-hidden="true">
+                  <strong>{readableDate(value)} · 三环闭合</strong>
+                  {RING_METRICS.map((metric) => (
+                    <span key={metric.key}>
+                      <i style={{ background: metric.color }} />
+                      {metric.label}{' '}
+                      {formatRingMetricValue(
+                        metric,
+                        record[`${metric.key}_actual` as const]
+                      )}{' '}
+                      /{' '}
+                      {formatRingMetricValue(
+                        metric,
+                        record[`${metric.key}_goal` as const]
+                      )}
+                    </span>
+                  ))}
+                </span>
+              )}
+              {isUnclosed && (
+                <span className={styles.dayTooltip} aria-hidden="true">
+                  <strong>
+                    {readableDate(value)} ·{' '}
+                    {value === today ? '今天尚未合上' : '未合上'}
+                  </strong>
+                  <span>Notion 未保留该日三环的具体数值</span>
+                </span>
+              )}
             </button>
           );
         })}
@@ -240,11 +340,47 @@ const MonthCalendar = ({
   );
 };
 
-const RingDetail = ({ record }: { record: ActivityRingRecord | null }) => {
-  if (!record) {
+const RingDetail = ({
+  record,
+  selectedDate,
+  today,
+}: {
+  record: ActivityRingRecord | null;
+  selectedDate?: string;
+  today: string;
+}) => {
+  if (!selectedDate) {
     return (
       <div className={styles.emptyDetail}>
-        选择任意闭合日期，查看三个圆环的实际值和目标。
+        选择一个已经进入统计范围的日期，查看圆环状态。
+      </div>
+    );
+  }
+
+  if (!record) {
+    const isToday = selectedDate === today;
+    return (
+      <div className={`${styles.detailCard} ${styles.unclosedDetailCard}`}>
+        <div className={styles.detailHeading}>
+          <span>选中日期</span>
+          <time dateTime={selectedDate}>{readableDate(selectedDate)}</time>
+          <strong className={styles.unclosedStatus}>
+            {isToday ? '今天尚未合上' : '三环未合上'}
+          </strong>
+        </div>
+        <div className={styles.unclosedDetailBody}>
+          <div className={styles.unclosedPreview}>
+            <RingGlyph record={null} />
+          </div>
+          <div>
+            <strong>
+              {isToday ? '今天仍在进行中' : 'Notion 没有这一天三环全闭合的记录'}
+            </strong>
+            <p>
+              灰色空环表示未合上；该日的实际活动、锻炼和站立数值尚未进入静态数据。
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -278,8 +414,8 @@ const RingDetail = ({ record }: { record: ActivityRingRecord | null }) => {
                 aria-label={`${metric.label}完成度`}
               />
               <small>
-                {numberFormatter.format(actual)} /{' '}
-                {numberFormatter.format(goal)} {metric.unit}
+                {formatRingMetricValue(metric, actual)} /{' '}
+                {formatRingMetricValue(metric, goal)}
               </small>
             </div>
           );
@@ -290,13 +426,31 @@ const RingDetail = ({ record }: { record: ActivityRingRecord | null }) => {
 };
 
 const RingCalendarHeatmap = ({ records }: RingCalendarHeatmapProps) => {
-  const years = useMemo(
+  const today = useMemo(localTodayKey, []);
+  const coverageStart = useMemo(
     () =>
-      [
-        ...new Set(records.map((record) => Number(record.date.slice(0, 4)))),
-      ].sort((left, right) => right - left),
-    [records]
+      records.length
+        ? records.reduce(
+            (earliest, record) =>
+              record.date < earliest ? record.date : earliest,
+            records[0].date
+          )
+        : today,
+    [records, today]
   );
+  const years = useMemo(() => {
+    const firstYear = Number(coverageStart.slice(0, 4));
+    const currentYear = Number(today.slice(0, 4));
+    const lastRecordYear = records.reduce(
+      (latest, record) => Math.max(latest, Number(record.date.slice(0, 4))),
+      currentYear
+    );
+    const lastYear = Math.max(currentYear, lastRecordYear);
+    return Array.from(
+      { length: lastYear - firstYear + 1 },
+      (_, index) => lastYear - index
+    );
+  }, [coverageStart, records, today]);
   const [year, setYear] = useState(() => years[0] || new Date().getFullYear());
   const [selectedDate, setSelectedDate] = useState<string>();
   const yearTabsRef = useRef<HTMLDivElement>(null);
@@ -338,6 +492,10 @@ const RingCalendarHeatmap = ({ records }: RingCalendarHeatmapProps) => {
     [yearRecords]
   );
   const bestMonth = useMemo(() => bestClosedMonth(yearRecords), [yearRecords]);
+  const unclosedDays = useMemo(
+    () => countUnclosedDays(recordsByDate, year, coverageStart, today),
+    [coverageStart, recordsByDate, today, year]
+  );
 
   return (
     <section className={styles.card} aria-labelledby="ring-calendar-title">
@@ -345,7 +503,7 @@ const RingCalendarHeatmap = ({ records }: RingCalendarHeatmapProps) => {
         <div>
           <span className={styles.eyebrow}>Apple Fitness</span>
           <h2 id="ring-calendar-title">活动圆环</h2>
-          <p>每天的三个圆环全部达成后点亮，点击日期查看详细数据。</p>
+          <p>三环全部达成后点亮；灰色空环表示该日未合上。</p>
         </div>
         <div
           ref={yearTabsRef}
@@ -392,9 +550,18 @@ const RingCalendarHeatmap = ({ records }: RingCalendarHeatmapProps) => {
                 } 天闭合`}
           </small>
         </div>
+        <div className={styles.summaryCard}>
+          <span>未合上天数</span>
+          <strong>{unclosedDays}</strong>
+          <small>{year} 年截至今天</small>
+        </div>
       </div>
 
-      <RingDetail record={selectedRecord} />
+      <RingDetail
+        record={selectedRecord}
+        selectedDate={selectedDate}
+        today={today}
+      />
 
       <div className={styles.legend} aria-label="圆环颜色说明">
         {RING_METRICS.map((metric) => (
@@ -403,7 +570,11 @@ const RingCalendarHeatmap = ({ records }: RingCalendarHeatmapProps) => {
             {metric.label}
           </span>
         ))}
-        <span className={styles.legendNote}>仅展示 Notion 中的闭合日期</span>
+        <span>
+          <i className={styles.unclosedLegend} />
+          未合上
+        </span>
+        <span className={styles.legendNote}>未来日期不计入未合上</span>
       </div>
 
       <div className={styles.monthGrid}>
@@ -414,7 +585,9 @@ const RingCalendarHeatmap = ({ records }: RingCalendarHeatmapProps) => {
             month={month}
             recordsByDate={recordsByDate}
             selectedDate={selectedDate}
-            onSelect={(record) => setSelectedDate(record.date)}
+            coverageStart={coverageStart}
+            today={today}
+            onSelect={setSelectedDate}
           />
         ))}
       </div>

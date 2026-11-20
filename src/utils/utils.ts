@@ -73,14 +73,26 @@ export type DashboardActivityFilter =
   | 'water'
   | 'rings';
 
-const RUN_ACTIVITY_TYPES = new Set(['Run', 'Trail Run', 'TrailRun', 'Treadmill', 'VirtualRun']);
+const RUN_ACTIVITY_TYPES = new Set([
+  'Run',
+  'Trail Run',
+  'TrailRun',
+  'Treadmill',
+  'VirtualRun',
+]);
 const WALK_ACTIVITY_TYPES = new Set(['Walk', 'Hike']);
-const RIDE_ACTIVITY_TYPES = new Set(['Ride', 'Ninebot', 'VirtualRide', 'EBikeRide', 'Indoor Ride']);
+const RIDE_ACTIVITY_TYPES = new Set([
+  'Ride',
+  'Ninebot',
+  'VirtualRide',
+  'EBikeRide',
+  'Indoor Ride',
+]);
 
 /** Keep dashboard categories aligned across stats, heatmap, and period selections. */
 export const activityMatchesDashboardFilter = (
   activity: Activity,
-  filter: DashboardActivityFilter,
+  filter: DashboardActivityFilter
 ): boolean => {
   if (filter === 'sleep') return false;
   if (filter === 'steps' || filter === 'water') return false;
@@ -89,7 +101,10 @@ export const activityMatchesDashboardFilter = (
   if (filter === 'walk') return WALK_ACTIVITY_TYPES.has(activity.type);
 
   // Older Ride records are ordinary bicycle rides. The electric-ride feed starts in 2025.
-  return RIDE_ACTIVITY_TYPES.has(activity.type) && activity.start_date_local.slice(0, 4) >= '2025';
+  return (
+    RIDE_ACTIVITY_TYPES.has(activity.type) &&
+    activity.start_date_local.slice(0, 4) >= '2025'
+  );
 };
 
 const titleForShow = (run: Activity): string => {
@@ -120,12 +135,15 @@ const formatSpeedOrPace = (speed: number, type: string): string => {
   }
 
   if (type === 'Swim') {
-    const pace100m = 100.0 / speed; 
+    const pace100m = 100.0 / speed;
     const minutes = Math.floor(pace100m / 60.0);
     const seconds = Math.floor(pace100m - minutes * 60.0);
-    return `${minutes}'${seconds.toFixed(0).toString().padStart(2, '0')}" /100m`;
+    return `${minutes}'${seconds
+      .toFixed(0)
+      .toString()
+      .padStart(2, '0')}" /100m`;
   }
-  
+
   return formatPace(speed);
 };
 
@@ -140,6 +158,18 @@ const convertMovingTime2Sec = (moving_time: string): number => {
   const [hours, minutes, seconds] = time.split(':').map(Number);
   const totalSeconds = ((days * 24 + hours) * 60 + minutes) * 60 + seconds;
   return totalSeconds;
+};
+
+export const formatMinutesAsDuration = (minutes: number): string => {
+  if (!Number.isFinite(minutes) || minutes <= 0) return '0 分钟';
+
+  const totalMinutes = Math.round(minutes);
+  const hours = Math.floor(totalMinutes / 60);
+  const remainingMinutes = totalMinutes % 60;
+
+  if (!hours) return `${remainingMinutes} 分钟`;
+  if (!remainingMinutes) return `${hours} 小时`;
+  return `${hours} 小时 ${remainingMinutes} 分钟`;
 };
 
 const formatRunTime = (moving_time: string): string => {
@@ -253,10 +283,10 @@ const geoJsonForRuns = (runs: Activity[]): FeatureCollection<LineString> => ({
         workoutType: run.type,
       },
       properties: {
-        'color': colorFromType(run.type),
-        'name': formatRunName(run.name, run.start_date_local, run.type),
-        'distance': run.distance,
-        'start_date_local': run.start_date_local,
+        color: colorFromType(run.type),
+        name: formatRunName(run.name, run.start_date_local, run.type),
+        distance: run.distance,
+        start_date_local: run.start_date_local,
       },
       name: run.name,
     };
@@ -309,25 +339,23 @@ const titleForType = (type: string): string => {
     default:
       return RUN_TITLES.RUN_TITLE;
   }
-}
+};
 
 const typeForRun = (run: Activity): string => {
-  const type = run.type
+  const type = run.type;
   var distance = run.distance / 1000;
   switch (type) {
     case 'Run':
       if (distance >= 40) {
         return 'Full Marathon';
-      }
-      else if (distance > 20) {
+      } else if (distance > 20) {
         return 'Half Marathon';
       }
       return 'Run';
     case 'Trail Run':
       if (distance >= 40) {
         return 'Full Marathon';
-      }
-      else if (distance > 20) {
+      } else if (distance > 20) {
         return 'Half Marathon';
       }
       return 'Trail Run';
@@ -365,18 +393,17 @@ const typeForRun = (run: Activity): string => {
     default:
       return 'Run';
   }
-}
+};
 
 const titleForRun = (run: Activity): string => {
   const type = run.type;
-  if (type == 'Run' || type == 'Trail Run'){
-      const runDistance = run.distance / 1000;
-      if (runDistance >= 40) {
-        return RUN_TITLES.FULL_MARATHON_RUN_TITLE;
-      }
-      else if (runDistance > 20) {
-        return RUN_TITLES.HALF_MARATHON_RUN_TITLE;
-      }
+  if (type == 'Run' || type == 'Trail Run') {
+    const runDistance = run.distance / 1000;
+    if (runDistance >= 40) {
+      return RUN_TITLES.FULL_MARATHON_RUN_TITLE;
+    } else if (runDistance > 20) {
+      return RUN_TITLES.HALF_MARATHON_RUN_TITLE;
+    }
   }
   return titleForType(type);
 };
@@ -477,15 +504,21 @@ const filterTitleRuns = (run: Activity, title: string) =>
   titleForRun(run) === title;
 
 const filterTypeRuns = (run: Activity, type: string) => {
-  switch (type){
+  switch (type) {
     case 'Full Marathon':
-      return (run.type === 'Run' || run.type === 'Trail Run') && run.distance > 40000
+      return (
+        (run.type === 'Run' || run.type === 'Trail Run') && run.distance > 40000
+      );
     case 'Half Marathon':
-      return (run.type === 'Run' || run.type === 'Trail Run') && run.distance < 40000 && run.distance > 20000
+      return (
+        (run.type === 'Run' || run.type === 'Trail Run') &&
+        run.distance < 40000 &&
+        run.distance > 20000
+      );
     default:
-      return run.type === type
+      return run.type === type;
   }
-}
+};
 
 const filterAndSortRuns = (
   activities: Activity[],
@@ -493,13 +526,13 @@ const filterAndSortRuns = (
   filterFunc: (_run: Activity, _bvalue: string) => boolean,
   sortFunc: (_a: Activity, _b: Activity) => number,
   item2: string | null = null,
-  filterFunc2: ((_run: Activity, _bvalue: string) => boolean) | null = null,
+  filterFunc2: ((_run: Activity, _bvalue: string) => boolean) | null = null
 ) => {
   let s = activities;
   if (item !== 'Total') {
     s = activities.filter((run) => filterFunc(run, item));
   }
-  if(filterFunc2 != null && item2 != null){
+  if (filterFunc2 != null && item2 != null) {
     s = s.filter((run) => filterFunc2(run, item2));
   }
   // Keep the imported activity list immutable; multiple views share this array.
@@ -516,26 +549,30 @@ const sortDateFunc = (a: Activity, b: Activity) => {
 const sortDateFuncReverse = (a: Activity, b: Activity) => sortDateFunc(b, a);
 
 const getHeartRateColor = (bpm: number): string => {
-  if (bpm < 100) return '#00CC00'; 
-  if (bpm < 115) return '#99FF00'; 
-  if (bpm < 130) return '#FFFF00'; 
-  if (bpm < 145) return '#FF9900'; 
-  if (bpm < 160) return '#FF3300'; 
-  return '#FF0000';                
+  if (bpm < 100) return '#00CC00';
+  if (bpm < 115) return '#99FF00';
+  if (bpm < 130) return '#FFFF00';
+  if (bpm < 145) return '#FF9900';
+  if (bpm < 160) return '#FF3300';
+  return '#FF0000';
 };
 
-const formatRunName = (name: string, startDateLocal: string, type: string): string => {
+const formatRunName = (
+  name: string,
+  startDateLocal: string,
+  type: string
+): string => {
   const date = new Date(startDateLocal.replace(' ', 'T'));
   const hour = date.getHours();
 
   let timePrefix = '';
-  if (hour >= 23 || hour < 2) timePrefix = '深夜'; 
-  else if (hour >= 2 && hour < 5) timePrefix = '凌晨'; 
-  else if (hour >= 5 && hour < 7) timePrefix = '清晨'; 
-  else if (hour >= 7 && hour < 11) timePrefix = '上午'; 
-  else if (hour >= 11 && hour < 13) timePrefix = '中午'; 
-  else if (hour >= 13 && hour < 18) timePrefix = '下午'; 
-  else if (hour >= 18 && hour < 20) timePrefix = '傍晚'; 
+  if (hour >= 23 || hour < 2) timePrefix = '深夜';
+  else if (hour >= 2 && hour < 5) timePrefix = '凌晨';
+  else if (hour >= 5 && hour < 7) timePrefix = '清晨';
+  else if (hour >= 7 && hour < 11) timePrefix = '上午';
+  else if (hour >= 11 && hour < 13) timePrefix = '中午';
+  else if (hour >= 13 && hour < 18) timePrefix = '下午';
+  else if (hour >= 18 && hour < 20) timePrefix = '傍晚';
   else timePrefix = '夜间';
 
   let typeStr = '';
@@ -543,22 +580,42 @@ const formatRunName = (name: string, startDateLocal: string, type: string): stri
     // 🌟 统一将新增的这几类翻译成“跑步”或“步行”
     case 'Run':
     case 'VirtualRun':
-    case 'Treadmill': typeStr = '跑步'; break;
-    case 'Ride': typeStr = '骑行'; break;
-    case 'Ninebot': typeStr = '九号出行'; break;
-    case 'Swim': typeStr = '游泳'; break;
+    case 'Treadmill':
+      typeStr = '跑步';
+      break;
+    case 'Ride':
+      typeStr = '骑行';
+      break;
+    case 'Ninebot':
+      typeStr = '九号出行';
+      break;
+    case 'Swim':
+      typeStr = '游泳';
+      break;
     case 'Hike':
-    case 'Walk': typeStr = '步行'; break;
-    default: typeStr = '运动';
+    case 'Walk':
+      typeStr = '步行';
+      break;
+    default:
+      typeStr = '运动';
   }
 
   // 🌟 将新增的类型单词加入拦截白名单正则
   const isDefaultName =
-    /^(晨间|上午|午间|午后|下午|傍晚|晚间|夜间|凌晨|清晨|Morning|Afternoon|Evening|Night|Lunch)/.test(name) &&
-    /(跑步|骑行|九号出行|行走|徒步|游泳|运动|Run|Ride|Ninebot|Walk|Swim|Hike|Treadmill|VirtualRun)$/.test(name) &&
+    /^(晨间|上午|午间|午后|下午|傍晚|晚间|夜间|凌晨|清晨|Morning|Afternoon|Evening|Night|Lunch)/.test(
+      name
+    ) &&
+    /(跑步|骑行|九号出行|行走|徒步|游泳|运动|Run|Ride|Ninebot|Walk|Swim|Hike|Treadmill|VirtualRun)$/.test(
+      name
+    ) &&
     name.length <= 15;
 
-  if (isDefaultName || name === 'Run' || name === 'Ride' || name === 'Ninebot') {
+  if (
+    isDefaultName ||
+    name === 'Run' ||
+    name === 'Ride' ||
+    name === 'Ninebot'
+  ) {
     return `${timePrefix}${typeStr}`;
   }
 

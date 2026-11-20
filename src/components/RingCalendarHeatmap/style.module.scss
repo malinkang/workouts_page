@@ -100,7 +100,7 @@
 
 .summaryGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -167,6 +167,53 @@
   background: color-mix(in srgb, #32d74b 14%, transparent);
   color: #32b957;
   font-size: 0.62rem;
+}
+
+.unclosedDetailCard {
+  border-style: dashed;
+}
+
+.detailHeading > .unclosedStatus {
+  background: color-mix(in srgb, var(--text-muted) 14%, transparent);
+  color: var(--text-secondary);
+}
+
+.unclosedDetailBody {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-inline-size: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 11px;
+  background: var(--surface);
+}
+
+.unclosedDetailBody > div:last-child {
+  min-inline-size: 0;
+}
+
+.unclosedDetailBody strong {
+  color: var(--text-primary);
+  font-size: 0.72rem;
+}
+
+.unclosedDetailBody p {
+  margin: 5px 0 0;
+  color: var(--text-secondary);
+  font-size: 0.64rem;
+  line-height: 1.45;
+}
+
+.unclosedPreview {
+  display: grid;
+  flex: none;
+  inline-size: 54px;
+  place-items: center;
+}
+
+.unclosedPreview .ringGlyph {
+  max-inline-size: 48px;
 }
 
 .emptyDetail {
@@ -270,6 +317,11 @@
   border-radius: 50%;
 }
 
+.legend .unclosedLegend {
+  border: 1px solid color-mix(in srgb, var(--text-muted) 48%, transparent);
+  background: transparent;
+}
+
 .legendNote {
   margin-inline-start: auto;
 }
@@ -339,6 +391,7 @@
 }
 
 .day {
+  position: relative;
   display: grid;
   place-items: center;
   padding: 0;
@@ -354,6 +407,21 @@
 .closedDay {
   border-color: color-mix(in srgb, var(--border-subtle) 74%, transparent);
   background: color-mix(in srgb, var(--surface) 72%, transparent);
+}
+
+.unclosedDay {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--text-muted) 28%, transparent);
+  background: color-mix(in srgb, var(--surface-hover) 68%, transparent);
+}
+
+.unclosedDay .ringTrack {
+  stroke: color-mix(in srgb, var(--text-muted) 34%, transparent);
+}
+
+.unavailableDay {
+  border-color: transparent;
+  background: transparent;
 }
 
 .day:hover:not(:disabled),
@@ -373,7 +441,74 @@
 
 .day:disabled {
   cursor: default;
-  opacity: 0.58;
+  opacity: 0.28;
+}
+
+.dayTooltip {
+  position: absolute;
+  z-index: 20;
+  inset-inline-start: 50%;
+  inset-block-end: calc(100% + 7px);
+  display: grid;
+  inline-size: max-content;
+  min-inline-size: 172px;
+  max-inline-size: 230px;
+  gap: 5px;
+  padding: 9px 10px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 16%, transparent);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text-primary);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 20%);
+  font-size: 0.62rem;
+  line-height: 1.35;
+  opacity: 0;
+  pointer-events: none;
+  text-align: start;
+  transform: translate(-50%, 4px);
+  visibility: hidden;
+}
+
+.dayTooltip::after {
+  position: absolute;
+  inset-inline-start: 50%;
+  inset-block-start: 100%;
+  inline-size: 8px;
+  block-size: 8px;
+  border-inline-end: 1px solid
+    color-mix(in srgb, var(--text-primary) 16%, transparent);
+  border-block-end: 1px solid
+    color-mix(in srgb, var(--text-primary) 16%, transparent);
+  background: var(--surface);
+  content: '';
+  transform: translate(-50%, -4px) rotate(45deg);
+}
+
+.dayTooltip > strong {
+  color: var(--text-primary);
+  font-size: 0.66rem;
+}
+
+.dayTooltip > span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.dayTooltip i {
+  flex: none;
+  inline-size: 7px;
+  block-size: 7px;
+  border-radius: 50%;
+}
+
+.day:hover .dayTooltip,
+.day:focus-visible .dayTooltip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  visibility: visible;
 }
 
 .ringGlyph {
@@ -400,6 +535,10 @@
 }
 
 @container ring-calendar (inline-size < 700px) {
+  .summaryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .monthGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }

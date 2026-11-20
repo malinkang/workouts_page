@@ -21,6 +21,7 @@ import {
   activityMatchesDashboardFilter,
   filterAndSortRuns,
   filterYearRuns,
+  formatMinutesAsDuration,
   geoJsonForRuns,
   scrollToMap,
   sortDateFunc,
@@ -42,12 +43,15 @@ const DASHBOARD_FILTERS: Array<{ key: DashboardFilter; label: string }> = [
   { key: 'rings', label: '圆环' },
 ];
 
+const SLEEP_HEATMAP_COLORS = ['#ef4444', '#f59e0b', '#facc15', '#22c55e'];
+
 const Index = () => {
   useSiteMetadata();
   const { activities, thisYear } = useActivities();
   const [year, setYear] = useState(thisYear);
   const [runIndex, setRunIndex] = useState(-1);
-  const [dashboardFilter, setDashboardFilter] = useState<DashboardFilter>('run');
+  const [dashboardFilter, setDashboardFilter] =
+    useState<DashboardFilter>('run');
   const [statsRuns, setStatsRuns] = useState<Activity[] | null>(null);
   const [statsTitle, setStatsTitle] = useState(`${thisYear}年`);
   const [runs, setActivity] = useState(
@@ -56,36 +60,56 @@ const Index = () => {
   // Keep the annual heatmap dataset separate from the currently selected period.
   const [heatmapYear, setHeatmapYear] = useState(thisYear);
   const [heatmapRuns, setHeatmapRuns] = useState(() =>
-    filterAndSortRuns(activities, thisYear, filterYearRuns, sortDateFunc)
-      .filter((activity) => activityMatchesDashboardFilter(activity, dashboardFilter))
+    filterAndSortRuns(
+      activities,
+      thisYear,
+      filterYearRuns,
+      sortDateFunc
+    ).filter((activity) =>
+      activityMatchesDashboardFilter(activity, dashboardFilter)
+    )
   );
-  
+
   const [title, setTitle] = useState('');
   const [geoData, setGeoData] = useState(geoJsonForRuns(runs));
   const dashboardMode: 'workout' | 'sleep' | 'metric' | 'rings' =
     dashboardFilter === 'sleep'
       ? 'sleep'
       : dashboardFilter === 'steps' || dashboardFilter === 'water'
-        ? 'metric'
-        : dashboardFilter === 'rings'
-          ? 'rings'
-          : 'workout';
+      ? 'metric'
+      : dashboardFilter === 'rings'
+      ? 'rings'
+      : 'workout';
   const sleepMetricRecords = useMemo(
-    () => (sleepRecords as SleepRecord[]).map((record) => ({
-      date: record.date,
-      value: record.sleep_minutes,
-    })),
-    [],
+    () =>
+      (sleepRecords as SleepRecord[]).map((record) => ({
+        date: record.date,
+        value: record.sleep_minutes,
+      })),
+    []
   );
   const stepsMetricRecords = useMemo(
-    () => stepsRecords.map((record) => ({ date: record.date, value: record.steps })),
-    [],
+    () =>
+      stepsRecords.map((record) => ({
+        date: record.date,
+        value: record.steps,
+      })),
+    []
   );
   const waterMetricRecords = useMemo(
-    () => waterRecords.map((record) => ({ date: record.date, value: record.water_ml })),
-    [],
+    () =>
+      waterRecords.map((record) => ({
+        date: record.date,
+        value: record.water_ml,
+      })),
+    []
   );
-  const metricHeatmap: { title: string; unit: string; records: MetricRecord[]; accent: string } | null =
+  const metricHeatmap: {
+    title: string;
+    unit: string;
+    records: MetricRecord[];
+    accent: string;
+  } | null =
     dashboardFilter === 'steps'
       ? {
           title: '步数热力图',
@@ -94,18 +118,24 @@ const Index = () => {
           accent: '#22a861',
         }
       : dashboardFilter === 'water'
-        ? {
-            title: '饮水热力图',
-            unit: 'ml',
-            records: waterMetricRecords,
-            accent: '#2196d3',
-          }
-        : null;
+      ? {
+          title: '饮水热力图',
+          unit: 'ml',
+          records: waterMetricRecords,
+          accent: '#2196d3',
+        }
+      : null;
 
   useEffect(() => {
     setHeatmapRuns(
-      filterAndSortRuns(activities, heatmapYear, filterYearRuns, sortDateFunc)
-        .filter((activity) => activityMatchesDashboardFilter(activity, dashboardFilter)),
+      filterAndSortRuns(
+        activities,
+        heatmapYear,
+        filterYearRuns,
+        sortDateFunc
+      ).filter((activity) =>
+        activityMatchesDashboardFilter(activity, dashboardFilter)
+      )
     );
   }, [activities, dashboardFilter, heatmapYear]);
 
@@ -153,72 +183,93 @@ const Index = () => {
     if (y !== heatmapYear) {
       setHeatmapYear(y);
       setHeatmapRuns(
-        filterAndSortRuns(activities, y, filterYearRuns, sortDateFunc)
-          .filter((activity) => activityMatchesDashboardFilter(activity, dashboardFilter)),
+        filterAndSortRuns(activities, y, filterYearRuns, sortDateFunc).filter(
+          (activity) =>
+            activityMatchesDashboardFilter(activity, dashboardFilter)
+        )
       );
     }
     changeByItem(y, 'Year', filterYearRuns);
   };
 
-  const selectActivityRuns = useCallback((runIds: RunIds, shouldScroll: boolean) => {
-    const ids = new Set(runIds);
-    const selectedRuns = !runIds.length
-      ? runs
-      : runs.filter((r: any) => ids.has(r.run_id));
+  const selectActivityRuns = useCallback(
+    (runIds: RunIds, shouldScroll: boolean) => {
+      const ids = new Set(runIds);
+      const selectedRuns = !runIds.length
+        ? runs
+        : runs.filter((r: any) => ids.has(r.run_id));
 
-    if (!selectedRuns.length) return;
+      if (!selectedRuns.length) return;
 
-    const lastRun = selectedRuns.reduce((acc: Activity, curr: Activity) =>
-      sortDateFunc(acc, curr) <= 0 ? acc : curr
-    );
+      const lastRun = selectedRuns.reduce((acc: Activity, curr: Activity) =>
+        sortDateFunc(acc, curr) <= 0 ? acc : curr
+      );
 
-    if (!lastRun) return;
+      if (!lastRun) return;
 
-    setGeoData(geoJsonForRuns(selectedRuns));
-    setTitle(titleForShow(lastRun));
-    if (shouldScroll && !isSticky) scrollToMap();
-  }, [isSticky, runs]);
+      setGeoData(geoJsonForRuns(selectedRuns));
+      setTitle(titleForShow(lastRun));
+      if (shouldScroll && !isSticky) scrollToMap();
+    },
+    [isSticky, runs]
+  );
 
-  const locateActivity = useCallback((runIds: RunIds) => {
-    selectActivityRuns(runIds, true);
-  }, [selectActivityRuns]);
+  const locateActivity = useCallback(
+    (runIds: RunIds) => {
+      selectActivityRuns(runIds, true);
+    },
+    [selectActivityRuns]
+  );
 
-  const locateActivityInline = useCallback((runIds: RunIds) => {
-    selectActivityRuns(runIds, false);
-  }, [selectActivityRuns]);
+  const locateActivityInline = useCallback(
+    (runIds: RunIds) => {
+      selectActivityRuns(runIds, false);
+    },
+    [selectActivityRuns]
+  );
 
   useEffect(() => {
     setGeoData(geoJsonForRuns(runs));
   }, [runs]);
 
-  const handleStatsSelection = useCallback((selectedActivities: Activity[], selection: StatsSelection) => {
-    setStatsRuns(selectedActivities);
-    setStatsTitle(selection.title || '');
-    setRunIndex(-1);
+  const handleStatsSelection = useCallback(
+    (selectedActivities: Activity[], selection: StatsSelection) => {
+      setStatsRuns(selectedActivities);
+      setStatsTitle(selection.title || '');
+      setRunIndex(-1);
 
-    // A period selection carries its owning year. Keep the annual heatmap
-    // stable for periods within that year and replace it only across years.
-    const selectedYear = selection.bucket !== 'total'
-      ? selection.bucket.slice(0, 4)
-      : undefined;
-    if (selectedYear) {
-      setYear(selectedYear);
-      if (selectedYear !== heatmapYear) {
-        setHeatmapYear(selectedYear);
-        setHeatmapRuns(
-          filterAndSortRuns(activities, selectedYear, filterYearRuns, sortDateFunc)
-            .filter((activity) => activityMatchesDashboardFilter(activity, dashboardFilter)),
-        );
+      // A period selection carries its owning year. Keep the annual heatmap
+      // stable for periods within that year and replace it only across years.
+      const selectedYear =
+        selection.bucket !== 'total' ? selection.bucket.slice(0, 4) : undefined;
+      if (selectedYear) {
+        setYear(selectedYear);
+        if (selectedYear !== heatmapYear) {
+          setHeatmapYear(selectedYear);
+          setHeatmapRuns(
+            filterAndSortRuns(
+              activities,
+              selectedYear,
+              filterYearRuns,
+              sortDateFunc
+            ).filter((activity) =>
+              activityMatchesDashboardFilter(activity, dashboardFilter)
+            )
+          );
+        }
       }
-    }
-  }, [activities, heatmapYear]);
+    },
+    [activities, heatmapYear]
+  );
 
   useEffect(() => {
     if (statsRuns === null) return;
     const nextRuns = [...statsRuns].sort(sortDateFunc);
     setActivity(nextRuns);
     setGeoData(geoJsonForRuns(nextRuns));
-    setTitle(nextRuns.length ? titleForShow(nextRuns[nextRuns.length - 1]) : '');
+    setTitle(
+      nextRuns.length ? titleForShow(nextRuns[nextRuns.length - 1]) : ''
+    );
   }, [statsRuns]);
 
   return (
@@ -241,39 +292,43 @@ const Index = () => {
     >
       {dashboardMode === 'workout' && (
         <>
-        <div className="bento-hero" ref={bentoRef}>
-          <div className="bento-map-placeholder">
-            <div className={`page-map bento-card-map ${isSticky ? 'sticky-map' : ''}`}>
-              <RunMap
-                title={title}
-                geoData={geoData}
-                changeYear={changeYear}
-                thisYear={year}
-                // 🌟 新增：把吸顶状态传给地图，让它知道什么时候该重新量尺寸
-                isSticky={isSticky} 
+          <div className="bento-hero" ref={bentoRef}>
+            <div className="bento-map-placeholder">
+              <div
+                className={`page-map bento-card-map ${
+                  isSticky ? 'sticky-map' : ''
+                }`}
+              >
+                <RunMap
+                  title={title}
+                  geoData={geoData}
+                  changeYear={changeYear}
+                  thisYear={year}
+                  // 🌟 新增：把吸顶状态传给地图，让它知道什么时候该重新量尺寸
+                  isSticky={isSticky}
+                />
+              </div>
+            </div>
+
+            <div className="bento-calendar-board">
+              <RunCalendar
+                runs={runs}
+                locateActivity={locateActivity}
+                runIndex={runIndex}
+                setRunIndex={setRunIndex}
+                year={year}
+                summaryTitle={statsTitle}
               />
             </div>
           </div>
-
-          <div className="bento-calendar-board">
-            <RunCalendar
-              runs={runs}
+          <div className="annual-heatmap-board">
+            <RunHeatmap
+              runs={heatmapRuns}
               locateActivity={locateActivity}
-              runIndex={runIndex}
               setRunIndex={setRunIndex}
-              year={year} 
-                summaryTitle={statsTitle}
+              year={heatmapYear}
             />
           </div>
-        </div>
-        <div className="annual-heatmap-board">
-          <RunHeatmap
-            runs={heatmapRuns}
-            locateActivity={locateActivity}
-            setRunIndex={setRunIndex}
-            year={heatmapYear}
-          />
-        </div>
         </>
       )}
       {dashboardMode === 'metric' && metricHeatmap && (
@@ -295,12 +350,16 @@ const Index = () => {
             year={heatmapYear}
             records={sleepMetricRecords}
             accent="#8667d7"
+            colors={SLEEP_HEATMAP_COLORS}
+            valueFormatter={formatMinutesAsDuration}
           />
         </div>
       )}
       {dashboardMode === 'rings' && (
         <div className="annual-heatmap-board">
-          <RingCalendarHeatmap records={activityRings as ActivityRingRecord[]} />
+          <RingCalendarHeatmap
+            records={activityRings as ActivityRingRecord[]}
+          />
         </div>
       )}
       {(dashboardMode === 'workout' || dashboardMode === 'sleep') && (
