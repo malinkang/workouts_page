@@ -10008,6 +10008,96 @@
     "notion_last_edited_time": "2026-09-24T10:02:00.000Z"
   },
   {
+    "steps_id": "41e86019-c92c-81e7-ae24-cad1810390e6",
+    "date": "2026-09-25",
+    "steps": 21447,
+    "notion_last_edited_time": "2026-11-20T09:49:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-81ef-8206-e576bfdffa0a",
+    "date": "2026-09-26",
+    "steps": 10244,
+    "notion_last_edited_time": "2026-11-20T09:49:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-812d-a9d5-f161685ad8ff",
+    "date": "2026-09-27",
+    "steps": 5835,
+    "notion_last_edited_time": "2026-11-20T09:48:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-81fd-8d8d-fe526f927fbf",
+    "date": "2026-09-28",
+    "steps": 17312,
+    "notion_last_edited_time": "2026-11-20T09:48:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-81ba-935b-f61b4a04dd94",
+    "date": "2026-09-29",
+    "steps": 9159,
+    "notion_last_edited_time": "2026-11-20T09:48:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-81bb-b458-e79e947d29d2",
+    "date": "2026-09-30",
+    "steps": 7949,
+    "notion_last_edited_time": "2026-11-20T09:48:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-8195-967a-d5ed0546d87d",
+    "date": "2026-10-01",
+    "steps": 7485,
+    "notion_last_edited_time": "2026-11-20T09:47:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-818a-8368-da25beeb71bd",
+    "date": "2026-10-02",
+    "steps": 12618,
+    "notion_last_edited_time": "2026-11-20T09:47:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-815f-b7dc-f2e44954e1e6",
+    "date": "2026-10-03",
+    "steps": 8132,
+    "notion_last_edited_time": "2026-11-20T09:47:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-8184-bd4f-c593707121c5",
+    "date": "2026-10-04",
+    "steps": 12179,
+    "notion_last_edited_time": "2026-11-20T09:46:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-8158-a8bd-f8cb19d44ff7",
+    "date": "2026-10-05",
+    "steps": 9889,
+    "notion_last_edited_time": "2026-11-20T09:46:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-8120-a9a6-db2e758d8c6d",
+    "date": "2026-10-06",
+    "steps": 10022,
+    "notion_last_edited_time": "2026-11-20T09:46:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-81ac-994a-ca7c0ca99365",
+    "date": "2026-10-07",
+    "steps": 17203,
+    "notion_last_edited_time": "2026-11-20T09:45:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-8104-a202-cb8a1613d1fa",
+    "date": "2026-10-08",
+    "steps": 6063,
+    "notion_last_edited_time": "2026-11-20T09:45:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-810b-84aa-d0c68d294f77",
+    "date": "2026-10-09",
+    "steps": 12660,
+    "notion_last_edited_time": "2026-11-20T09:45:00.000Z"
+  },
+  {
     "steps_id": "seed-2026-10-10",
     "date": "2026-10-10",
     "steps": 6217
@@ -10083,5 +10173,215 @@
     "date": "2026-10-16",
     "steps": 3832,
     "notion_last_edited_time": "2026-10-17T00:23:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-8142-a839-d71ca9155ca5",
+    "date": "2026-10-17",
+    "steps": 2022,
+    "notion_last_edited_time": "2026-11-20T09:44:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-8127-8b5c-e1c5e2b1b957",
+    "date": "2026-10-18",
+    "steps": 3189,
+    "notion_last_edited_time": "2026-11-20T09:44:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-8169-9b4a-f5dbae947a51",
+    "date": "2026-10-19",
+    "steps": 6517,
+    "notion_last_edited_time": "2026-11-20T09:27:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-8143-9510-e975d3087712",
+    "date": "2026-10-20",
+    "steps": 13573,
+    "notion_last_edited_time": "2026-11-20T09:27:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-81a2-ba89-d4c9171ea381",
+    "date": "2026-10-21",
+    "steps": 9398,
+    "notion_last_edited_time": "2026-11-20T09:27:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-81d2-b480-fee89a4ec13c",
+    "date": "2026-10-22",
+    "steps": 6640,
+    "notion_last_edited_time": "2026-11-20T09:27:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-811d-a1ac-c51bd5c7cb07",
+    "date": "2026-10-23",
+    "steps": 6688,
+    "notion_last_edited_time": "2026-11-20T09:26:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-8164-bd6f-e1cb298e7268",
+    "date": "2026-10-24",
+    "steps": 14772,
+    "notion_last_edited_time": "2026-11-20T09:26:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-81aa-8629-d21a7a2014aa",
+    "date": "2026-10-25",
+    "steps": 11022,
+    "notion_last_edited_time": "2026-11-20T09:26:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-812d-8503-d545f421bdd5",
+    "date": "2026-10-26",
+    "steps": 15935,
+    "notion_last_edited_time": "2026-11-20T09:25:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-817f-b78a-e999d74adb77",
+    "date": "2026-10-27",
+    "steps": 15933,
+    "notion_last_edited_time": "2026-11-20T09:25:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-813e-ad36-fad3ced38b66",
+    "date": "2026-10-28",
+    "steps": 16383,
+    "notion_last_edited_time": "2026-11-20T09:25:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-8178-a0e7-e7832515ab0b",
+    "date": "2026-10-29",
+    "steps": 15192,
+    "notion_last_edited_time": "2026-11-20T09:24:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-8157-801a-e4a5ff54180e",
+    "date": "2026-10-30",
+    "steps": 14534,
+    "notion_last_edited_time": "2026-11-20T09:24:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-8178-b792-ef42cd79fa43",
+    "date": "2026-10-31",
+    "steps": 4388,
+    "notion_last_edited_time": "2026-11-20T09:24:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-81c1-9321-e2b6644a1457",
+    "date": "2026-11-01",
+    "steps": 8910,
+    "notion_last_edited_time": "2026-11-20T09:23:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-81ba-bd75-fa43903e9012",
+    "date": "2026-11-02",
+    "steps": 13428,
+    "notion_last_edited_time": "2026-11-20T09:23:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-81d6-8fbf-ed6a92483f4e",
+    "date": "2026-11-03",
+    "steps": 11796,
+    "notion_last_edited_time": "2026-11-20T09:23:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-818c-be2a-ec37b8824404",
+    "date": "2026-11-04",
+    "steps": 16444,
+    "notion_last_edited_time": "2026-11-20T09:22:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-81b3-ba28-ce8303580510",
+    "date": "2026-11-05",
+    "steps": 16128,
+    "notion_last_edited_time": "2026-11-20T09:22:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-8183-8437-d808c8b92be5",
+    "date": "2026-11-06",
+    "steps": 18645,
+    "notion_last_edited_time": "2026-11-20T09:22:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-8113-b826-c511896e4461",
+    "date": "2026-11-07",
+    "steps": 27122,
+    "notion_last_edited_time": "2026-11-20T09:22:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-818a-a932-de1e6c9db905",
+    "date": "2026-11-08",
+    "steps": 19152,
+    "notion_last_edited_time": "2026-11-20T09:21:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-81bc-91b3-f8c953d3627a",
+    "date": "2026-11-09",
+    "steps": 4199,
+    "notion_last_edited_time": "2026-11-20T09:21:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-81fc-91aa-e5595ff8f8b3",
+    "date": "2026-11-10",
+    "steps": 16562,
+    "notion_last_edited_time": "2026-11-20T09:21:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-81f1-95a1-fdf0af214820",
+    "date": "2026-11-11",
+    "steps": 17284,
+    "notion_last_edited_time": "2026-11-20T09:20:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-81ea-8dce-d2413230144d",
+    "date": "2026-11-12",
+    "steps": 6361,
+    "notion_last_edited_time": "2026-11-20T09:20:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-81a8-a2ff-d8e9b6e5d1bd",
+    "date": "2026-11-13",
+    "steps": 12359,
+    "notion_last_edited_time": "2026-11-20T09:20:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-81e2-bb63-ccf929db6b94",
+    "date": "2026-11-14",
+    "steps": 10519,
+    "notion_last_edited_time": "2026-11-20T09:44:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-8173-a126-ef0f303b52a8",
+    "date": "2026-11-15",
+    "steps": 4956,
+    "notion_last_edited_time": "2026-11-20T09:43:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-817e-9e5b-f134554bcc8e",
+    "date": "2026-11-16",
+    "steps": 5245,
+    "notion_last_edited_time": "2026-11-20T09:43:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-81a5-adb5-f2d7039cc854",
+    "date": "2026-11-17",
+    "steps": 15821,
+    "notion_last_edited_time": "2026-11-20T09:43:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-8100-97fc-f9611096285b",
+    "date": "2026-11-18",
+    "steps": 13701,
+    "notion_last_edited_time": "2026-11-20T09:43:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-8158-a1cf-c40cb50fc02e",
+    "date": "2026-11-19",
+    "steps": 16466,
+    "notion_last_edited_time": "2026-11-20T09:43:00.000Z"
+  },
+  {
+    "steps_id": "41e86019-c92c-81bb-9437-de421d3b8fa5",
+    "date": "2026-11-20",
+    "steps": 11240,
+    "notion_last_edited_time": "2026-11-20T09:42:00.000Z"
   }
 ]
