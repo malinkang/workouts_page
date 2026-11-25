@@ -12430,5 +12430,37 @@
     "respiration_range": "",
     "source": "notion-keep-sleep",
     "notion_last_edited_time": "2026-11-21T09:01:00.000Z"
+  },
+  {
+    "sleep_id": "42286019-c92c-819f-baa8-da8e11090116",
+    "name": "2026-11-23",
+    "date": "2026-11-23",
+    "sleep_start": "2026-11-23 03:12:00",
+    "sleep_end": "2026-11-23 09:21:00",
+    "sleep_minutes": 331,
+    "bed_minutes": 369,
+    "deep_sleep_ratio": 0.095890410959,
+    "light_sleep_ratio": 0.624657534247,
+    "rem_sleep_ratio": 0.178082191781,
+    "awake_count": 11,
+    "respiration_range": "",
+    "source": "notion-keep-sleep",
+    "notion_last_edited_time": "2026-11-24T11:53:00.000Z"
+  },
+  {
+    "sleep_id": "42286019-c92c-818e-9cf8-ede02a3dddcf",
+    "name": "2026-11-24",
+    "date": "2026-11-24",
+    "sleep_start": "2026-11-23 23:00:00",
+    "sleep_end": "2026-11-24 06:30:00",
+    "sleep_minutes": 406,
+    "bed_minutes": 450,
+    "deep_sleep_ratio": 0.056053811659,
+    "light_sleep_ratio": 0.72197309417,
+    "rem_sleep_ratio": 0.130044843049,
+    "awake_count": 13,
+    "respiration_range": "",
+    "source": "notion-keep-sleep",
+    "notion_last_edited_time": "2026-11-24T11:54:00.000Z"
   }
 ]
