@@ -11823,5 +11823,16 @@
     "stand_actual": 15.0,
     "stand_goal": 12.0,
     "notion_last_edited_time": "2026-11-25T04:56:00.000Z"
+  },
+  {
+    "ring_id": "42586019-c92c-81a6-a605-d3994875e4c2",
+    "date": "2026-11-25",
+    "move_actual": 935.01,
+    "move_goal": 800.0,
+    "exercise_actual": 55.0,
+    "exercise_goal": 35.0,
+    "stand_actual": 14.0,
+    "stand_goal": 12.0,
+    "notion_last_edited_time": "2026-11-27T01:12:00.000Z"
   }
 ]
